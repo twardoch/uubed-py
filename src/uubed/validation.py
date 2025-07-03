@@ -340,25 +340,62 @@ def _validate_embedding_dimensions(
             )
 
 
-def validate_method_parameters(method: str, **kwargs: Any) -> Dict[str, Any]:
+def validate_method_parameters(
+    method: str,
+    **kwargs: Any
+) -> Dict[str, Any]:
     """
     Validates method-specific parameters passed as keyword arguments.
-    
+
+    This function ensures that the parameters provided for a specific encoding
+    method are of the correct type, within valid ranges, and that no unknown
+    parameters are supplied. It returns a dictionary of validated and normalized
+    parameters that can be safely used by the encoding functions.
+
     Args:
-        method (str): The encoding method for which to validate parameters.
+        method (str): The encoding method for which to validate parameters (e.g., "shq64", "t8q64").
         **kwargs: Arbitrary keyword arguments representing method-specific parameters.
-        
+                  These are typically passed directly from the `encode` function.
+
     Returns:
         Dict[str, Any]: A dictionary containing the validated and normalized parameters.
-        
+                        If no method-specific parameters are expected or provided, an empty
+                        dictionary is returned.
+
     Raises:
         UubedValidationError: If any parameter is invalid (e.g., wrong type, out of range),
                               or if unknown parameters are provided for a given method.
+
+    Example:
+        >>> from uubed.validation import validate_method_parameters
+        >>>
+        >>> # Valid parameters for shq64
+        >>> validate_method_parameters("shq64", planes=128)
+        {'planes': 128}
+
+        >>> # Valid parameters for t8q64
+        >>> validate_method_parameters("t8q64", k=16)
+        {'k': 16}
+
+        >>> # Invalid 'planes' type for shq64
+        >>> try:
+        ...     validate_method_parameters("shq64", planes="64")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: 'planes' parameter must be an integer
+
+        >>> # Unknown parameter for eq64 (which expects none)
+        >>> try:
+        ...     validate_method_parameters("eq64", some_param="value")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Unknown parameters for 'eq64' method: some_param
     """
     validated_params: Dict[str, Any] = {}
     
     if method == 'shq64':
-        planes: int = kwargs.get('planes', 64) # Default value for planes.
+        # Validate 'planes' parameter for shq64 method.
+        planes: int = kwargs.get('planes', 64) # Default value for planes if not provided.
         if not isinstance(planes, int):
             raise validation_error(
                 "'planes' parameter must be an integer",
@@ -390,7 +427,8 @@ def validate_method_parameters(method: str, **kwargs: Any) -> Dict[str, Any]:
         validated_params['planes'] = planes
     
     elif method == 't8q64':
-        k: int = kwargs.get('k', 8) # Default value for k.
+        # Validate 'k' parameter for t8q64 method.
+        k: int = kwargs.get('k', 8) # Default value for k if not provided.
         if not isinstance(k, int):
             raise validation_error(
                 "'k' parameter must be an integer",
@@ -415,6 +453,7 @@ def validate_method_parameters(method: str, **kwargs: Any) -> Dict[str, Any]:
         validated_params['k'] = k
 
     elif method == 'mq64':
+        # Validate 'levels' parameter for mq64 method.
         levels: Optional[List[int]] = kwargs.get('levels', None)
         if levels is not None:
             if not isinstance(levels, list) or not all(isinstance(l, int) and l > 0 for l in levels):
@@ -434,13 +473,14 @@ def validate_method_parameters(method: str, **kwargs: Any) -> Dict[str, Any]:
         validated_params['levels'] = levels
     
     # Define known parameters for each method to catch unknown/unsupported arguments.
+    # This helps in providing clear error messages for misconfigured parameters.
     known_params: Dict[str, set[str]] = {
         'shq64': {'planes'},
         't8q64': {'k'},
         'mq64': {'levels'},
-        'eq64': set(),
-        'zoq64': set(),
-        'auto': set() # 'auto' method does not have specific parameters.
+        'eq64': set(),  # eq64 has no specific parameters.
+        'zoq64': set(), # zoq64 has no specific parameters.
+        'auto': set()   # 'auto' method does not have specific parameters.
     }
     
     # Check for any unknown parameters provided for the given method.
@@ -462,18 +502,51 @@ def validate_batch_parameters(
     max_memory_mb: Optional[int] = None
 ) -> Dict[str, Any]:
     """
-    Validates parameters related to batch processing.
-    
+    Validates parameters related to batch processing operations.
+
+    This function ensures that parameters like `batch_size` and `max_memory_mb`
+    are valid integers and fall within reasonable ranges. It is used to prevent
+    misconfigurations that could lead to excessive memory consumption or inefficient
+    processing during batch operations.
+
     Args:
-        batch_size (Optional[int]): The desired size of processing batches. If `None`, no validation is performed.
+        batch_size (Optional[int]): The desired size of processing batches. If provided,
+                                    it must be a positive integer. Defaults to `None` (no validation).
         max_memory_mb (Optional[int]): The maximum memory allowed for an operation in megabytes.
-                                      If `None`, no validation is performed.
-        
+                                       If provided, it must be a positive integer. Defaults to `None` (no validation).
+
     Returns:
-        Dict[str, Any]: A dictionary containing the validated parameters.
-        
+        Dict[str, Any]: A dictionary containing the validated parameters. Only parameters
+                        that were explicitly provided and validated will be included.
+
     Raises:
-        UubedValidationError: If `batch_size` or `max_memory_mb` are invalid (e.g., non-integer, non-positive, too large).
+        UubedValidationError: If `batch_size` or `max_memory_mb` are invalid (e.g., non-integer,
+                              non-positive, or excessively large).
+
+    Example:
+        >>> from uubed.validation import validate_batch_parameters
+        >>>
+        >>> # Valid batch size
+        >>> validate_batch_parameters(batch_size=500)
+        {'batch_size': 500}
+
+        >>> # Valid max memory limit
+        >>> validate_batch_parameters(max_memory_mb=2048)
+        {'max_memory_mb': 2048}
+
+        >>> # Invalid batch size (negative)
+        >>> try:
+        ...     validate_batch_parameters(batch_size=-10)
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: 'batch_size' must be positive
+
+        >>> # Invalid max memory limit (non-integer)
+        >>> try:
+        ...     validate_batch_parameters(max_memory_mb="1024")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: 'max_memory_mb' must be an integer
     """
     validated: Dict[str, Any] = {}
     
@@ -529,20 +602,73 @@ def validate_file_path(
 ) -> Path:
     """
     Validates a file path with comprehensive checks for existence, readability, and writability.
-    
+
+    This function provides robust validation for file system paths, ensuring that
+    operations on these paths will succeed. It can check if a file or directory exists,
+    if it's readable, and if it's writable (either the file itself or its parent directory
+    if the file does not yet exist).
+
     Args:
-        path (Union[str, Path]): The file path to validate. Can be a string or a `pathlib.Path` object.
-        check_exists (bool): If `True`, checks if the file or directory exists. Defaults to `True`.
-        check_readable (bool): If `True`, checks if the file is readable. Requires `check_exists` to be `True`. Defaults to `True`.
-        check_writable (bool): If `True`, checks if the file (or its parent directory if it doesn't exist) is writable. Defaults to `False`.
-        
+        path (Union[str, Path]): The file path to validate. Can be provided as a string
+                                 or a `pathlib.Path` object.
+        check_exists (bool): If `True`, the function checks if the specified file or directory
+                             actually exists on the filesystem. Defaults to `True`.
+        check_readable (bool): If `True`, and `check_exists` is also `True`, the function
+                               verifies that the file is readable. This involves attempting
+                               to open and read a small portion of the file. Defaults to `True`.
+        check_writable (bool): If `True`, the function checks if the file (if it exists) or
+                               its parent directory (if the file does not exist) is writable.
+                               This involves attempting to open the file for writing or creating
+                               a temporary file in the parent directory. Defaults to `False`.
+
     Returns:
-        Path: A `pathlib.Path` object representing the validated file path.
-        
+        Path: A `pathlib.Path` object representing the validated file path. This ensures
+              consistency in path handling throughout the application.
+
     Raises:
-        UubedValidationError: If the `path` is not a string or `Path` object.
-        UubedResourceError: If the file does not exist, is not a file, is not readable/writable,
-                            or if its parent directory does not exist or is not writable.
+        UubedValidationError: If the `path` input is not a string or `pathlib.Path` object.
+        UubedResourceError: If any of the specified checks fail (e.g., file not found,
+                            permissions issues, path is not a file/directory as expected).
+
+    Example:
+        >>> from uubed.validation import validate_file_path
+        >>> from pathlib import Path
+        >>> import os
+
+        >>> # Create a dummy file for testing
+        >>> test_dir = Path(".uubed_test_dir")
+        >>> test_dir.mkdir(exist_ok=True)
+        >>> test_file = test_dir / "test_file.txt"
+        >>> test_file.write_text("hello")
+
+        >>> # Valid existing and readable file
+        >>> validate_file_path(test_file, check_exists=True, check_readable=True)
+        # Expected: Path('.uubed_test_dir/test_file.txt')
+
+        >>> # Valid non-existent but writable path (for creating a new file)
+        >>> new_file = test_dir / "new_file.txt"
+        >>> validate_file_path(new_file, check_exists=False, check_writable=True)
+        # Expected: Path('.uubed_test_dir/new_file.txt')
+
+        >>> # Invalid: file does not exist when check_exists is True
+        >>> try:
+        ...     validate_file_path(Path("non_existent.txt"), check_exists=True)
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: File or directory does not exist: 'non_existent.txt'
+
+        >>> # Invalid: directory not writable
+        >>> # (This example might require manual setup of permissions to demonstrate)
+        >>> # os.chmod(test_dir, 0o444) # Make directory read-only
+        >>> # try:
+        >>> #     validate_file_path(test_dir / "another_new_file.txt", check_writable=True)
+        >>> # except Exception as e:
+        >>> #     print(e)
+        >>> # os.chmod(test_dir, 0o755) # Restore permissions
+
+        >>> # Cleanup
+        >>> test_file.unlink()
+        >>> test_dir.rmdir()
     """
     if not isinstance(path, (str, Path)):
         raise validation_error(
@@ -554,58 +680,69 @@ def validate_file_path(
     
     path_obj: Path = Path(path)
     
-    # Check if the path exists.
+    # Step 1: Check if the path exists if required.
     if check_exists and not path_obj.exists():
         raise resource_error(
             f"File or directory does not exist: '{path_obj}'",
-            resource_type="file"
+            resource_type="file",
+            suggestion="Check the provided path for typos or ensure the file/directory exists."
         )
     
-    # If checking for existence and readability, ensure it's a file.
+    # Step 2: If checking for existence and readability, ensure it's a file.
+    # This prevents attempting to read directories as files.
     if check_exists and check_readable and not path_obj.is_file():
         raise resource_error(
             f"Path is not a file: '{path_obj}'",
-            resource_type="file"
+            resource_type="file",
+            suggestion="The path exists but is not a regular file. Provide a path to a file."
         )
     
-    # Check if the file is readable.
+    # Step 3: Check if the file is readable if required.
     if check_exists and check_readable:
         try:
-            # Attempt to open and read a byte to verify readability.
+            # Attempt to open and read a single byte to verify readability without loading the whole file.
             with open(path_obj, 'rb') as f:
-                f.read(1)  
+                f.read(1)  # Read just one byte
         except PermissionError:
             raise resource_error(
                 f"File is not readable: '{path_obj}'",
                 resource_type="file",
-                suggestion="Check file permissions."
+                suggestion="Check file permissions. Ensure the current user has read access."
             )
         except Exception as e:
+            # Catch any other unexpected errors during file read attempt.
             raise resource_error(
                 f"Cannot read file '{path_obj}': {e}",
                 resource_type="file",
-                suggestion="Ensure the file is not corrupted or locked."
-            )
+                suggestion="Ensure the file is not corrupted, locked, or in an inaccessible state."
+            ) from e
     
-    # Check if the file or its parent directory is writable.
+    # Step 4: Check if the file or its parent directory is writable if required.
     if check_writable:
         if path_obj.exists():
-            # If the file exists, check if it's a file and writable.
+            # If the path exists, it must be a file to be writable directly.
             if not path_obj.is_file():
                 raise resource_error(
                     f"Path exists but is not a file: '{path_obj}'",
-                    resource_type="file"
+                    resource_type="file",
+                    suggestion="To write to this path, it must be a file. If it's a directory, specify a file name within it."
                 )
             try:
-                # Attempt to open in append mode to check writability without truncating.
+                # Attempt to open in append binary mode. This checks writability without truncating existing content.
                 with open(path_obj, 'ab') as f:
-                    pass  
+                    pass  # Successfully opened for writing
             except PermissionError:
                 raise resource_error(
                     f"File is not writable: '{path_obj}'",
                     resource_type="file",
-                    suggestion="Check file permissions."
+                    suggestion="Check file permissions. Ensure the current user has write access."
                 )
+            except Exception as e:
+                raise resource_error(
+                    f"Cannot write to file '{path_obj}': {e}",
+                    resource_type="file",
+                    suggestion="Ensure the file is not locked or there is sufficient disk space."
+                ) from e
         else:
             # If the file does not exist, check if its parent directory is writable.
             parent: Path = path_obj.parent
@@ -613,24 +750,31 @@ def validate_file_path(
                 raise resource_error(
                     f"Parent directory does not exist: '{parent}'",
                     resource_type="directory",
-                    suggestion="Create the parent directory first."
+                    suggestion="Create the parent directory first before attempting to write a file within it."
                 )
             if not parent.is_dir():
                 raise resource_error(
                     f"Parent path is not a directory: '{parent}'",
-                    resource_type="directory"
+                    resource_type="directory",
+                    suggestion="The parent path exists but is not a directory. Provide a valid directory path."
                 )
             try:
-                # Create and immediately delete a temporary file to test writability.
-                test_file: Path = parent / f".uubed_write_test_{id(path_obj)}"
-                test_file.touch()
-                test_file.unlink()
+                # Create and immediately delete a temporary file to test writability of the directory.
+                test_file: Path = parent / f".uubed_write_test_{id(path_obj)}.tmp"
+                test_file.touch() # Create the file
+                test_file.unlink() # Delete the file
             except PermissionError:
                 raise resource_error(
                     f"Parent directory is not writable: '{parent}'",
                     resource_type="directory",
-                    suggestion="Check directory permissions."
+                    suggestion="Check directory permissions. Ensure the current user has write access."
                 )
+            except Exception as e:
+                raise resource_error(
+                    f"Cannot test writability in directory '{parent}': {e}",
+                    resource_type="directory",
+                    suggestion="Ensure there is sufficient disk space and no other issues preventing file creation."
+                ) from e
     
     return path_obj
 
@@ -642,20 +786,49 @@ def validate_memory_usage(
 ) -> None:
     """
     Validates that an operation's estimated memory usage does not exceed a specified limit.
-    
+
+    This function is a critical safeguard against excessive memory consumption, particularly
+    for operations involving large datasets or complex encoding methods. It compares the
+    estimated memory requirement of an operation against a predefined or user-specified
+    maximum memory limit. If the estimate exceeds the limit, a `UubedResourceError` is raised.
+
     Args:
         estimated_bytes (int): The estimated memory usage of the operation in bytes.
-        operation (str): A descriptive name of the operation being performed (e.g., "encoding").
+                               This value is typically calculated by `estimate_memory_usage`.
+        operation (str): A descriptive name of the operation being performed (e.g., "encoding",
+                         "batch processing"). This is used in error messages for clarity.
                          Defaults to "operation".
-        max_bytes (Optional[int]): The maximum allowed memory usage in bytes. If `None`,
-                                   a default of 1GB is used.
-        
+        max_bytes (Optional[int]): The maximum allowed memory usage in bytes for the operation.
+                                   If `None`, a default limit of 1GB (1024 * 1024 * 1024 bytes) is used.
+
     Raises:
-        UubedResourceError: If the `estimated_bytes` exceeds `max_bytes`.
+        UubedResourceError: If the `estimated_bytes` exceeds the `max_bytes` limit.
+
+    Example:
+        >>> from uubed.validation import validate_memory_usage
+        >>>
+        >>> # Valid memory usage
+        >>> validate_memory_usage(estimated_bytes=500 * 1024 * 1024, operation="large encoding") # 500MB < 1GB default
+
+        >>> # Invalid memory usage (exceeds default 1GB)
+        >>> try:
+        ...     validate_memory_usage(estimated_bytes=1.5 * 1024 * 1024 * 1024, operation="huge batch")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Estimated memory usage (1536 MB) is too high for huge batch.
+
+        >>> # Custom max memory limit
+        >>> try:
+        ...     validate_memory_usage(estimated_bytes=200 * 1024 * 1024, operation="small task", max_bytes=100 * 1024 * 1024)
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Estimated memory usage (200 MB) is too high for small task.
     """
+    # Set a default maximum memory limit if not explicitly provided. (1GB)
     if max_bytes is None:
-        max_bytes = 1024 * 1024 * 1024  # Default to 1GB.
+        max_bytes = 1024 * 1024 * 1024  # 1 GB in bytes
     
+    # Compare the estimated memory usage against the maximum allowed. If it exceeds, raise an error.
     if estimated_bytes > max_bytes:
         raise resource_error(
             f"Estimated memory usage ({estimated_bytes // (1024*1024)} MB) is too high for {operation}.",
@@ -672,66 +845,132 @@ def estimate_memory_usage(
     method: str
 ) -> int:
     """
-    Estimates the memory usage for an encoding operation based on the number of embeddings,
-    their size, and the encoding method.
-    
-    This is a heuristic estimate and may not reflect exact memory consumption.
-    
+    Estimates the memory usage for an encoding operation.
+
+    This function provides a heuristic estimate of the memory that an encoding
+    operation might consume. The estimate is based on the number of embeddings,
+    their individual size, and a method-specific multiplier that accounts for
+    overhead (e.g., intermediate data structures, string representation).
+
     Args:
-        embedding_count (int): The number of embeddings to be processed.
-        embedding_size (int): The size of each embedding in bytes (or dimensions if 1 byte per dim).
-        method (str): The encoding method being used, which influences memory overhead.
-        
+        embedding_count (int): The number of embeddings to be processed in the operation.
+        embedding_size (int): The size of each individual embedding in bytes (or dimensions
+                              if each dimension is treated as 1 byte, e.g., for `uint8` arrays).
+        method (str): The encoding method being used (e.g., "eq64", "shq64"). This
+                      parameter influences the memory overhead multiplier.
+
     Returns:
-        int: The estimated total memory usage in bytes.
+        int: The estimated total memory usage in bytes for the operation.
+
+    Note:
+        This is a heuristic estimate and may not reflect the exact memory consumption
+        due to various factors like Python's memory management, underlying native
+        library allocations, and system-specific overheads. It serves as a guide
+        for preventing gross over-allocations.
+
+    Example:
+        >>> from uubed.validation import estimate_memory_usage
+        >>>
+        >>> # Estimate memory for 1000 embeddings of 768 dimensions using eq64
+        >>> estimate_memory_usage(1000, 768, "eq64")
+        1536000
+
+        >>> # Estimate memory for a single 128-dimension embedding using shq64
+        >>> estimate_memory_usage(1, 128, "shq64")
+        192
     """
-    # Base memory consumption for storing the raw embeddings.
+    # Calculate the base memory consumption for storing the raw embeddings.
     base_memory: int = embedding_count * embedding_size
     
-    # Multipliers to account for method-specific overhead (e.g., intermediate data structures, string encoding).
-    # These are approximate values.
+    # Define multipliers to account for method-specific overhead.
+    # These are approximate values based on typical memory patterns for each encoding type.
     method_multipliers: Dict[str, float] = {
-        'eq64': 2.0,    # Base64 encoding typically doubles size for string representation.
-        'shq64': 1.5,   # SimHash might involve matrix operations, but output is compact.
+        'eq64': 2.0,    # Lossless encoding often involves string conversion, roughly doubling size.
+        'shq64': 1.5,   # SimHash involves matrix operations, but output is compact.
         't8q64': 1.2,   # Top-k involves sorting/selection, relatively low overhead.
         'zoq64': 1.8,   # Z-order involves bit manipulation, some intermediate storage.
-        'mq64': 2.5,    # Matryoshka might have higher overhead due to hierarchical processing.
-        'auto': 2.5     # Assume worst-case overhead for auto-detection.
+        'mq64': 2.5,    # Matryoshka might have higher overhead due to hierarchical processing and string concatenation.
+        'auto': 2.5     # Assume worst-case overhead for auto-detection to be safe.
     }
     
+    # Retrieve the appropriate multiplier for the given method, defaulting to 2.0 if not found.
     multiplier: float = method_multipliers.get(method, 2.0)
+    
+    # Return the estimated total memory usage, rounded to an integer.
     return int(base_memory * multiplier)
 
 
 def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
     """
     Validates GPU-related parameters and checks for GPU availability.
-    
+
+    This function is used to ensure that GPU-related parameters are valid and that
+    the specified GPU device is accessible. It checks for the presence of `cupy`
+    (the CuPy library for GPU computing) and validates the `device_id` against
+    available CUDA devices.
+
     Args:
-        device_id (Optional[int]): The CUDA device ID to validate. If `None`, only checks
-                                   for general GPU availability.
-        
+        device_id (Optional[int]): The CUDA device ID to validate. If `None`, the function
+                                   only checks for general GPU availability without validating
+                                   a specific device. Defaults to `None`.
+
     Returns:
-        Dict[str, Any]: A dictionary containing validated parameters (e.g., `device_id`).
-        
+        Dict[str, Any]: A dictionary containing validated parameters. Currently, this
+                        includes `device_id` if it was provided and validated.
+
     Raises:
-        UubedResourceError: If CuPy is not installed, or if the specified `device_id` is invalid
-                            or the GPU is inaccessible.
-        UubedValidationError: If `device_id` is not an integer or is negative.
+        UubedResourceError: If `cupy` is not installed (meaning GPU acceleration is not
+                            available), or if the specified `device_id` is invalid (e.g.,
+                            out of range) or the GPU is inaccessible due to driver issues.
+        UubedValidationError: If `device_id` is provided but is not an integer or is negative.
+
+    Example:
+        >>> from uubed.validation import validate_gpu_parameters
+        >>>
+        >>> # Check for general GPU availability
+        >>> try:
+        ...     params = validate_gpu_parameters()
+        ...     print("GPU is available.")
+        ... except Exception as e:
+        ...     print(f"GPU check failed: {e}")
+
+        >>> # Validate a specific GPU device (assuming device 0 exists)
+        >>> try:
+        ...     params = validate_gpu_parameters(device_id=0)
+        ...     print(f"Device 0 is valid: {params}")
+        ... except Exception as e:
+        ...     print(f"Device validation failed: {e}")
+
+        >>> # Invalid device_id (negative)
+        >>> try:
+        ...     validate_gpu_parameters(device_id=-1)
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: 'device_id' must be non-negative
+
+        >>> # Invalid device_id (out of range, assuming only 1 GPU)
+        >>> # (This example depends on your system's GPU count)
+        >>> # try:
+        >>> #     validate_gpu_parameters(device_id=99)
+        >>> # except Exception as e:
+        >>> #     print(e)
+        # Expected: GPU device 99 not available.
     """
     validated: Dict[str, Any] = {}
     
-    # Attempt to import cupy to check for GPU availability.
+    # Step 1: Attempt to import `cupy` to check for GPU availability.
     try:
         import cupy as cp
-        gpu_available: bool = True
+        gpu_available: bool = True # Flag to indicate CuPy is imported.
     except ImportError:
+        # If CuPy is not installed, GPU acceleration is not possible.
         raise resource_error(
             "GPU acceleration not available. CuPy is not installed.",
             resource_type="gpu",
             suggestion="Install CuPy: `pip install cupy-cuda11x` (or appropriate CUDA version for your system)."
         )
     
+    # Step 2: If a specific `device_id` is provided, validate it.
     if device_id is not None:
         if not isinstance(device_id, int):
             raise validation_error(
@@ -748,9 +987,9 @@ def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
                 received=f"{device_id}"
             )
         
-        # Check if the specified device_id corresponds to an available GPU.
+        # Step 3: Check if the specified `device_id` corresponds to an actually available GPU.
         try:
-            # Get the total number of available CUDA devices.
+            # Get the total number of available CUDA devices reported by CuPy.
             device_count: int = cp.cuda.runtime.getDeviceCount()
             if device_id >= device_count:
                 raise resource_error(
@@ -761,7 +1000,7 @@ def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
                     suggestion=f"Use a 'device_id' in the range 0-{device_count-1}."
                 )
         except Exception as e:
-            # Catch any other exceptions during device access (e.g., CUDA driver issues).
+            # Catch any other exceptions during device access (e.g., CUDA driver issues, hardware problems).
             raise resource_error(
                 f"Cannot access GPU device {device_id}: {e}",
                 resource_type="gpu",

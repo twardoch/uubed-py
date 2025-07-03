@@ -11,6 +11,7 @@
 #------------------------------------------------------------------------------
 [project]
 name = 'uubed' # Package name on PyPI
+version = "1.0.2"
 description = "High-performance, position-safe embedding encoding"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -58,7 +59,6 @@ vectordb = [
 all = [
   "uubed[test,gpu,langchain,vectordb]"
 ]
-dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://github.com/twardoch/uubed"
@@ -70,12 +70,12 @@ Repository = "https://github.com/twardoch/uubed.git"
 uubed = "uubed.cli:main"
 
 [build-system]
-requires = ["setuptools>=61", "wheel", "setuptools-scm>=6.2"]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools-scm]
-version_scheme = "post-release"
-local_scheme = "dirty-tag"
+[tool.setuptools]
+packages = ["uubed"]
+package-dir = {"" = "src"}
 
 
 
