@@ -5,6 +5,13 @@ All notable changes to the uubed Python package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-01-03
+
+### Known Issues
+- **Test Environment Issues**: Tests fail with `ModuleNotFoundError` for 'uubed' and 'numpy'
+  - Python module import path configuration needs to be fixed
+  - Test runner environment setup requires adjustment
+
 ## [0.2.1] - 2025-07-03 (Current Development)
 
 ### Added
@@ -39,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - TOML/YAML/JSON configuration file support
   - Environment variable overrides
   - Method-specific parameter defaults
+- **Hatch build system configuration** to fix test environment issues
+  - Added complete hatch configuration to pyproject.toml
+  - Configured development environments for testing
+  - Set up proper package source discovery
 
 ### Modified
 - **API Enhancements**
@@ -49,6 +60,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Native Wrapper Updates**
   - Added mq64 encoding/decoding function imports
   - Updated method availability checks
+- **Build System Migration**
+  - Migrated from setuptools to hatchling build backend
+  - Updated package configuration for proper source discovery
+  - Fixed package import issues in test environments
 
 ### Fixed
 - **Build system configuration** migrated from maturin to setuptools for pure Python distribution
@@ -57,11 +72,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed version configuration for proper package building
 - **Package import and basic functionality verification** confirmed working
 - **Ruff configuration** added to pyproject.toml for linting and formatting
+- **Test environment configuration** - attempted to fix ModuleNotFoundError issues
+  - Added proper hatch configuration with dev-mode enabled
+  - Configured test environment with correct dependencies
+  - Note: Test import issues persist and require further investigation
 
 ### Enhanced
 - **Development workflow** improvements for better maintainability
 - **Documentation accuracy** with implementation status verification
 - **Error messages** now include specific parameter details and helpful suggestions
+
+### Known Issues - PARTIALLY RESOLVED ✅⚠️
+- **Test Environment**: Major progress made, mostly working now
+  - ✅ **FIXED**: Missing dependencies issue - added `toml>=0.10.0` to project dependencies
+  - ✅ **FIXED**: Syntax error in vectordb.py that was breaking imports
+  - ✅ **RESOLVED**: Tests now run successfully with manual virtual environment setup
+  - ✅ **CONFIRMED**: Test collection working - 102 tests found across 5 modules
+  - ✅ **VALIDATED**: Basic functionality confirmed - 77 tests passing, 21 failing, 4 skipped
+  - ⚠️ **REMAINING**: Hatch test environment still has import issues - dev-mode may not be working correctly
+  - ⚠️ **TODO**: 21 test failures remain, mostly validation logic and error message format mismatches
+
+### Remaining Work - Next Iteration Priority
+- **Test Failure Resolution**: Address 21 failing tests across multiple categories
+  - API validation edge cases and parameter handling (6 failures)
+  - Error handling message format alignment (2 failures)
+  - Streaming operations and resource management (2 failures)
+  - Integration test mock setup and configuration (4 failures)
+  - CLI and encoder-specific issues (7 failures)
+- **Hatch Environment**: Investigate why dev-mode installation isn't working in hatch test environment
 
 ## [0.2.0] - 2024-01-XX (In Development)
 

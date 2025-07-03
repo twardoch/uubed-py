@@ -1140,6 +1140,6 @@ def get_connector(db_type: str, **kwargs: Any) -> VectorDBConnector:
     
     db_type_lower = db_type.lower()
     if db_type_lower not in connectors:
-        raise ValueError(f"Unknown or unsupported database type: '{db_type}'. Expected one of: {\', \'.join(sorted(connectors.keys()))}.")
+        raise ValueError(f"Unknown or unsupported database type: '{db_type}'. Expected one of: {', '.join(sorted(connectors.keys()))}.")
     
     return connectors[db_type_lower](**kwargs)

@@ -36,6 +36,7 @@ dependencies = [
   "numpy>=1.20",
   "click>=8.0",
   "rich>=10.0",
+  "toml>=0.10.0",
 ]
 
 [project.optional-dependencies]
@@ -69,12 +70,51 @@ Repository = "https://github.com/twardoch/uubed.git"
 uubed = "uubed.cli:main"
 
 [build-system]
-requires = ["setuptools>=61", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
-packages = ["uubed", "uubed.encoders"]
-package-dir = {"" = "src"}
+#------------------------------------------------------------------------------
+# HATCH CONFIGURATION
+# Configuration for hatch build system and test environments.
+#------------------------------------------------------------------------------
+
+[tool.hatch.build.targets.sdist]
+packages = ["src/uubed"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uubed"]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "numpy>=1.20",
+  "click>=8.0",
+  "rich>=10.0",
+  "toml>=0.10.0",
+]
+dev-mode = true
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov=uubed --cov-report=term-missing {args:tests}"
+lint = "ruff check {args:src tests}"
+format = "ruff format {args:src tests}"
+type-check = "mypy {args:src}"
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "numpy>=1.20",
+  "click>=8.0",
+  "rich>=10.0",
+  "toml>=0.10.0",
+]
+dev-mode = true
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12"]
 
 
 
