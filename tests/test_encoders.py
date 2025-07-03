@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 from uubed import encode, decode
 from uubed.encoders import q64
+from uubed.exceptions import UubedValidationError
 
 
 class TestQ64:
