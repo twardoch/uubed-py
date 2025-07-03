@@ -32,4 +32,5 @@
 - [ ] Performance optimization guide
 
 ### Testing & Quality
-- [ ] Fix pytest environment conflicts for automated testing
+- [ ] Fix pytest environment conflicts for automated testing.
+- [ ] Investigate and resolve `ModuleNotFoundError: No module named 'uubed'` when running tests.
