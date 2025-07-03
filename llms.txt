@@ -112,12 +112,12 @@ This section contains the contents of the repository's files.
 
 <file path="issues/102.txt">
 ...
-       190    
+       190
        191    ## 6. Implementation Phases
-       192    
+       192
        193 -  ### 6.1. Phase 1: Python Package Foundation (Current)
        193 +  ### 6.1. Phase 1: Python Package Foundation ✅ COMPLETED
-       194    
+       194
        195    - [x] Basic package structure
        196    - [x] Prototype implementations
        197 -  - [ ] Refactor voyemb.py into package modules
@@ -126,10 +126,10 @@ This section contains the contents of the repository's files.
        197 +  - [x] Refactored voyemb.py into package modules
        198 +  - [x] Comprehensive test suite (9 tests passing)
        199 +  - [x] Initial documentation created
-       200    
+       200
        201 -  ### 6.2. Phase 2: Native Core Development
        201 +  ### 6.2. Phase 2: Native Core Development ✅ COMPLETED
-       202    
+       202
        203 -  - [ ] Language selection and toolchain setup
        204 -  - [ ] Port QuadB64 to native code
        205 -  - [ ] Implement SIMD optimizations
@@ -140,10 +140,10 @@ This section contains the contents of the repository's files.
        205 +  - [x] Placeholder for SIMD optimizations
        206 +  - [x] Python bindings working perfectly
        207 +  - [x] 40-105x performance improvement!
-       208    
+       208
        209 -  ### 6.3. Phase 3: Advanced Features
        209 +  ### 6.3. Phase 3: Integration & Packaging 🔄 NEARLY COMPLETE
-       210    
+       210
        211 -  - [ ] Streaming API for large datasets
        212 -  - [ ] GPU acceleration exploration
        213 -  - [ ] Integration with vector databases
@@ -154,10 +154,10 @@ This section contains the contents of the repository's files.
        213 +  - [x] Documentation (quickstart, API reference)
        214 +  - [x] Build system with maturin
        215 +  - [ ] PyPI publishing (remaining)
-       216    
+       216
        217 -  ### 6.4. Phase 4: Ecosystem & Adoption
        217 +  ### 6.4. Phase 4: Publishing & Distribution ⏳ IN PROGRESS
-       218    
+       218
        219 -  - [ ] Create plugins for popular frameworks
        220 -  - [ ] Develop conversion tools
        221 -  - [ ] Build community examples
@@ -166,12 +166,12 @@ This section contains the contents of the repository's files.
        220 +  - [ ] Upload to PyPI
        221 +  - [ ] Create documentation website
        222 +  - [ ] Announce release
-       223    
+       223
        224    ---
-       225    
+       225
        226 -  ## 7. Technical Decisions Pending
        226 +  ## 7. Technical Decisions Made
-       227    
+       227
        228 -  1. **Native Language Choice:** Rust (with PyO3) vs C (with CFFI) vs Zig
        229 -  2. **SIMD Strategy:** Auto-vectorization vs explicit intrinsics
        230 -  3. **API Design:** Functional vs object-oriented interface
@@ -182,11 +182,11 @@ This section contains the contents of the repository's files.
        230 +  3. **API Design:** ✅ Functional interface chosen
        231 +  4. **Error Handling:** ✅ Exceptions via PyO3 conversion
        232 +  5. **Parallelism:** ✅ Rayon for parallel processing
-       233    
+       233
        234    ---
-       235    
+       235
        236    ## 8. Next Immediate Steps
-       237    
+       237
        238 -  1. [ ] Extract encoders from voyemb.py into uubed package
        239 -  2. [ ] Create unit tests for each encoding method
        240 -  3. [ ] Set up benchmarking framework
@@ -197,11 +197,11 @@ This section contains the contents of the repository's files.
        240 +  3. [x] ✅ Benchmarking framework created
        241 +  4. [x] ✅ Documentation written
        242 +  5. [ ] Create CLI tool (future work)
-       243    
+       243
        244    ---
-       245    
+       245
        246    ## 9. Success Metrics
-       247    
+       247
        248 -  - **Performance:** 10x faster than pure Python implementation
        249 -  - **Accuracy:** Bit-perfect compatibility with prototype
        250 -  - **Usability:** Install with uv/pip, no external dependencies
@@ -212,17 +212,17 @@ This section contains the contents of the repository's files.
        250 +  - **Usability:** ✅ Simple pip install with maturin
        251 +  - **Adoption:** ⏳ Vector DB integration pending
        252 +  - **Documentation:** ✅ API docs and guides complete
-       253    
+       253
        254    ---
-       255    
+       255
 
 ⏺ Now let me add the missing sections at the end:
 
 ⏺ Update(PROJECT.md)
-  ⎿  Updated PROJECT.md with 20 additions and 5 removals                                                 
-       257    
+  ⎿  Updated PROJECT.md with 20 additions and 5 removals
+       257
        258    After each implementation phase, the team should ask:
-       259    
+       259
        260 -  1. Is the API as simple as it could be?
        261 -  2. Are we over-engineering any component?
        262 -  3. What would a new user find confusing?
@@ -233,16 +233,16 @@ This section contains the contents of the repository's files.
        262 +  3. What would a new user find confusing? ⚠️ Maybe the different encoding methods
        263 +  4. Can we reduce the cognitive load further? ✅ Auto method selection helps
        264 +  5. Are all features truly necessary for v1.0? ✅ Yes - all encoders serve distinct purposes
-       265 +  
+       265 +
        266 +  ## 11. Future Work (Phase 5+)
-       267 +  
+       267 +
        268 +  ### Advanced Features
        269 +  - [ ] Streaming API for large datasets
-       270 +  - [ ] GPU acceleration exploration  
+       270 +  - [ ] GPU acceleration exploration
        271 +  - [ ] Integration with vector databases
        272 +  - [ ] Matryoshka embedding support
        273 +  - [ ] Binary quantization options
-       274 +  
+       274 +
        275 +  ### Ecosystem Integration
        276 +  - [ ] Create plugins for popular frameworks
        277 +  - [ ] LangChain integration
@@ -250,7 +250,7 @@ This section contains the contents of the repository's files.
        279 +  - [ ] Example notebooks and demos
 
 ⏺ Update Todos
-  ⎿  ☒ Update PROJECT.md to reflect current status           
+  ⎿  ☒ Update PROJECT.md to reflect current status
      ☐ Update PROGRESS.md with Phase 3 completion details
      ☐ Update PLAN.md to mark Phase 3 as complete
      ☐ Update TODO.md to move completed items to CHANGELOG.md
@@ -261,96 +261,96 @@ This section contains the contents of the repository's files.
 ⏺ Now let me update PROGRESS.md:
 
 ⏺ Update(PROGRESS.md)
-  ⎿  Updated PROGRESS.md with 1 addition and 1 removal                                                                
+  ⎿  Updated PROGRESS.md with 1 addition and 1 removal
        1    # Progress Report: uubed Implementation
-       2    
+       2
        3 -  ## Phase 1: Python Package Foundation - COMPLETED (95%)
        3 +  ## Phase 1: Python Package Foundation - COMPLETED ✅
-       4    
+       4
        5    ### Summary
-       6    Successfully implemented the core Python package with all encoders working and tests passing. The package 
-           structure is complete, all encoding methods are functional, and baseline performance metrics have been 
+       6    Successfully implemented the core Python package with all encoders working and tests passing. The package
+           structure is complete, all encoding methods are functional, and baseline performance metrics have been
            established.
 
 ⏺ Update(PROGRESS.md)
-  ⎿  Updated PROGRESS.md with 1 addition and 5 removals                     
+  ⎿  Updated PROGRESS.md with 1 addition and 5 removals
        66      - **T8q64**: 1.3-5.5 MB/s (fast for large)
        67      - **Zoq64**: 1.5-7.0 MB/s (fastest overall)
-       68    
+       68
        69 -  ### Remaining Tasks (5%)
        70 -  - Add property-based tests with Hypothesis
        71 -  - Document performance in README
        72 -  - Add usage examples to README
        73 -  - Create formal API documentation
        69 +  ### All Phase 1 Tasks Completed ✅
-       70    
+       70
        71    ### Key Technical Decisions
        72    1. **Position-dependent alphabets** prevent substring pollution
 
 ⏺ Now let me add Phase 2 and Phase 3 sections to PROGRESS.md:
 
 ⏺ Update(PROGRESS.md)
-  ⎿  Updated PROGRESS.md with 82 additions and 2 removals                                                                  
+  ⎿  Updated PROGRESS.md with 82 additions and 2 removals
         82    4. Index overflow needs handling for large embeddings
         83    5. Clear error messages improve debugging
-        84    
+        84
         85 -  ### Next Steps
         86 -  Ready to proceed to Phase 2: Rust Core Implementation for 10x performance improvement.
         85 +  ---
-        86    
+        86
         87 +  ## Phase 2: Rust Core Implementation - COMPLETED ✅
-        88 +  
+        88 +
         89 +  ### Summary
-        90 +  Successfully implemented native Rust encoders with PyO3 bindings, achieving massive performance improvements 
+        90 +  Successfully implemented native Rust encoders with PyO3 bindings, achieving massive performance improvements
            + that exceed our 10x goal.
-        91 +  
+        91 +
         92 +  ### Completed Tasks
-        93 +  
+        93 +
         94 +  #### Rust Project Setup ✅
         95 +  - Created Rust workspace with proper Cargo.toml configuration
         96 +  - Integrated PyO3 for Python bindings
         97 +  - Set up maturin build system
         98 +  - Configured module naming (uubed._native)
-        99 +  
+        99 +
        100 +  #### Native Encoder Implementations ✅
        101 +  1. **Q64 Codec** - 40-105x speedup!
        102 +     - Compile-time lookup tables for O(1) performance
        103 +     - Efficient byte-by-byte processing
        104 +     - SIMD optimization placeholders
-       105 +  
+       105 +
        106 +  2. **SimHash** - 1.7-9.7x speedup
        107 +     - Parallel matrix operations with Rayon
        108 +     - Efficient random projection
-       109 +  
+       109 +
        110 +  3. **Top-k** - Mixed results (needs optimization)
        111 +     - Currently slower for some sizes
        112 +     - Identified as optimization target
-       113 +  
+       113 +
        114 +  4. **Z-order** - 60-1600x speedup!
        115 +     - Highly optimized bit interleaving
        116 +     - Efficient Morton code generation
-       117 +  
+       117 +
        118 +  #### Performance Achievements ✅
        119 +  - Q64: >230 MB/s throughput on 1KB data
        120 +  - Exceeded 10x performance goal significantly
        121 +  - Automatic fallback to pure Python when native unavailable
-       122 +  
+       122 +
        123 +  ---
-       124 +  
+       124 +
        125 +  ## Phase 3: Integration & Packaging - NEARLY COMPLETE (90%)
-       126 +  
+       126 +
        127 +  ### Summary
-       128 +  Successfully integrated native module with Python package, set up CI/CD, and created comprehensive 
+       128 +  Successfully integrated native module with Python package, set up CI/CD, and created comprehensive
            + documentation.
-       129 +  
+       129 +
        130 +  ### Completed Tasks
-       131 +  
+       131 +
        132 +  #### Build System Integration ✅
        133 +  - Replaced hatchling with maturin as build backend
        134 +  - Configured workspace-level Cargo.toml
        135 +  - Successfully building wheels for all platforms
        136 +  - Native module loads correctly with fallback
-       137 +  
+       137 +
        138 +  #### CI/CD Pipeline ✅
        139 +  - Created GitHub Actions workflows:
        140 +    - ci.yml for testing
@@ -359,7 +359,7 @@ This section contains the contents of the repository's files.
        143 +  - Multi-platform support (Linux, macOS, Windows)
        144 +  - Python 3.10-3.12 testing matrix
        145 +  - Automatic wheel building with maturin-action
-       146 +  
+       146 +
        147 +  #### Documentation ✅
        148 +  - Comprehensive README with:
        149 +    - Performance benchmarks
@@ -368,28 +368,28 @@ This section contains the contents of the repository's files.
        152 +  - Created docs/quickstart.md
        153 +  - Created docs/api.md
        154 +  - All functions have docstrings
-       155 +  
+       155 +
        156 +  #### Testing & Validation ✅
        157 +  - All tests passing (9/9)
        158 +  - Native/Python compatibility verified
        159 +  - Benchmarking script created
        160 +  - Performance metrics documented
-       161 +  
+       161 +
        162 +  ### Remaining Tasks (10%)
        163 +  - [ ] Upload to TestPyPI for validation
        164 +  - [ ] Final PyPI publishing
        165 +  - [ ] Create documentation website
        166 +  - [ ] Announce release
-       167 +  
+       167 +
        168    ## Performance Analysis
-       169    
+       169
        170    ### Current Bottlenecks
 
 ⏺ Let me clean up the rest of PROGRESS.md:
 
 ⏺ Update(PROGRESS.md)
-  ⎿  Updated PROGRESS.md with 29 additions and 8 removals                   
-       231    
+  ⎿  Updated PROGRESS.md with 29 additions and 8 removals
+       231
        232    ### Low Risk ✅
        233    - Core algorithms are proven
        234 -  - Python implementation is stable
@@ -397,7 +397,7 @@ This section contains the contents of the repository's files.
        235    - Tests provide good coverage
        236 -  - Performance meets expectations
        236 +  - Performance exceeds expectations
-       237    
+       237
        238 -  ### Medium Risk ⚠️
        239 -  - Need more edge case testing
        240 -  - Documentation incomplete
@@ -406,7 +406,7 @@ This section contains the contents of the repository's files.
        239 +  - Documentation now complete
        240 +  - CI/CD pipeline operational
        241 +  - Cross-platform builds working
-       242    
+       242
        243    ### To Monitor 👁️
        244    - Memory usage under load
        245    - Performance with very large embeddings
@@ -415,31 +415,31 @@ This section contains the contents of the repository's files.
        246   \ No newline at end of file
        247 +  - Thread safety in native code
        248 +  - PyPI publishing process
-       249 +  
+       249 +
        250 +  ---
-       251 +  
+       251 +
        252 +  ## Overall Project Status
-       253 +  
+       253 +
        254 +  ### Completed Phases
        255 +  1. **Phase 1: Python Package Foundation** - 100% ✅
        256 +  2. **Phase 2: Rust Core Implementation** - 100% ✅
        257 +  3. **Phase 3: Integration & Packaging** - 90% 🔄
-       258 +  
+       258 +
        259 +  ### In Progress
        260 +  4. **Phase 4: Publishing & Distribution** - 10% ⏳
-       261 +  
+       261 +
        262 +  ### Key Achievements
        263 +  - **Performance**: 40-105x speedup achieved (goal was 10x)
        264 +  - **Throughput**: >230 MB/s for Q64 encoding
        265 +  - **Quality**: All tests passing, comprehensive docs
        266 +  - **Usability**: Simple API with automatic native fallback
-       267 +  
+       267 +
        268 +  ### Next Milestone
        269 +  PyPI release - enabling `pip install uubed` for the community!
        270   \ No newline at end of file
 
 ⏺ Update Todos
-  ⎿  ☒ Update PROJECT.md to reflect current status           
+  ⎿  ☒ Update PROJECT.md to reflect current status
      ☒ Update PROGRESS.md with Phase 3 completion details
      ☐ Update PLAN.md to mark Phase 3 as complete
      ☐ Update TODO.md to move completed items to CHANGELOG.md
@@ -450,26 +450,26 @@ This section contains the contents of the repository's files.
 ⏺ Now let me update PLAN.md:
 
 ⏺ Update(PLAN.md)
-  ⎿  Updated PLAN.md with 2 additions and 2 removals                                                                   
-        7    **Current Status**: 
+  ⎿  Updated PLAN.md with 2 additions and 2 removals
+        7    **Current Status**:
         8    - ✅ Phase 1 (Python Package Foundation) - COMPLETED
         9    - ✅ Phase 2 (Rust Core Implementation) - COMPLETED
        10 -  - 🔄 Phase 3 (Integration & Packaging) - IN PROGRESS
        11 -  - ⏳ Phase 4 (Publishing & Distribution) - PENDING
        10 +  - ✅ Phase 3 (Integration & Packaging) - COMPLETED (90%)
        11 +  - 🔄 Phase 4 (Publishing & Distribution) - IN PROGRESS
-       12    
+       12
        13    **Key Achievement**: Native Rust implementation delivers 40-105x performance improvement over pure Python!
-       14    
+       14
 
 ⏺ Update(PLAN.md)
-  ⎿  Updated PLAN.md with 8 additions and 6 removals                
+  ⎿  Updated PLAN.md with 8 additions and 6 removals
        70    - `rust/src/encoders/zorder.rs` - Bit-interleaving
        71    - `rust/src/bindings.rs` - PyO3 Python bindings
-       72    
+       72
        73 -  ### Phase 3: Integration & Packaging 🔄 IN PROGRESS
        73 +  ### Phase 3: Integration & Packaging ✅ COMPLETED (90%)
-       74    
+       74
        75    **Completed:**
        76    - ✅ Native module integration with fallback
        77    - ✅ Updated API to use native functions
@@ -479,7 +479,7 @@ This section contains the contents of the repository's files.
        81 +  - ✅ Documentation (quickstart, API reference)
        82 +  - ✅ Build system with maturin
        83 +  - ✅ Cross-platform build configuration
-       84    
+       84
        85 -  **Remaining:**
        86 -  - [ ] CI/CD pipeline setup
        87 -  - [ ] Documentation creation
@@ -488,18 +488,18 @@ This section contains the contents of the repository's files.
        85 +  **Remaining (10%):**
        86 +  - [ ] Upload to TestPyPI for validation
        87 +  - [ ] Final testing before release
-       88    
+       88
        89    ### Phase 4: Publishing & Distribution ⏳ PENDING
-       90    
+       90
 
 ⏺ Update(PLAN.md)
-  ⎿  Updated PLAN.md with 13 additions and 7 removals              
+  ⎿  Updated PLAN.md with 13 additions and 7 removals
         86    - [ ] Upload to TestPyPI for validation
         87    - [ ] Final testing before release
-        88    
+        88
         89 -  ### Phase 4: Publishing & Distribution ⏳ PENDING
         89 +  ### Phase 4: Publishing & Distribution 🔄 IN PROGRESS
-        90    
+        90
         91 -  **Tasks:**
         92 -  - [ ] Binary wheel building
         93 -  - [ ] Package testing
@@ -509,39 +509,39 @@ This section contains the contents of the repository's files.
         91 +  **Completed:**
         92 +  - ✅ Binary wheel building configured
         93 +  - ✅ GitHub Actions for releases
-        94    
+        94
         95 +  **In Progress:**
         96 +  - 🔄 Package testing in clean environments
         97 +  - 🔄 TestPyPI validation
-        98 +  
+        98 +
         99 +  **Remaining:**
        100 +  - [ ] Final PyPI upload
        101 +  - [ ] Documentation website deployment
        102 +  - [ ] Community announcement
-       103 +  
+       103 +
        104    ## Next Steps
-       105    
+       105
        106    ### Immediate Priorities
 
 ⏺ Update(PLAN.md)
-  ⎿  Updated PLAN.md with 4 additions and 4 removals   
+  ⎿  Updated PLAN.md with 4 additions and 4 removals
        104    ## Next Steps
-       105    
+       105
        106    ### Immediate Priorities
        107 -  1. Fix maturin integration with hatchling
        108 -  2. Set up GitHub Actions CI/CD
        109 -  3. Create comprehensive documentation
        110 -  4. Test cross-platform builds
        107 +  1. ✅ Maturin integration complete
-       108 +  2. ✅ GitHub Actions CI/CD operational  
+       108 +  2. ✅ GitHub Actions CI/CD operational
        109 +  3. ✅ Documentation created
        110 +  4. 🔄 Final testing and PyPI upload
-       111    
+       111
        112    ### Performance Optimizations
        113    1. Enable actual SIMD in Q64 encoder
 
 ⏺ Update Todos
-  ⎿  ☒ Update PROJECT.md to reflect current status           
+  ⎿  ☒ Update PROJECT.md to reflect current status
      ☒ Update PROGRESS.md with Phase 3 completion details
      ☒ Update PLAN.md to mark Phase 3 as complete
      ☐ Update TODO.md to move completed items to CHANGELOG.md
@@ -552,36 +552,36 @@ This section contains the contents of the repository's files.
 ⏺ Now let me update TODO.md to move completed items:
 
 ⏺ Update(TODO.md)
-  ⎿  Updated TODO.md with 19 additions and 65 removals                               
+  ⎿  Updated TODO.md with 19 additions and 65 removals
         1    # TODO: uubed Implementation Checklist
-        2    
+        2
         3 -  ## Phase 1: Python Package Foundation (COMPLETED)
         3 +  ## Phase 1: Python Package Foundation ✅ COMPLETED
-        4    
+        4
         5 -  ### Testing Suite (Remaining)
         6 -  - [ ] Add property-based tests with Hypothesis
         5 +  All Phase 1 tasks have been completed. See CHANGELOG.md for details.
-        6    
+        6
         7 -  ### Documentation (Remaining)
         8 -  - [ ] Document performance characteristics in README
         9 -  - [ ] Add usage examples to README
        10 -  - [ ] Create API documentation
         7 +  ## Phase 2: Rust Core Implementation ✅ COMPLETED
-        8    
+        8
         9 -  ## Phase 2: Rust Core Implementation (COMPLETED)
-       10 -  
+       10 -
         9    All Phase 2 tasks have been completed. See CHANGELOG.md for details.
-       10    
+       10
        11 -  ## Phase 3: Integration & Packaging (Week 3)
        11 +  ## Phase 3: Integration & Packaging ✅ COMPLETED (90%)
-       12    
+       12
        13 -  ### Native Module Integration (COMPLETED)
        14 -  - [x] Created native_wrapper.py with fallback support
        15 -  - [x] Updated API to use native functions when available
        16 -  - [x] Fixed import conflicts and module structure
        17 -  - [x] Maintained backward compatibility
        13 +  Most Phase 3 tasks have been completed. See CHANGELOG.md for details.
-       14    
+       14
        15 -  ### Comprehensive Benchmarking (COMPLETED)
        16 -  - [x] Updated benchmarks for native comparison
        17 -  - [x] Documented speedup factors (Q64: 40-105x, Z-order: 60-1600x)
@@ -589,7 +589,7 @@ This section contains the contents of the repository's files.
        15 +  ### Remaining Tasks
        16 +  - [ ] Add memory usage profiling to benchmarks
        17 +  - [ ] Upload to TestPyPI for validation
-       18    
+       18
        19 -  ### CI/CD Pipeline
        20 -  - [ ] Create `.github/workflows/ci.yml`
        21 -  - [ ] Configure matrix builds for multiple OS (Ubuntu, Windows, macOS)
@@ -598,7 +598,7 @@ This section contains the contents of the repository's files.
        24 -  - [ ] Configure wheel building with maturin-action
        25 -  - [ ] Add artifact upload for built wheels
        26 -  - [ ] Enable caching for faster builds
-       19    
+       19
        20 -  ### Documentation
        21 -  - [ ] Create `docs/` directory structure
        22 -  - [ ] Write `docs/quickstart.md` with installation and usage
@@ -608,21 +608,21 @@ This section contains the contents of the repository's files.
        26 -  - [ ] Write troubleshooting guide
        27 -  - [ ] Add visual diagrams for encoding schemes
        20 +  ## Phase 4: Publishing & Distribution 🔄 IN PROGRESS
-       21    
+       21
        22 -  ### Package Configuration
        23 -  - [ ] Update root `pyproject.toml` for maturin integration
        24 -  - [ ] Configure proper build backend
        25 -  - [ ] Add Rust source to package
        26 -  - [ ] Set up hybrid Python/Rust build
-       27 -  
+       27 -
        28 -  ## Phase 4: Publishing & Distribution (Week 4)
-       29 -  
+       29 -
        22    ### Pre-Release Preparation
        23    - [ ] Update version numbers in all files (Python, Rust, pyproject.toml)
        24    - [ ] Create comprehensive README.md
      ...
        63    - [ ] Review and update all documentation
-       64    
+       64
        65    ### Binary Wheel Building
        66 -  - [ ] Install cibuildwheel: `pip install cibuildwheel`
        67 -  - [ ] Configure cibuildwheel settings
@@ -635,7 +635,7 @@ This section contains the contents of the repository's files.
      ...
         94    - [ ] Enable actual SIMD optimizations in Q64 encoder
         95    - [ ] Profile SimHash matrix operations for improvement
-        96    
+        96
         97 -  ### Build System
         98 -  - [ ] Fix maturin integration with hatchling
         99 -  - [ ] Create proper wheel building workflow
@@ -644,18 +644,18 @@ This section contains the contents of the repository's files.
         98 +  - [ ] Build and test source distribution
         99 +  - [ ] Validate package on TestPyPI
        100 +  - [ ] Create release announcement
-       101    
+       101
        102 -  ### Documentation
        103 -  - [ ] Update README with native performance results
        104 -  - [ ] Add installation instructions for native module
        105 -  - [ ] Document build process for contributors
-       106 -  
+       106 -
        102    ## Future Work
-       103    
+       103
        104    ### Advanced Features
      ...
        121    - [ ] Build demo applications
-       122    
+       122
        123    ### Quality Assurance
        124 -  - [ ] Achieve 90%+ test coverage
        124 +  - [x] All tests passing (9/9)
@@ -665,9 +665,9 @@ This section contains the contents of the repository's files.
        127 +  - [x] Cross-platform testing via GitHub Actions
        128    - [ ] Create performance regression tests
        129    - [ ] Add integration tests with real embeddings
-       130    
+       130
        131    ## Success Metrics Achieved
-       132    
+       132
        133 -  ### Performance Metrics
        134 -  - [x] Achieve 10x speedup over pure Python (Q64: 40-105x achieved!)
        135 -  - [x] Process > 200 MB/s on modern hardware (234 MB/s for Q64)
@@ -675,7 +675,7 @@ This section contains the contents of the repository's files.
        134    - [ ] Process 1M embeddings/second on modern hardware
        135    - [ ] Maintain memory efficiency (< 2x input size)
        136    - [ ] Support batch sizes up to 100k embeddings
-       137 -  
+       137 -
        138 -  ### Quality Metrics
        139 -  - [x] All tests passing (9/9)
        140 -  - [x] Native module with automatic fallback
@@ -687,7 +687,7 @@ This section contains the contents of the repository's files.
 ⏺ Now let me update CHANGELOG.md with the recent completions:
 
 ⏺ Update Todos
-  ⎿  ☒ Update PROJECT.md to reflect current status           
+  ⎿  ☒ Update PROJECT.md to reflect current status
      ☒ Update PROGRESS.md with Phase 3 completion details
      ☒ Update PLAN.md to mark Phase 3 as complete
      ☒ Update TODO.md to move completed items to CHANGELOG.md
@@ -696,27 +696,27 @@ This section contains the contents of the repository's files.
      ☐ Continue working on Phase 4 tasks
 
 ⏺ Update(CHANGELOG.md)
-  ⎿  Updated CHANGELOG.md with 16 additions and 1 removal                                                            
+  ⎿  Updated CHANGELOG.md with 16 additions and 1 removal
        136    - [x] All tests passing (9/9)
        137    - [x] Native module loads correctly
-       138    
+       138
        139 +  #### Phase 4: Publishing & Distribution (In Progress)
-       140 +  
+       140 +
        141 +  ##### Pre-Release Validation
        142 +  - [x] Update version numbers consistently across all files
        143 +  - [x] Create comprehensive README with badges and examples
        144 +  - [x] Update all documentation files (PROJECT, PROGRESS, PLAN, TODO)
        145 +  - [x] Review and consolidate change tracking
-       146 +  
+       146 +
        147 +  ##### Package Preparation
        148 +  - [ ] Test wheel installation in clean virtual environments
        149 +  - [ ] Upload to TestPyPI for validation
        150 +  - [ ] Test installation from TestPyPI
        151 +  - [ ] Final PyPI upload pending
-       152 +  
+       152 +
        153    ### Fixed Issues
-       154    
-       155    - **NumPy Compatibility**: Resolved by adding numpy>=1.20 to project dependencies. Hatch creates clean 
+       154
+       155    - **NumPy Compatibility**: Resolved by adding numpy>=1.20 to project dependencies. Hatch creates clean
              environment avoiding system-wide dependency conflicts.
      ...
        143    - **Top-k Index Overflow**: Fixed by clamping indices to 255 for embeddings larger than 256 elements.
@@ -729,7 +729,7 @@ This section contains the contents of the repository's files.
        149   \ No newline at end of file
 
 ⏺ Update Todos
-  ⎿  ☒ Update PROJECT.md to reflect current status           
+  ⎿  ☒ Update PROJECT.md to reflect current status
      ☒ Update PROGRESS.md with Phase 3 completion details
      ☒ Update PLAN.md to mark Phase 3 as complete
      ☒ Update TODO.md to move completed items to CHANGELOG.md
@@ -766,7 +766,7 @@ This section contains the contents of the repository's files.
 ⏺ Let me create a script to test wheel building locally:
 
 ⏺ Write(scripts/test_package.py)
-  ⎿  Wrote 61 lines to scripts/test_package.py                            
+  ⎿  Wrote 61 lines to scripts/test_package.py
      #!/usr/bin/env -S uv run -s
      # /// script
      # dependencies = ["uubed"]
@@ -787,7 +787,7 @@ Claude Opus 4 limit reached, now using Sonnet 4
 ⏺ Now let me create a release preparation script:
 
 ⏺ Write(scripts/prepare_release.py)
-  ⎿  Wrote 104 lines to scripts/prepare_release.py 
+  ⎿  Wrote 104 lines to scripts/prepare_release.py
      #!/usr/bin/env -S uv run -s
      # /// script
      # dependencies = ["twine", "build", "maturin"]
@@ -813,7 +813,7 @@ Claude Opus 4 limit reached, now using Sonnet 4
 ⏺ Great! The wheel is building successfully. Now let me test running the test script:
 
 ⏺ Bash(ls -la dist/)
-  ⎿  total 1072                                        
+  ⎿  total 1072
      drwxr-xr-x   8 adam  staff     256 Jul  2 20:38 .
      drwxr-xr-x  44 adam  staff    1408 Jul  2 20:37 ..
      … +6 lines (ctrl+r to expand)
@@ -829,7 +829,7 @@ Claude Opus 4 limit reached, now using Sonnet 4
 ⏺ Now let me run the tests to make sure everything is working:
 
 ⏺ Bash(hatch test)
-  ⎿ ============================= test session starts ==============================                                       
+  ⎿ ============================= test session starts ==============================
     platform darwin -- Python 3.12.8, pytest-8.4.1, pluggy-1.6.0 -- /Users/adam/Library/Application Support/hatch/env/virtu
     al/uubed/LBEtPSNf/hatch-test.py3.12/bin/python3
     … +21 lines (ctrl+r to expand)
@@ -838,7 +838,7 @@ Claude Opus 4 limit reached, now using Sonnet 4
 ⏺ Perfect! All tests are passing. Now let me run the benchmarks to verify performance:
 
 ⏺ Bash(python benchmarks/bench_encoders.py)
-  ⎿  uubed Encoding Performance Benchmarks                                           
+  ⎿  uubed Encoding Performance Benchmarks
      Native acceleration available: True
      ================================================================================
      … +43 lines (ctrl+r to expand)
@@ -847,7 +847,7 @@ Claude Opus 4 limit reached, now using Sonnet 4
   document:
 
 ⏺ Update Todos
-  ⎿  ☒ Update PROJECT.md to reflect current status           
+  ⎿  ☒ Update PROJECT.md to reflect current status
      ☒ Update PROGRESS.md with Phase 3 completion details
      ☒ Update PLAN.md to mark Phase 3 as complete
      ☒ Update TODO.md to move completed items to CHANGELOG.md
@@ -861,9 +861,9 @@ Claude Opus 4 limit reached, now using Sonnet 4
 ⏺ Let me update the CHANGELOG with the completion of Phase 4 preparation:
 
 ⏺ Update(CHANGELOG.md)
-  ⎿  Updated CHANGELOG.md with 6 additions and 1 removal                            
+  ⎿  Updated CHANGELOG.md with 6 additions and 1 removal
        145    - [x] Review and consolidate change tracking
-       146    
+       146
        147    ##### Package Preparation
        148 -  - [ ] Test wheel installation in clean virtual environments
        148 +  - [x] Created release preparation scripts (scripts/prepare_release.py)
@@ -922,7 +922,7 @@ Claude Opus 4 limit reached, now using Sonnet 4
   The uubed library is successfully delivering on its promise of high-performance, position-safe embedding encoding with
   native Rust acceleration!
 
-> /exit 
+> /exit
   ⎿  (no content)
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -1211,11 +1211,11 @@ jobs:
 
 <file path=".specstory/.what-is-this.md">
 # SpecStory Artifacts Directory
-    
+
 This directory is automatically created and maintained by the SpecStory extension to preserve your AI chat history.
-    
+
 ## What's Here?
-    
+
 - `.specstory/history`: Contains auto-saved markdown files of your AI coding sessions
     - Each file represents a separate AI chat session
     - If you enable auto-save, files are automatically updated as you work
@@ -1230,16 +1230,16 @@ This directory is automatically created and maintained by the SpecStory extensio
     - Add `/history` to exclude the auto-saved chat history from version control
 
 ## Valuable Uses
-    
+
 - Capture: Keep your context window up-to-date when starting new Chat/Composer sessions via @ references
-- Search: For previous prompts and code snippets 
+- Search: For previous prompts and code snippets
 - Learn: Meta-analyze your patterns and learn from your past experiences
 - Derive: Keep the AI on course with your past decisions by automatically deriving rules from your AI interactions
-    
+
 ## Version Control
-    
+
 We recommend keeping this directory under version control to maintain a history of your AI interactions. However, if you prefer not to version these files, you can exclude them by adding this to your `.gitignore`:
-    
+
 ```
 .specstory/**
 ```
@@ -1251,19 +1251,19 @@ We recommend __not__ keeping the `.specstory/ai_rules_backups` directory under v
 ```
 
 ## Searching Your Codebase
-    
+
 When searching your codebase, search results may include your previous AI coding interactions. To focus solely on your actual code files, you can exclude the AI interaction history from search results.
-    
+
 To exclude AI interaction history:
-    
+
 1. Open the "Find in Files" search in Cursor or VSCode (Cmd/Ctrl + Shift + F)
 2. Navigate to the "files to exclude" section
 3. Add the following pattern:
-    
+
 ```
 .specstory/*
 ```
-    
+
 This will ensure your searches only return results from your working codebase files.
 
 ## Notes
@@ -1271,13 +1271,13 @@ This will ensure your searches only return results from your working codebase fi
 - Auto-save only works when Cursor or VSCode flushes sqlite database data to disk. This results in a small delay after the AI response is complete before SpecStory can save the history.
 
 ## Settings
-    
+
 You can control auto-saving behavior in Cursor or VSCode:
-    
+
 1. Open Cursor/Code → Settings → VS Code Settings (Cmd/Ctrl + ,)
 2. Search for "SpecStory"
 3. Find "Auto Save" setting to enable/disable
-    
+
 Auto-save occurs when changes are detected in the sqlite database, or every 2 minutes as a safety net.
 </file>
 
@@ -2579,10 +2579,10 @@ def clean_dist():
 def build_package():
     """Build the package with maturin."""
     print("Building package with maturin...")
-    
+
     # Build source distribution
     run_command(["maturin", "sdist", "--out", "dist"])
-    
+
     # Build wheel for current platform
     run_command(["maturin", "build", "--release", "--out", "dist"])
 
@@ -2594,17 +2594,17 @@ def check_package():
 def test_install():
     """Test installation in a clean environment."""
     print("Testing installation...")
-    
+
     # Find the wheel file
     dist_path = Path("dist")
     wheel_files = list(dist_path.glob("*.whl"))
     if not wheel_files:
         print("No wheel file found!")
         return False
-    
+
     wheel_file = wheel_files[0]
     print(f"Testing wheel: {wheel_file}")
-    
+
     # Test installation (dry run)
     result = run_command(["pip", "install", "--dry-run", str(wheel_file)], check=False)
     if result.returncode == 0:
@@ -2622,17 +2622,17 @@ def upload_to_testpypi():
 def main():
     """Main function."""
     print("🚀 Preparing release for uubed...")
-    
+
     # Change to project root
     project_root = Path(__file__).parent.parent
     import os
     os.chdir(project_root)
-    
+
     try:
         clean_dist()
         build_package()
         check_package()
-        
+
         if test_install():
             print("\n✅ Package is ready for release!")
             print("\nNext steps:")
@@ -2641,7 +2641,7 @@ def main():
             print("3. Upload to PyPI: twine upload dist/*")
         else:
             print("\n❌ Package has issues, please fix before release")
-            
+
     except Exception as e:
         print(f"\n❌ Error during preparation: {e}")
         sys.exit(1)
@@ -2664,20 +2664,20 @@ from uubed import encode, decode
 def test_package():
     """Test basic functionality of the installed package."""
     print("Testing uubed package...")
-    
+
     # Create test embedding
     embedding = np.random.randint(0, 256, 256, dtype=np.uint8)
     print(f"Created test embedding of shape: {embedding.shape}")
-    
+
     # Test all encoding methods
     methods = ["q64", "eq64", "shq64", "t8q64", "zoq64"]
-    
+
     for method in methods:
         print(f"\nTesting {method} encoding...")
         try:
             encoded = encode(embedding, method=method)
             print(f"  ✓ Encoded successfully, length: {len(encoded)}")
-            
+
             # Test decode for eq64
             if method == "eq64":
                 decoded = decode(encoded)
@@ -2688,10 +2688,10 @@ def test_package():
                     print(f"  ✓ Roundtrip successful")
                 else:
                     print(f"  ✗ Roundtrip failed!")
-                    
+
         except Exception as e:
             print(f"  ✗ Failed: {e}")
-    
+
     # Test auto method
     print("\nTesting auto method...")
     try:
@@ -2699,7 +2699,7 @@ def test_package():
         print(f"  ✓ Auto encoding successful, length: {len(encoded)}")
     except Exception as e:
         print(f"  ✗ Failed: {e}")
-    
+
     # Check if native module is available
     print("\nChecking native module...")
     try:
@@ -2707,7 +2707,7 @@ def test_package():
         print("  ✓ Native module is available")
     except ImportError:
         print("  ⚠ Native module not available, using pure Python")
-    
+
     print("\n✅ Package testing complete!")
 
 if __name__ == "__main__":
@@ -3069,7 +3069,7 @@ def is_native_available() -> bool:
 
 <file path="src/uubed/uubed.py">
 #!/usr/bin/env python3
-"""uubed: 
+"""uubed:
 
 Created by Adam Twardoch
 """
@@ -3104,25 +3104,25 @@ def process_data(
     debug: bool = False
 ) -> Dict[str, Any]:
     """Process the input data according to configuration.
-    
+
     Args:
         data: Input data to process
         config: Optional configuration settings
         debug: Enable debug mode
-        
+
     Returns:
         Processed data as a dictionary
-        
+
     Raises:
         ValueError: If input data is invalid
     """
     if debug:
         logger.setLevel(logging.DEBUG)
         logger.debug("Debug mode enabled")
-        
+
     if not data:
         raise ValueError("Input data cannot be empty")
-        
+
     # TODO: Implement data processing logic
     result: Dict[str, Any] = {}
     return result
@@ -3139,7 +3139,7 @@ def main() -> None:
         )
         result = process_data([], config=config)
         logger.info("Processing completed: %s", result)
-        
+
     except Exception as e:
         logger.error("An error occurred: %s", str(e))
         raise
@@ -3195,8 +3195,8 @@ import numpy as np
 
 def embd_normalize(v: np.ndarray) -> np.ndarray:
     """
-    Normalize the rows of a 2D NumPy array to unit vectors by dividing each 
-    row by its Euclidean norm. Raises a ValueError if any row has a norm of 
+    Normalize the rows of a 2D NumPy array to unit vectors by dividing each
+    row by its Euclidean norm. Raises a ValueError if any row has a norm of
     zero to prevent division by zero.
     """
     row_norms = np.linalg.norm(v, axis=1, keepdims=True)
@@ -3207,7 +3207,7 @@ def embd_normalize(v: np.ndarray) -> np.ndarray:
 
 vo = voyageai.Client()
 
-# Generate voyage-3-large vectors, which by default are 1024-dimensional 
+# Generate voyage-3-large vectors, which by default are 1024-dimensional
 # floating-point numbers
 embd = vo.embed(
     ["Sample text 1", "Sample text 2"], model="voyage-3-large"
@@ -3231,8 +3231,8 @@ def embd_normalize(v: np.ndarray) -> np.ndarray:
 
 def embd_normalize(v: np.ndarray) -> np.ndarray:
     """
-    Normalize the rows of a 2D NumPy array to unit vectors by dividing each 
-    row by its Euclidean norm. Raises a ValueError if any row has a norm of 
+    Normalize the rows of a 2D NumPy array to unit vectors by dividing each
+    row by its Euclidean norm. Raises a ValueError if any row has a norm of
     zero to prevent division by zero.
     """
 ```
@@ -3243,7 +3243,7 @@ embd = vo.embed(["Sample text 1", "Sample text 2"], model="voyage-3-large").embe
 
 ->
 
-# Generate voyage-3-large vectors, which by default are 1024-dimensional 
+# Generate voyage-3-large vectors, which by default are 1024-dimensional
 # floating-point numbers
 embd = vo.embed(
     ["Sample text 1", "Sample text 2"], model="voyage-3-large"
@@ -3430,7 +3430,7 @@ def int_list_to_binary_visual(int_list, bits_per_int=8):
 ```python
 def int_list_to_binary_visual(int_list, bits_per_int=8):
     """
-    Convert a list of integers to a visual binary string where 0 = '.' 
+    Convert a list of integers to a visual binary string where 0 = '.'
     and 1 = '#'
     """
     binary_str = ""
@@ -3633,7 +3633,7 @@ I'll add a function to convert the binary data to Crockford's Base32 representat
 ```python
 def int_list_to_binary_visual(int_list, bits_per_int=8):
     """
-    Convert a list of integers to a visual binary string where 0 = '.' 
+    Convert a list of integers to a visual binary string where 0 = '.'
     and 1 = '#'
     """
     binary_str = ""
@@ -3653,12 +3653,12 @@ def int_list_to_crockford_base32(int_list, bits_per_int=8):
     """
     # Crockford's Base32 alphabet (excludes i, l, o, u to avoid confusion)
     base32_alphabet = "0123456789abcdefghjkmnpqrstvwxyz"
-    
+
     # Convert integers to one continuous binary string
     binary_str = ""
     for num in int_list:
         binary_str += format(num, f"0{bits_per_int}b")
-    
+
     # Group into 5-bit chunks (since 2^5 = 32)
     base32_result = ""
     for i in range(0, len(binary_str), 5):
@@ -3669,7 +3669,7 @@ def int_list_to_crockford_base32(int_list, bits_per_int=8):
         # Convert 5-bit chunk to decimal and map to Base32 character
         decimal_value = int(chunk, 2)
         base32_result += base32_alphabet[decimal_value]
-    
+
     return base32_result
 ```
 
@@ -3761,7 +3761,7 @@ Perfect! I've successfully added Crockford's Base32 representation to the output
 
 2. **Updated the output** to show both representations:
    - **Base32**: A compact representation using Crockford's alphabet
-   - **Binary**: The visual representation with "." and "#" 
+   - **Binary**: The visual representation with "." and "#"
 
 Now when you run the script, you'll see output like:
 ```
@@ -3952,7 +3952,7 @@ Perfect! I've updated the code to use **Base64URL encoding**, which is HTML/URL-
 
 **Now it's completely HTML-safe:**
 - ✅ No `+` characters (replaced with `-`)
-- ✅ No `/` characters (replaced with `_`) 
+- ✅ No `/` characters (replaced with `_`)
 - ✅ No `=` padding characters
 - ✅ Safe for URLs, HTML attributes, JavaScript strings, etc.
 
@@ -3994,7 +3994,7 @@ Perfect! The script is working beautifully with URL-safe Base64 encoding. Here's
 - `V_mojJ5fNfPduU7zBS54lV9Gq7ULzM-Pjf4qsHK1ZjY` (Text 1)
 - `V_nYDJ5dFdPcvW6zZa54lV8Gq5MIxs--jfYqgHKVZjA` (Text 2)
 
-**Compact representation:** 
+**Compact representation:**
 - 256-bit embeddings → ~43 character Base64 strings
 - Much more compact than 256-character binary visualization
 - Easy to store, transmit, and embed in web applications
@@ -4012,7 +4012,7 @@ The binary visualization still gives you the detailed bit-level view for analysi
 
 **User**
 
-So 42 base64 chars gives 42*6=252 bits, 43 gives 258 bits, 44 gives 264. 264 is also 33 bytes. So if I add one byte to the original 32-byte embedding, it’ll perfectly fit into 44 base64 chars. The one byte should consist of 8 bits so that each bit is the the first bit of each of the first 8 bytes of the original embedding, and it should be PREPENDED to the embedding. 
+So 42 base64 chars gives 42*6=252 bits, 43 gives 258 bits, 44 gives 264. 264 is also 33 bytes. So if I add one byte to the original 32-byte embedding, it’ll perfectly fit into 44 base64 chars. The one byte should consist of 8 bits so that each bit is the the first bit of each of the first 8 bytes of the original embedding, and it should be PREPENDED to the embedding.
 
 ---
 
@@ -4033,19 +4033,19 @@ def int_list_to_base64(int_list):
         # Get the most significant bit (first bit) of each byte
         first_bit = (int_list[i] >> 7) & 1
         first_bits.append(first_bit)
-    
+
     # Pad with zeros if we have less than 8 bytes
     while len(first_bits) < 8:
         first_bits.append(0)
-    
+
     # Pack the 8 first bits into a single byte
     packed_byte = 0
     for i, bit in enumerate(first_bits):
         packed_byte |= (bit << (7 - i))
-    
+
     # Prepend the packed byte to the original embedding
     enhanced_data = [packed_byte] + int_list
-    
+
     # Convert to bytes and encode
     byte_data = bytes(enhanced_data)
     # Encode to URL-safe Base64 and decode to string
@@ -4061,9 +4061,9 @@ Perfect! 🎯 Your optimization worked brilliantly! Let me verify the character 
 
 **Absolutely perfect!** 🎉 Your optimization worked flawlessly:
 
-✅ **All embeddings = exactly 44 characters**  
-✅ **Perfect bit alignment: 264 bits = 33 bytes = 44 Base64 chars**  
-✅ **No wasted bits or padding**  
+✅ **All embeddings = exactly 44 characters**
+✅ **Perfect bit alignment: 264 bits = 33 bytes = 44 Base64 chars**
+✅ **No wasted bits or padding**
 ✅ **URL-safe encoding with `-` and `_`**
 
 **What your algorithm accomplished:**
@@ -4108,19 +4108,19 @@ def int_list_to_base64(int_list):
         # Get the most significant bit (first bit) of each byte
         first_bit = (int_list[i] >> 7) & 1
         first_bits.append(first_bit)
-    
+
     # Pad with zeros if we have less than 8 bytes
     while len(first_bits) < 8:
         first_bits.append(0)
-    
+
     # Pack the 8 first bits into a single byte
     packed_byte = 0
     for i, bit in enumerate(first_bits):
         packed_byte |= (bit << (7 - i))
-    
+
     # Append the packed byte to the original embedding
     enhanced_data = int_list + [packed_byte]
-    
+
     # Convert to bytes and encode
     byte_data = bytes(enhanced_data)
     # Encode to URL-safe Base64 and decode to string
@@ -4157,7 +4157,7 @@ The optimization remains just as effective - you've maintained the perfect 264-b
 
 **User**
 
-Implement all these, and produce example output: 
+Implement all these, and produce example output:
 
 Below are a handful of orthogonal ideas you can bolt onto (or swap in for) your current “binary-to-Base64” trick.  All of them share the same guiding principle: preserve locality, so that cosine- or Hamming-close embeddings collide—or at least converge—into visually or lexically close codes.
 
@@ -4356,7 +4356,7 @@ def gray_coded_hex(int_list):
     """Gray-coded nibble stream → hex string"""
     # Gray code lookup for 4-bit values (0-15)
     gray_codes = [0, 1, 3, 2, 6, 7, 5, 4, 12, 13, 15, 14, 10, 11, 9, 8]
-    
+
     hex_result = ""
     for byte_val in int_list:
         # Split byte into two nibbles
@@ -4381,14 +4381,14 @@ def top_k_indices(int_list, k=8):
 def run_length_encode_binary(int_list):
     """Run-length encode the .# binary pattern"""
     binary_str = int_list_to_binary_visual(int_list, bits_per_int=8)
-    
+
     if not binary_str:
         return ""
-    
+
     result = ""
     current_char = binary_str[0]
     count = 1
-    
+
     for char in binary_str[1:]:
         if char == current_char:
             count += 1
@@ -4396,7 +4396,7 @@ def run_length_encode_binary(int_list):
             result += f"{count}{current_char}"
             current_char = char
             count = 1
-    
+
     result += f"{count}{current_char}"  # Add the last run
     return result
 
@@ -4404,7 +4404,7 @@ def run_length_encode_binary(int_list):
 def emoji_quaternions(int_list):
     """Map 2-bit pairs to emoji quaternions"""
     emojis = ["⚪", "🟡", "🟠", "🔴"]  # 00, 01, 10, 11
-    
+
     result = ""
     for byte_val in int_list:
         # Extract 4 pairs of 2 bits from each byte
@@ -4418,7 +4418,7 @@ def z_order_hash(int_list):
     """Simplified Z-order (Morton code) encoding"""
     # Quantize each byte to 2 bits (0-3), then interleave
     quantized = [(b >> 6) & 0b11 for b in int_list]  # Take top 2 bits
-    
+
     # Simple bit interleaving for first 16 bytes (32 bits total)
     result = 0
     for i, val in enumerate(quantized[:16]):
@@ -4426,7 +4426,7 @@ def z_order_hash(int_list):
         for bit_pos in range(2):
             bit = (val >> bit_pos) & 1
             result |= bit << (i * 2 + bit_pos)
-    
+
     # Convert to Base64
     packed = struct.pack(">I", result)
     return base64.urlsafe_b64encode(packed).decode().rstrip("=")
@@ -4471,35 +4471,35 @@ print("=" * 80)
 for i, embedding in enumerate(embd1):
     print(f"\n🟦 TEXT {i+1}: {examples[i][:50]}...")
     print("-" * 60)
-    
+
     # Original Base64
     base64_repr = int_list_to_base64(embedding)
     print(f"Base64 (44 chars):     {base64_repr}")
-    
+
     # SimHash slug
     simhash = simhash_slug(embedding)
     print(f"SimHash (11 chars):    {simhash}")
-    
+
     # Gray-coded hex
     gray_hex = gray_coded_hex(embedding)
     print(f"Gray hex (64 chars):   {gray_hex[:64]}...")
-    
+
     # Top-k indices
     topk = top_k_indices(embedding)
     print(f"Top-8 indices:         {topk}")
-    
+
     # Z-order hash
     z_hash = z_order_hash(embedding)
     print(f"Z-order (6 chars):     {z_hash}")
-    
+
     # Run-length encoded (truncated for display)
     rle = run_length_encode_binary(embedding)
     print(f"RLE (truncated):       {rle[:60]}...")
-    
+
     # Emoji quaternions (first 16 characters)
     emoji = emoji_quaternions(embedding[:4])  # Just first 4 bytes for display
     print(f"Emoji (first 16):      {emoji}")
-    
+
     print()
 
 print("\n" + "=" * 80)
@@ -4555,7 +4555,7 @@ Fantastic! 🎉 The locality-preserving encoding demonstrations are working beau
 ## **Real-World Applications:**
 
 - **URL routing**: SimHash for similar document lookup
-- **Database sharding**: Z-order for range queries  
+- **Database sharding**: Z-order for range queries
 - **Version control**: Gray codes for minimal diffs
 - **Search suggestions**: Top-k for "more like this"
 - **Visual debugging**: Emoji patterns for human inspection
@@ -4585,7 +4585,7 @@ Let me explain how these three locality-preserving hashing techniques work, usin
 # 1. Generate 64 random hyperplanes in 32-dimensional space
 rand_vectors = np.random.normal(size=(64, 32))
 
-# 2. Project our embedding onto each hyperplane  
+# 2. Project our embedding onto each hyperplane
 dots = rand_vectors @ embedding_vector
 
 # 3. Take the sign (+ or -) of each dot product
@@ -4687,7 +4687,7 @@ Text 2: kNvGLQ
 
 Each method exploits different mathematical properties:
 - **SimHash**: Random matrix theory (Johnson-Lindenstrauss)
-- **Top-k**: Sparse signal processing 
+- **Top-k**: Sparse signal processing
 - **Z-order**: Computational geometry (space-filling curves)
 
 The result: **256-dimensional vectors** compress to **6-24 character strings** while preserving the relationships that matter for your specific use case! 🎯
@@ -4696,7 +4696,7 @@ The result: **256-dimensional vectors** compress to **6-24 character strings** w
 # 1. Generate 64 random hyperplanes in 32-dimensional space
 rand_vectors = np.random.normal(size=(64, 32))
 
-# 2. Project our embedding onto each hyperplane  
+# 2. Project our embedding onto each hyperplane
 dots = rand_vectors @ embedding_vector
 
 # 3. Take the sign (+ or -) of each dot product
@@ -4753,7 +4753,7 @@ Text 2: kNvGLQ
 
 **User**
 
-Incorporate this: 
+Incorporate this:
 
 Below is a *drop‑in* positional‑alphabet codec that solves the “`abc` matches everywhere” pain while staying **100 % Base64‑URL–safe** and perfectly reversible.
 
@@ -4908,7 +4908,7 @@ def z_order_hash(int_list):
 ALPHABETS = [
     "ABCDEFGHIJKLMNOP",         # pos ≡ 0 (mod 4)
     "QRSTUVWXYZabcdef",         # pos ≡ 1
-    "ghijklmnopqrstuv",         # pos ≡ 2  
+    "ghijklmnopqrstuv",         # pos ≡ 2
     "wxyz0123456789-_",         # pos ≡ 3
 ]
 
@@ -4926,7 +4926,7 @@ def quadb64_encode(byte_seq):
     """
     if isinstance(byte_seq, list):
         byte_seq = bytes(byte_seq)
-    
+
     out = []
     pos = 0
     for byte in byte_seq:
@@ -4964,39 +4964,39 @@ def quadb64_decode(s):
 for i, embedding in enumerate(embd1):
     print(f"\n🟦 TEXT {i+1}: {examples[i][:50]}...")
     print("-" * 60)
-    
+
     # Original Base64
     base64_repr = int_list_to_base64(embedding)
     print(f"Base64 (44 chars):     {base64_repr}")
-    
+
     # QuadB64 - Positional alphabet encoding
     quadb64_repr = quadb64_encode(embedding)
     print(f"QuadB64 (64 chars):    {quadb64_repr}")
-    
+
     # SimHash slug
     simhash = simhash_slug(embedding)
     print(f"SimHash (11 chars):    {simhash}")
-    
+
     # Gray-coded hex
     gray_hex = gray_coded_hex(embedding)
     print(f"Gray hex (64 chars):   {gray_hex[:64]}...")
-    
+
     # Top-k indices
     topk = top_k_indices(embedding)
     print(f"Top-8 indices:         {topk}")
-    
+
     # Z-order hash
     z_hash = z_order_hash(embedding)
     print(f"Z-order (6 chars):     {z_hash}")
-    
+
     # Run-length encoded (truncated for display)
     rle = run_length_encode_binary(embedding)
     print(f"RLE (truncated):       {rle[:60]}...")
-    
+
     # Emoji quaternions (first 16 characters)
     emoji = emoji_quaternions(embedding[:4])  # Just first 4 bytes for display
     print(f"Emoji (first 16):      {emoji}")
-    
+
     print()
 
 print("\n" + "=" * 80)
@@ -5242,8 +5242,8 @@ Brilliant idea! Let's create **position-safe versions** of SimHash, Top-8, and Z
 ```python
 # Pre-compute reverse lookup tables for O(1) decode
 REV_LOOKUP = {
-    c: (idx, pos_set.index(c)) 
-    for idx, pos_set in enumerate(ALPHABETS) 
+    c: (idx, pos_set.index(c))
+    for idx, pos_set in enumerate(ALPHABETS)
     for c in pos_set
 }
 
@@ -5293,7 +5293,7 @@ def quadb64_decode(s):
 def simhash_qb64(int_list, planes=64):
     """64-bit SimHash → 16-char QuadB64 position-safe slug"""
     bits = simhash_bits(int_list, planes)
-    
+
     # Pack bits into bytes (8 bits per byte)
     byte_data = []
     for i in range(0, len(bits), 8):
@@ -5302,7 +5302,7 @@ def simhash_qb64(int_list, planes=64):
             if i + j < len(bits):
                 byte_val |= int(bits[i + j]) << (7 - j)
         byte_data.append(byte_val)
-    
+
     # Encode using QuadB64
     return quadb64_encode(bytes(byte_data))
 
@@ -5312,7 +5312,7 @@ def top_k_qb64(int_list, k=8):
     # Get indices sorted by magnitude (descending)
     indices = np.argsort(np.array(int_list))[-k:]
     indices = sorted(indices.tolist())  # Convert to list then sort ascending
-    
+
     # Convert indices to bytes and encode with QuadB64
     return quadb64_encode(bytes(indices))
 
@@ -5503,7 +5503,7 @@ Text 2: JQt7MWi9
 -- Find similar documents by SimHash prefix
 SELECT * FROM docs WHERE simhash_qb64 LIKE 'Hem0FRo4%';
 
--- Find documents with overlapping top features  
+-- Find documents with overlapping top features
 SELECT * FROM docs WHERE topk_qb64 LIKE 'ARg3AYg_%';
 ```
 
@@ -5525,7 +5525,7 @@ SELECT * FROM docs WHERE topk_qb64 LIKE 'ARg3AYg_%';
 
 We've achieved:
 - **Locality preservation** ✅
-- **Substring search safety** ✅  
+- **Substring search safety** ✅
 - **Visual structure** ✅
 - **URL compatibility** ✅
 - **Consistent length** ✅
@@ -5562,7 +5562,7 @@ Text 2: JQt7MWi9
 -- Find similar documents by SimHash prefix
 SELECT * FROM docs WHERE simhash_qb64 LIKE 'Hem0FRo4%';
 
--- Find documents with overlapping top features  
+-- Find documents with overlapping top features
 SELECT * FROM docs WHERE topk_qb64 LIKE 'ARg3AYg_%';
 ```
 
@@ -5593,18 +5593,18 @@ PRO
 
 This kind of binary 256-dimensional embedding plus text encoding:
 
-    
-    
+
+
     #!/usr/bin/env -S uv run -s
     # /// script
     # dependencies = ["voyageai", "numpy"]
     # ///
     # this_file: voyemb.py
-    
+
     import voyageai
     import base64
-    
-    
+
+
     def int_list_to_binary_visual(int_list, bits_per_int=8):
         """
         Convert a list of integers to a visual binary string where 0 = '.'
@@ -5618,8 +5618,8 @@ This kind of binary 256-dimensional embedding plus text encoding:
             visual_binary = binary_repr.replace("0", ".").replace("1", "#")
             binary_str += visual_binary
         return binary_str
-    
-    
+
+
     def int_list_to_base64(int_list):
         """
         Convert a list of integers to URL-safe Base64 representation.
@@ -5632,19 +5632,19 @@ This kind of binary 256-dimensional embedding plus text encoding:
             # Get the most significant bit (first bit) of each byte
             first_bit = (int_list[i] >> 7) & 1
             first_bits.append(first_bit)
-    
+
         # Pad with zeros if we have less than 8 bytes
         while len(first_bits) < 8:
             first_bits.append(0)
-    
+
         # Pack the 8 first bits into a single byte
         packed_byte = 0
         for i, bit in enumerate(first_bits):
             packed_byte |= bit << (7 - i)
-    
+
         # Append the packed byte to the original embedding
         enhanced_data = int_list + [packed_byte]
-    
+
         # Convert to bytes and encode
         byte_data = bytes(enhanced_data)
         # Encode to URL-safe Base64 and decode to string
@@ -5652,10 +5652,10 @@ This kind of binary 256-dimensional embedding plus text encoding:
         # Remove padding for cleaner URLs (should be exactly 44 chars now)
         base64_result = base64_result.rstrip("=")
         return base64_result
-    
-    
+
+
     vo = voyageai.Client()
-    
+
     examples = [
         (
             "FontLab 8 is an integrated font editor for Mac and Windows that "
@@ -5673,7 +5673,7 @@ This kind of binary 256-dimensional embedding plus text encoding:
         ),
         ("Warsaw is the capital of Poland."),
     ]
-    
+
     # Generate voyage-3-large vectors, which by default are 1024-dimensional
     # floating-point numbers
     embd1 = vo.embed(
@@ -5684,7 +5684,7 @@ This kind of binary 256-dimensional embedding plus text encoding:
         output_dimension=256,
         output_dtype="ubinary",
     ).embeddings
-    
+
     for i, embedding in enumerate(embd1):
         base64_repr = int_list_to_base64(embedding)
         visual_binary = int_list_to_binary_visual(embedding, bits_per_int=8)
@@ -5694,17 +5694,17 @@ This kind of binary 256-dimensional embedding plus text encoding:
 
 yields:
 
-    
-    
+
+
     Text 1 Base64: V_mojJ5fNfPduU7zBS54lV9Gq7ULzM-Pjf4qsHK1ZjZ5
     Text 1 Binary: .#.#.########..##.#.#...#...##..#..####..#.#####..##.#.#####..####.###.##.###..#.#..###.####..##.....#.#..#.###..####...#..#.#.#.#.#####.#...##.#.#.#.###.##.#.#....#.####..##..##..#####...#####...##.########...#.#.#.#.##.....###..#.#.##.#.#.##..##...##.##.
-    
+
     Text 2 Base64: V_nYDJ5dFdPcvW6zZa54lV8Gq5MIxs--jfYqgHKVZjBp
     Text 2 Binary: .#.#.########..###.##.......##..#..####..#.###.#...#.#.###.#..####.###..#.####.#.##.###.#.##..##.##..#.##.#.###..####...#..#.#.#.#.#####.....##.#.#.#.###..#..##....#...##...##.##..#####.#####.#...##.#####.##...#.#.#.#........###..#.#..#.#.#.##..##...##....
-    
+
     Text 3 Base64: V_24DJ5dN_PduU7zBS54ld9Hq5EK7M-vjf4KsHK1ZjJp
     Text 3 Binary: .#.#.#########.##.###.......##..#..####..#.###.#..##.#######..####.###.##.###..#.#..###.####..##.....#.#..#.###..####...#..#.#.###.#####.#...####.#.#.###..#...#....#.#.###.##..##..#####.#.#####...##.########.....#.#.#.##.....###..#.#.##.#.#.##..##...##..#.
-    
+
     Text 4 Base64: xP0iTE7RJbPP3GJRLYsahV8vqZseJMOGzKAYsP7AfoLF
     Text 4 Binary: ##...#..######.#..#...#..#..##...#..###.##.#...#..#..#.##.##..####..######.###...##...#..#.#...#..#.##.##...#.##...##.#.#....#.#.#.#####..#.#####.#.#..##..##.##...####...#..#..##....###....##.##..##..#.#........##...#.##....#######.##.......######.#.....#.
 
@@ -5729,12 +5729,12 @@ then stores only the sign bit. Cosine-similar vectors differ in few bits ⇒
 small Hamming distance ⇒ similar hex/Base32 strings (1 typo = neighbouring
 bucket).
 
-    
-    
+
+
     python
-    
+
     Copy
-    
+
     def simhash_bits(int_list, planes=64):
         rng = np.random.default_rng(42)
         rand_vectors = rng.normal(size=(planes, len(int_list)))
@@ -5744,7 +5744,7 @@ bucket).
         dots = rand_vectors @ vec
         bits = (dots > 0).astype(int)
         return bits
-    
+
 
 Encode 4 bits → hex or 5 bits → Base32 for a URL-friendly 13-character slug.
 
@@ -5781,8 +5781,8 @@ Gray codes ⇒ hex strings with sparse diffs.
 ### 5 Top-k index signature
 
 Choose k = 8 highest-magnitude dimensions, store their indices sorted
-ascending.  
-`[17, 42, 123, 199, 201, 202, 204, 230] → "11-2a-7b-c7-c9-ca-cc-e6"`  
+ascending.
+`[17, 42, 123, 199, 201, 202, 204, 230] → "11-2a-7b-c7-c9-ca-cc-e6"`
 The edit distance of the dash-separated string is basically twice the set-
 difference size—very Jaccard-like.
 
@@ -5792,14 +5792,14 @@ difference size—very Jaccard-like.
 
 Your current `.#` raster can compress nicely and keep locality:
 
-    
-    
+
+
     arduino
-    
+
     Copy
-    
+
     4.1#3.2# ... → "4.1#3.2#"
-    
+
 
 When only a few bits toggle, the neighbouring run lengths wiggle by ±1, so
 Levenshtein distance remains small.
@@ -5809,7 +5809,7 @@ Levenshtein distance remains small.
 ### 7 Emoji quaternions
 
 Map two bits to one of four visually distinct emojis: `00 → ⚪, 01 → 🟡, 10 → 🟠,
-11 → 🔴`.  
+11 → 🔴`.
 A single-bit flip changes colour but not glyph shape; two flips jump farther
 in the palette—an intuitive visual Hamming heat-map.
 
@@ -5817,14 +5817,14 @@ in the palette—an intuitive visual Hamming heat-map.
 
 ## Putting one idea into practice: 64-bit SimHash slug
 
-    
-    
+
+
     python
-    
+
     Copy
-    
+
     import numpy as np, base64, struct
-    
+
     def simhash_slug(int_list, planes=64):
         bits = simhash_bits(int_list, planes)          # from snippet above
         # Pack into 8-byte integer
@@ -5832,7 +5832,7 @@ in the palette—an intuitive visual Hamming heat-map.
         for b in bits: h = (h << 1) | int(b)
         slug = base64.urlsafe_b64encode(struct.pack(">Q", h)).decode().rstrip("=")
         return slug  # 11 chars
-    
+
 
 Two embeddings with Hamming distance ≤3 on the 64-bit SimHash differ in ≤3
 Base64 characters (often in adjacent positions).
@@ -5841,14 +5841,14 @@ Base64 characters (often in adjacent positions).
 
 ### Quick decision guide
 
-Goal| Pick  
----|---  
-**Ultra-compact URL slug**|  SimHash (64 bits → 11 chars)  
-**Sub-byte precision, fast ANN lookup**|  Product Quantisation  
-**Prefix-search or trie storage**|  Z-order/Hilbert hash  
-**Human-diff-friendly**|  Gray-coded hex or RLE dot-hash  
-**Visual heat-map**|  Emoji quaternions  
-  
+Goal| Pick
+---|---
+**Ultra-compact URL slug**|  SimHash (64 bits → 11 chars)
+**Sub-byte precision, fast ANN lookup**|  Product Quantisation
+**Prefix-search or trie storage**|  Z-order/Hilbert hash
+**Human-diff-friendly**|  Gray-coded hex or RLE dot-hash
+**Visual heat-map**|  Emoji quaternions
+
 All of these can coexist: compute once, cache multiple views, choose the one
 that best fits the UX moment (sharing link vs. console diff vs. DB key).
 
@@ -5856,20 +5856,20 @@ Wait, but
 
 ##### You said:
 
-    
-    
+
+
     #!/usr/bin/env -S uv run -s
     # /// script
     # dependencies = ["voyageai", "numpy"]
     # ///
     # this_file: voyemb.py
-    
+
     import voyageai
     import base64
     import numpy as np
     import struct
-    
-    
+
+
     def int_list_to_binary_visual(int_list, bits_per_int=8):
         """
         Convert a list of integers to a visual binary string where 0 = '.'
@@ -5883,8 +5883,8 @@ Wait, but
             visual_binary = binary_repr.replace("0", ".").replace("1", "#")
             binary_str += visual_binary
         return binary_str
-    
-    
+
+
     def int_list_to_base64(int_list):
         """
         Convert a list of integers to URL-safe Base64 representation.
@@ -5897,19 +5897,19 @@ Wait, but
             # Get the most significant bit (first bit) of each byte
             first_bit = (int_list[i] >> 7) & 1
             first_bits.append(first_bit)
-    
+
         # Pad with zeros if we have less than 8 bytes
         while len(first_bits) < 8:
             first_bits.append(0)
-    
+
         # Pack the 8 first bits into a single byte
         packed_byte = 0
         for i, bit in enumerate(first_bits):
             packed_byte |= bit << (7 - i)
-    
+
         # Append the packed byte to the original embedding
         enhanced_data = int_list + [packed_byte]
-    
+
         # Convert to bytes and encode
         byte_data = bytes(enhanced_data)
         # Encode to URL-safe Base64 and decode to string
@@ -5917,8 +5917,8 @@ Wait, but
         # Remove padding for cleaner URLs (should be exactly 44 chars now)
         base64_result = base64_result.rstrip("=")
         return base64_result
-    
-    
+
+
     def simhash_bits(int_list, planes=64):
         """SimHash: Project onto random hyperplanes, store sign bits"""
         rng = np.random.default_rng(42)
@@ -5929,8 +5929,8 @@ Wait, but
         dots = rand_vectors @ vec
         bits = (dots > 0).astype(int)
         return bits
-    
-    
+
+
     def simhash_slug(int_list, planes=64):
         """64-bit SimHash → 11-char URL slug"""
         bits = simhash_bits(int_list, planes)
@@ -5940,13 +5940,13 @@ Wait, but
             h = (h << 1) | int(b)
         slug = base64.urlsafe_b64encode(struct.pack(">Q", h)).decode().rstrip("=")
         return slug
-    
-    
+
+
     def gray_coded_hex(int_list):
         """Gray-coded nibble stream → hex string"""
         # Gray code lookup for 4-bit values (0-15)
         gray_codes = [0, 1, 3, 2, 6, 7, 5, 4, 12, 13, 15, 14, 10, 11, 9, 8]
-    
+
         hex_result = ""
         for byte_val in int_list:
             # Split byte into two nibbles
@@ -5957,8 +5957,8 @@ Wait, but
             gray_low = gray_codes[low_nibble]
             hex_result += f"{gray_high:x}{gray_low:x}"
         return hex_result
-    
-    
+
+
     def top_k_indices(int_list, k=8):
         """Top-k index signature: indices of highest magnitude values"""
         # Get indices sorted by magnitude (descending)
@@ -5966,19 +5966,19 @@ Wait, but
         indices = sorted(indices.tolist())  # Convert to list then sort ascending
         # Format as dash-separated hex
         return "-".join(f"{idx:02x}" for idx in indices)
-    
-    
+
+
     def run_length_encode_binary(int_list):
         """Run-length encode the .# binary pattern"""
         binary_str = int_list_to_binary_visual(int_list, bits_per_int=8)
-    
+
         if not binary_str:
             return ""
-    
+
         result = ""
         current_char = binary_str[0]
         count = 1
-    
+
         for char in binary_str[1:]:
             if char == current_char:
                 count += 1
@@ -5986,15 +5986,15 @@ Wait, but
                 result += f"{count}{current_char}"
                 current_char = char
                 count = 1
-    
+
         result += f"{count}{current_char}"  # Add the last run
         return result
-    
-    
+
+
     def emoji_quaternions(int_list):
         """Map 2-bit pairs to emoji quaternions"""
         emojis = ["⚪", "🟡", "🟠", "🔴"]  # 00, 01, 10, 11
-    
+
         result = ""
         for byte_val in int_list:
             # Extract 4 pairs of 2 bits from each byte
@@ -6002,13 +6002,13 @@ Wait, but
                 two_bits = (byte_val >> shift) & 0b11
                 result += emojis[two_bits]
         return result
-    
-    
+
+
     def z_order_hash(int_list):
         """Simplified Z-order (Morton code) encoding"""
         # Quantize each byte to 2 bits (0-3), then interleave
         quantized = [(b >> 6) & 0b11 for b in int_list]  # Take top 2 bits
-    
+
         # Simple bit interleaving for first 16 bytes (32 bits total)
         result = 0
         for i, val in enumerate(quantized[:16]):
@@ -6016,14 +6016,14 @@ Wait, but
             for bit_pos in range(2):
                 bit = (val >> bit_pos) & 1
                 result |= bit << (i * 2 + bit_pos)
-    
+
         # Convert to Base64
         packed = struct.pack(">I", result)
         return base64.urlsafe_b64encode(packed).decode().rstrip("=")
-    
-    
+
+
     vo = voyageai.Client()
-    
+
     examples = [
         (
             "FontLab 8 is an integrated font editor for Mac and Windows that "
@@ -6042,7 +6042,7 @@ Wait, but
         ),
         ("Warsaw is the capital of Poland."),
     ]
-    
+
     # Generate voyage-3-large vectors, which by default are 1024-dimensional
     # floating-point numbers
     embd1 = vo.embed(
@@ -6053,45 +6053,45 @@ Wait, but
         output_dimension=256,
         output_dtype="ubinary",
     ).embeddings
-    
+
     print("=" * 80)
     print("LOCALITY-PRESERVING ENCODING DEMONSTRATIONS")
     print("=" * 80)
-    
+
     for i, embedding in enumerate(embd1):
         print(f"\n🟦 TEXT {i + 1}: {examples[i][:50]}...")
         print("-" * 60)
-    
+
         # Original Base64
         base64_repr = int_list_to_base64(embedding)
         print(f"Base64 (44 chars):     {base64_repr}")
-    
+
         # SimHash slug
         simhash = simhash_slug(embedding)
         print(f"SimHash (11 chars):    {simhash}")
-    
+
         # Gray-coded hex
         gray_hex = gray_coded_hex(embedding)
         print(f"Gray hex (64 chars):   {gray_hex[:64]}...")
-    
+
         # Top-k indices
         topk = top_k_indices(embedding)
         print(f"Top-8 indices:         {topk}")
-    
+
         # Z-order hash
         z_hash = z_order_hash(embedding)
         print(f"Z-order (6 chars):     {z_hash}")
-    
+
         # Run-length encoded (truncated for display)
         rle = run_length_encode_binary(embedding)
         print(f"RLE (truncated):       {rle[:60]}...")
-    
+
         # Emoji quaternions (first 16 characters)
         emoji = emoji_quaternions(embedding[:4])  # Just first 4 bytes for display
         print(f"Emoji (first 16):      {emoji}")
-    
+
         print()
-    
+
     print("\n" + "=" * 80)
     print("LOCALITY COMPARISON: Similar texts should have similar codes!")
     print("=" * 80)
@@ -6125,34 +6125,34 @@ reversible.
 
 ## 1 How the trick works — “QuadB64”
 
-Idea| Consequence  
----|---  
+Idea| Consequence
+---|---
 Partition the 64 Base‑64URL symbols into **four disjoint 16‑symbol alphabets**
 `Σ₀, Σ₁, Σ₂, Σ₃`.| The same character can never appear in two different
-positions _mod 4_.  
+positions _mod 4_.
 Encode **one 4‑bit nibble** (0–15) per output character. The character that
 represents a nibble is taken from the alphabet whose index equals the
 character position **mod 4**.| Every 8‑bit byte ⇒ 2 output characters. Longer
-code but <sup>✓</sup> prefix‑searchable.  
+code but <sup>✓</sup> prefix‑searchable.
 Because the alphabets are disjoint, any literal substring you search for is
 automatically _anchored_ to its intended position class.| Searching for
 `"abc"` can only succeed when the first char sits at a position that is
 allowed to contain `'a'`, the next at a position allowed for `'b'`, etc.
-“`jjiijdabc`” can never occur.  
-      
-    
+“`jjiijdabc`” can never occur.
+
+
     arduino
-    
+
     Copy
-    
+
     Σ₀ = "ABCDEFGHIJKLMNOP"          (16)
     Σ₁ = "QRSTUVWXYZabcdef"          (16)
     Σ₂ = "ghijklmnopqrstuv"          (16)
     Σ₃ = "wxyz0123456789-_"          (16)
-    
 
-> **Why 4 alphabets?**  
->  • 16 symbols × 4 classes = 64 → covers the full Base64URL set  
+
+> **Why 4 alphabets?**
+>  • 16 symbols × 4 classes = 64 → covers the full Base64URL set
 >  • Position mod 4 aligns with the natural 32‑/64‑bit boundary if you ever
 > stream the code in words.
 
@@ -6160,15 +6160,15 @@ allowed to contain `'a'`, the next at a position allowed for `'b'`, etc.
 
 ## 2 Reference implementation
 
-    
-    
+
+
     python
-    
+
     Copy
-    
+
     # Positional‑alphabet (“QuadB64”) codec for 8‑bit data  →  Base64URL string.
     # Reversible, prefix‑search‐friendly, no external deps.
-    
+
     ALPHABETS = [
         "ABCDEFGHIJKLMNOP",         # pos ≡ 0 (mod 4)
         "QRSTUVWXYZabcdef",         # pos ≡ 1
@@ -6179,8 +6179,8 @@ allowed to contain `'a'`, the next at a position allowed for `'b'`, etc.
     REV_LOOKUP = {c: (idx, pos_set.index(c))
                   for idx, pos_set in enumerate(ALPHABETS)
                   for c in pos_set}
-    
-    
+
+
     def quadb64_encode(byte_seq: bytes) -> str:
         """
         Encode arbitrarily long bytes into QuadB64.
@@ -6195,15 +6195,15 @@ allowed to contain `'a'`, the next at a position allowed for `'b'`, etc.
                 out.append(alphabet[nibble])
                 pos += 1
         return "".join(out)
-    
-    
+
+
     def quadb64_decode(s: str) -> bytes:
         """
         Inverse of `quadb64_encode`.  Raises ValueError on malformed input.
         """
         if len(s) & 1:
             raise ValueError("QuadB64 length must be even (2 chars per byte).")
-    
+
         nibbles = []
         for pos, ch in enumerate(s):
             try:
@@ -6213,27 +6213,27 @@ allowed to contain `'a'`, the next at a position allowed for `'b'`, etc.
             if expected_alpha != (pos & 3):
                 raise ValueError(f"Character {ch!r} illegal at position {pos}")
             nibbles.append(val)
-    
+
         # Stitch nibbles back into bytes
         it = iter(nibbles)
         return bytes((hi << 4) | lo for hi, lo in zip(it, it))
-    
+
 
 ### Drop‑in usage with your Voyage embedding
 
-    
-    
+
+
     python
-    
+
     Copy
-    
+
     # … after obtaining `embedding` as a list[int] 0–255 …
     quadb64 = quadb64_encode(bytes(embedding))
     print(quadb64[:64], "...")          # demonstrator
-    
+
     # Round‑trip safety check (optional)
     assert list(quadb64_decode(quadb64)) == embedding
-    
+
 
 * * *
 
@@ -6249,20 +6249,20 @@ allowed to contain `'a'`, the next at a position allowed for `'b'`, etc.
 
 ## 4 Trade‑offs & tunables
 
-Knob| Effect  
----|---  
+Knob| Effect
+---|---
 **Alphabet cycle length** (4)| Make it 2, 3, 8… if you prefer other chunk
-sizes.  
+sizes.
 **Bits per symbol** (4)| Could bump to 5 (use 32‑symbol alphabets, code length
-×1.6) if you need shorter strings.  
+×1.6) if you need shorter strings.
 **Alphabet design**|  Any disjoint partition of the 64 URL‑safe chars works.
-Reserve `-`/`_` for checksum, etc.  
-  
+Reserve `-`/`_` for checksum, etc.
+
 * * *
 
 ### Searching in practice
 
-_Looking for all embeddings that share the first two bytes?_  
+_Looking for all embeddings that share the first two bytes?_
 Take the first **four** QuadB64 characters (because 2 bytes × 2 chars/byte)
 and run a plain substring / prefix filter – no regex anchors needed.
 
@@ -6274,7 +6274,7 @@ function is symmetric if you ever need to reconstruct the original bytes.
 
 Wait, but
 
-  
+
 
 Tools
 
@@ -6862,7 +6862,7 @@ rprint(
 <file path="work/voyemb.txt">
 🔬 Q64 FAMILY ENCODING DEMONSTRATIONS
 ─────────────────────────────────────────────────────────────────────────────────── Position-Safe Encoding Analysis ────────────────────────────────────────────────────────────────────────────────────
-                                                                           🧬 Q64 Family Encoding Results                                                                           
+                                                                           🧬 Q64 Family Encoding Results
 ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Text      ┃ Eq64 (Full Embedding)                                                                         ┃ Shq64 (SimHash)        ┃ T8q64 (Top-8)         ┃ Zoq64 (Z-order)     ┃
 ┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━┩
@@ -6874,7 +6874,7 @@ rprint(
 
 🎯 LOCALITY PRESERVATION ANALYSIS
 ─────────────────────────────────────────────────────────────────────────────── Similar texts should have similar codes! ───────────────────────────────────────────────────────────────────────────────
-                                                                            🔍 Q64 Family Locality Preservation                                                                             
+                                                                            🔍 Q64 Family Locality Preservation
 ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Method ┃ Text 1                                                                  ┃ Text 2                                                                  ┃ Similarity Notes            ┃
 ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
@@ -6886,7 +6886,7 @@ rprint(
 
 🔄 ROUND-TRIP VERIFICATION
 ───────────────────────────────────────────────────────────────────────────────────────── Data Integrity Check ─────────────────────────────────────────────────────────────────────────────────────────
-                 ✅ Q64 Round-Trip Verification Results                  
+                 ✅ Q64 Round-Trip Verification Results
 ┏━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┓
 ┃ Text   ┃ Original Length ┃ Eq64 Length ┃ Status  ┃ Details            ┃
 ┡━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━┩
@@ -6896,7 +6896,7 @@ rprint(
 
 📋 Q64 METHOD COMPARISON
 ─────────────────────────────────────────────────────────────────────────────────────────── Method Overview ────────────────────────────────────────────────────────────────────────────────────────────
-                         🏆 Q64 Family Method Comparison                          
+                         🏆 Q64 Family Method Comparison
 ┏━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
 ┃ Method ┃ Length ┃ Best For          ┃ Key Advantage              ┃ Performance ┃
 ┡━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
@@ -6953,7 +6953,7 @@ A high-performance library for encoding embedding vectors into position-safe, lo
 - **Proven locality preservation** - Similar embeddings produce similar strings
 - **Basic package structure created**
 
-**Problem:** Regular Base64 allows "abc" to match anywhere in the string  
+**Problem:** Regular Base64 allows "abc" to match anywhere in the string
 **Solution:** QuadB64 uses position-dependent alphabets so "abc" can only match at specific positions, eliminating false positives in substring searches while preserving embedding similarity relationships.
 
 ## Goal
@@ -7036,7 +7036,7 @@ When you’re finished, print "Wait, but" to go back, think & reflect, revise & 
 
 Be creative, diligent, critical, relentless & funny! Lead two experts: "Ideot" for creative, unorthodox ideas, and "Critin" to critique flawed thinking and moderate for balanced discussions. The three of you shall illuminate knowledge with concise, beautiful responses, process methodically for clear answers, collaborate step-by-step, sharing thoughts and adapting. If errors are found, step back and focus on accuracy and progress.
 
-NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds. 
+NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds.
 
 To test, run `hatch test`, not `python -m pytest`. To install, use `uv pip install -e .`.
 </file>
@@ -7057,7 +7057,7 @@ A high-performance library for encoding embedding vectors into position-safe, lo
 - **Proven locality preservation** - Similar embeddings produce similar strings
 - **Basic package structure created**
 
-**Problem:** Regular Base64 allows "abc" to match anywhere in the string  
+**Problem:** Regular Base64 allows "abc" to match anywhere in the string
 **Solution:** QuadB64 uses position-dependent alphabets so "abc" can only match at specific positions, eliminating false positives in substring searches while preserving embedding similarity relationships.
 
 ## Goal
@@ -7140,7 +7140,7 @@ When you’re finished, print "Wait, but" to go back, think & reflect, revise & 
 
 Be creative, diligent, critical, relentless & funny! Lead two experts: "Ideot" for creative, unorthodox ideas, and "Critin" to critique flawed thinking and moderate for balanced discussions. The three of you shall illuminate knowledge with concise, beautiful responses, process methodically for clear answers, collaborate step-by-step, sharing thoughts and adapting. If errors are found, step back and focus on accuracy and progress.
 
-NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds. 
+NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds.
 
 To test, run `hatch test`, not `python -m pytest`. To install, use `uv pip install -e .`.
 </file>
@@ -7204,20 +7204,20 @@ def main():
     """Run benchmarks."""
     # Generate test data
     sizes = [32, 256, 1024]
-    
+
     print("uubed Encoding Performance Benchmarks")
     print(f"Native acceleration available: {is_native_available()}")
     print("=" * 80)
     print(f"{'Size':<10} {'Method':<15} {'Implementation':<15} {'Time (μs)':<15} {'Throughput (MB/s)':<15}")
     print("-" * 80)
-    
+
     for size in sizes:
         data = np.random.randint(0, 256, size, dtype=np.uint8).tolist()
         data_bytes = bytes(data)
-        
+
         # Benchmark each encoding method - both pure Python and native
         methods = []
-        
+
         # Always benchmark pure Python
         methods.extend([
             ("q64", "Pure Python", lambda: q64.q64_encode(data)),
@@ -7226,7 +7226,7 @@ def main():
             ("t8q64", "Pure Python", lambda: t8q64.top_k_q64(data)),
             ("zoq64", "Pure Python", lambda: zoq64.z_order_q64(data)),
         ])
-        
+
         # Benchmark native if available
         if is_native_available():
             methods.extend([
@@ -7235,35 +7235,35 @@ def main():
                 ("t8q64", "Native Rust", lambda: top_k_q64_native(data_bytes)),
                 ("zoq64", "Native Rust", lambda: z_order_q64_native(data_bytes)),
             ])
-        
+
         for method_name, impl_name, method_func in methods:
             # Use fewer iterations for larger sizes
             iters = 1000 if size <= 256 else 100
-            
+
             time_per_op = benchmark_function(method_func, iterations=iters)
             throughput = size / (time_per_op * 1e6)  # MB/s
-            
+
             print(f"{size:<10} {method_name:<15} {impl_name:<15} {time_per_op*1e6:<15.2f} {throughput:<15.2f}")
-        
+
         print()
-    
+
     # If native is available, calculate speedup
     if is_native_available():
         print("\nSpeedup Analysis")
         print("=" * 50)
         print(f"{'Method':<15} {'Size':<10} {'Speedup':<15}")
         print("-" * 50)
-        
+
         for size in [32, 256, 1024]:
             data = np.random.randint(0, 256, size, dtype=np.uint8).tolist()
             data_bytes = bytes(data)
-            
+
             # Compare q64 encoding
             py_time = benchmark_function(q64.q64_encode, data, iterations=100)
             native_time = benchmark_function(q64_encode_native, data_bytes, iterations=100)
             speedup = py_time / native_time
             print(f"{'q64':<15} {size:<10} {speedup:<15.2f}x")
-            
+
             # Compare simhash
             py_time = benchmark_function(shq64.simhash_q64, data, iterations=100)
             native_time = benchmark_function(simhash_q64_native, data_bytes, iterations=100)
@@ -7345,7 +7345,7 @@ def encode(
         embedding_bytes = bytes(embedding)
     else:
         embedding_bytes = embedding
-    
+
     # Dispatch to appropriate encoder
     if method == "eq64":
         return q64_encode_native(embedding_bytes)
@@ -7546,7 +7546,7 @@ A high-performance library for encoding embedding vectors into position-safe, lo
 - **Proven locality preservation** - Similar embeddings produce similar strings
 - **Basic package structure created**
 
-**Problem:** Regular Base64 allows "abc" to match anywhere in the string  
+**Problem:** Regular Base64 allows "abc" to match anywhere in the string
 **Solution:** QuadB64 uses position-dependent alphabets so "abc" can only match at specific positions, eliminating false positives in substring searches while preserving embedding similarity relationships.
 
 ## Goal
@@ -7629,7 +7629,7 @@ When you’re finished, print "Wait, but" to go back, think & reflect, revise & 
 
 Be creative, diligent, critical, relentless & funny! Lead two experts: "Ideot" for creative, unorthodox ideas, and "Critin" to critique flawed thinking and moderate for balanced discussions. The three of you shall illuminate knowledge with concise, beautiful responses, process methodically for clear answers, collaborate step-by-step, sharing thoughts and adapting. If errors are found, step back and focus on accuracy and progress.
 
-NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds. 
+NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds.
 
 To test, run `hatch test`, not `python -m pytest`. To install, use `uv pip install -e .`.
 </file>
@@ -7822,7 +7822,7 @@ A high-performance library for encoding embedding vectors into position-safe, lo
 - **Proven locality preservation** - Similar embeddings produce similar strings
 - **Basic package structure created**
 
-**Problem:** Regular Base64 allows "abc" to match anywhere in the string  
+**Problem:** Regular Base64 allows "abc" to match anywhere in the string
 **Solution:** QuadB64 uses position-dependent alphabets so "abc" can only match at specific positions, eliminating false positives in substring searches while preserving embedding similarity relationships.
 
 ## Goal
@@ -7905,7 +7905,7 @@ When you’re finished, print "Wait, but" to go back, think & reflect, revise & 
 
 Be creative, diligent, critical, relentless & funny! Lead two experts: "Ideot" for creative, unorthodox ideas, and "Critin" to critique flawed thinking and moderate for balanced discussions. The three of you shall illuminate knowledge with concise, beautiful responses, process methodically for clear answers, collaborate step-by-step, sharing thoughts and adapting. If errors are found, step back and focus on accuracy and progress.
 
-NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds. 
+NOW: Read `./TODO.md` and `./PLAN.md`. Implement the changes, and document them by moving them from `./TODO.md` to a `./CHANGELOG.md` file, and clean up `./PLAN.md` so that both `./TODO.md` and `./PLAN.md` only contain tasks not yet done. Be vigilant, thoughtful, intelligent, efficient. Work in iteration rounds.
 
 To test, run `hatch test`, not `python -m pytest`. To install, use `uv pip install -e .`.
 </file>
@@ -8451,7 +8451,7 @@ After each implementation phase, the team should ask:
 
 ### Advanced Features
 - [ ] Streaming API for large datasets
-- [ ] GPU acceleration exploration  
+- [ ] GPU acceleration exploration
 - [ ] Integration with vector databases
 - [ ] Matryoshka embedding support
 - [ ] Binary quantization options
@@ -8485,7 +8485,7 @@ After each implementation phase, the team should ask:
 
 With native Rust acceleration:
 - **Q64 encoding**: 40-105x speedup (>230 MB/s throughput)
-- **SimHash**: 1.7-9.7x faster with parallel processing  
+- **SimHash**: 1.7-9.7x faster with parallel processing
 - **Z-order**: 60-1600x faster with efficient bit manipulation
 
 ## Installation
@@ -8562,7 +8562,7 @@ assert np.array_equal(embedding, np.frombuffer(decoded, dtype=np.uint8))
 - **Size**: 2 chars per byte
 - **Features**: Lossless, supports decode
 
-### Shq64 - SimHash  
+### Shq64 - SimHash
 - **Use case**: Fast similarity search
 - **Size**: 16 characters (64-bit hash)
 - **Features**: Preserves cosine similarity
@@ -8587,7 +8587,7 @@ encode("Hello") → "SGVsbG8="
 search("Vsb") → Matches! (false positive)
 ```
 
-### The Solution  
+### The Solution
 QuadB64 uses position-dependent alphabets:
 ```python
 # QuadB64
@@ -8653,7 +8653,7 @@ Size: 1024 bytes
 Method    Implementation    Time (μs)    Throughput (MB/s)
 Q64       Pure Python       464.82       2.20
 Q64       Native Rust       4.37         234.42      (105x faster!)
-SimHash   Pure Python       1431.33      0.72  
+SimHash   Pure Python       1431.33      0.72
 SimHash   Native Rust       139.79       7.33        (10x faster!)
 Z-order   Pure Python       73.59        13.91
 Z-order   Native Rust       0.63         1631.92     (116x faster!)
@@ -8818,14 +8818,14 @@ markers = [
     "benchmark: marks tests as benchmarks (select with '-m benchmark')",
     "unit: mark a test as a unit test",
     "integration: mark a test as an integration test",
-    "permutation: tests for permutation functionality", 
+    "permutation: tests for permutation functionality",
     "parameter: tests for parameter parsing",
     "prompt: tests for prompt parsing",
 ]
 norecursedirs = [
     ".*",
     "build",
-    "dist", 
+    "dist",
     "venv",
     "__pycache__",
     "*.egg-info",
@@ -8856,7 +8856,7 @@ compare = [
 #------------------------------------------------------------------------------
 # RUFF CONFIGURATION
 # Configuration for Ruff, including linter and formatter settings.
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 
 # Ruff linter and formatter configuration
 [tool.ruff]
@@ -9105,7 +9105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [x] Built source distribution
 - [x] Verified all tests passing (9/9)
 - [x] Confirmed native module performance (30-58x speedup)
-- [x] Upload to TestPyPI for validation  
+- [x] Upload to TestPyPI for validation
 - [x] Test installation from TestPyPI
 - [x] Final PyPI upload completed (v1.0.1, v1.0.2, v1.0.3 published)
 

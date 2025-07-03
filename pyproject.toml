@@ -34,8 +34,31 @@ classifiers = [
 ]
 dependencies = [
   "numpy>=1.20",
+  "click>=8.0",
+  "rich>=10.0",
 ]
-version = "0.1.0"
+
+[project.optional-dependencies]
+test = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+]
+gpu = [
+  "cupy-cuda11x>=10.0",
+]
+langchain = [
+  "langchain>=0.1.0",
+]
+vectordb = [
+  "pinecone-client>=2.0",
+  "weaviate-client>=3.0",
+  "qdrant-client>=1.0",
+  "chromadb>=0.4.0",
+]
+all = [
+  "uubed[test,gpu,langchain,vectordb]"
+]
+dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://github.com/twardoch/uubed"
@@ -43,13 +66,16 @@ Documentation = "https://github.com/twardoch/uubed/blob/main/README.md"
 Repository = "https://github.com/twardoch/uubed.git"
 "Bug Tracker" = "https://github.com/twardoch/uubed/issues"
 
-[build-system]
-requires = ["maturin>=1.7,<2"]
-build-backend = "maturin"
+[project.scripts]
+uubed = "uubed.cli:main"
 
-[tool.maturin]
-features = ["pyo3/extension-module"]
-module-name = "uubed.uubed_native"
+[build-system]
+requires = ["setuptools>=61", "wheel", "setuptools-scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-scm]
+version_scheme = "post-release"
+local_scheme = "dirty-tag"
 
 
 
@@ -122,7 +148,7 @@ disallow_incomplete_defs = false
 #------------------------------------------------------------------------------
 
 [tool.pytest.ini_options]
-addopts = "-v --durations=10 -p no:briefcase"
+addopts = "-v --durations=10 -p no:briefcase -p no:pytest_virtualenv -p no:pytest-virtualenv"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 console_output_style = "progress"
@@ -133,14 +159,14 @@ markers = [
     "benchmark: marks tests as benchmarks (select with '-m benchmark')",
     "unit: mark a test as a unit test",
     "integration: mark a test as an integration test",
-    "permutation: tests for permutation functionality", 
+    "permutation: tests for permutation functionality",
     "parameter: tests for parameter parsing",
     "prompt: tests for prompt parsing",
 ]
 norecursedirs = [
     ".*",
     "build",
-    "dist", 
+    "dist",
     "venv",
     "__pycache__",
     "*.egg-info",
@@ -171,7 +197,7 @@ compare = [
 #------------------------------------------------------------------------------
 # RUFF CONFIGURATION
 # Configuration for Ruff, including linter and formatter settings.
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 
 # Ruff linter and formatter configuration
 [tool.ruff]

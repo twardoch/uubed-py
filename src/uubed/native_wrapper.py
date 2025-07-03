@@ -10,6 +10,8 @@ try:
     simhash_q64_native = _native.simhash_q64_native
     top_k_q64_native = _native.top_k_q64_native
     z_order_q64_native = _native.z_order_q64_native
+    mq64_encode_native = _native.mq64_encode_native
+    mq64_decode_native = _native.mq64_decode_native
     HAS_NATIVE = True
 except ImportError:
     # Fall back to pure Python
@@ -21,6 +23,8 @@ except ImportError:
     from .encoders.shq64 import simhash_q64 as simhash_q64_native
     from .encoders.t8q64 import top_k_q64 as top_k_q64_native
     from .encoders.zoq64 import z_order_q64 as z_order_q64_native
+    from .encoders.mq64 import mq64_encode as mq64_encode_native
+    from .encoders.mq64 import mq64_decode as mq64_decode_native
 
 
 def is_native_available() -> bool:

@@ -1,0 +1,28 @@
+[encoding]
+default_method = "auto"
+
+[streaming]
+default_batch_size = 100
+progress = false
+memory_limit_mb = 1024
+
+[performance]
+use_gpu = "auto"
+parallel_workers = "auto"
+cache_enabled = true
+cache_size_mb = 256
+
+[output]
+verbosity = "info"
+progress_style = "rich"
+color = "auto"
+
+[encoding.eq64]
+
+[encoding.shq64]
+planes = 128
+
+[encoding.t8q64]
+k = 8
+
+[encoding.zoq64]

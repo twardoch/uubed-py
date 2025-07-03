@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""Test core API functionality."""
+
+import pytest
+import numpy as np
+from uubed.api import encode, decode, EncodingMethod
+
+
+class TestEncodeDecode:
+    """Test encoding and decoding functionality."""
+    
+    def test_encode_bytes(self):
+        """Test encoding from bytes."""
+        data = b"Hello, World!"
+        encoded = encode(data, method="eq64")
+        assert isinstance(encoded, str)
+        assert len(encoded) > 0
+    
+    def test_encode_list(self):
+        """Test encoding from list of integers."""
+        data = [72, 101, 108, 108, 111]  # "Hello"
+        encoded = encode(data, method="eq64")
+        assert isinstance(encoded, str)
+        assert len(encoded) > 0
+    
+    def test_encode_numpy_array(self):
+        """Test encoding from numpy array."""
+        data = np.array([72, 101, 108, 108, 111], dtype=np.uint8)
+        encoded = encode(data, method="eq64")
+        assert isinstance(encoded, str)
+        assert len(encoded) > 0
+    
+    def test_encode_decode_roundtrip(self):
+        """Test that encoding and decoding produces original data."""
+        original = np.random.randint(0, 256, 32, dtype=np.uint8).tobytes()
+        encoded = encode(original, method="eq64")
+        decoded = decode(encoded, method="eq64")
+        assert decoded == original
+    
+    def test_all_encoding_methods(self):
+        """Test all encoding methods work."""
+        data = np.random.randint(0, 256, 64, dtype=np.uint8)
+        
+        methods = ["eq64", "shq64", "t8q64", "zoq64"]
+        for method in methods:
+            if method == "t8q64":
+                encoded = encode(data, method=method, k=8)
+            elif method == "shq64":
+                encoded = encode(data, method=method, planes=64)
+            else:
+                encoded = encode(data, method=method)
+            
+            assert isinstance(encoded, str)
+            assert len(encoded) > 0
+    
+    def test_auto_method_selection(self):
+        """Test automatic method selection."""
+        small_data = np.random.randint(0, 256, 16, dtype=np.uint8)
+        large_data = np.random.randint(0, 256, 128, dtype=np.uint8)
+        
+        small_encoded = encode(small_data, method="auto")
+        large_encoded = encode(large_data, method="auto")
+        
+        assert isinstance(small_encoded, str)
+        assert isinstance(large_encoded, str)
+    
+    def test_invalid_input_values(self):
+        """Test validation of input values."""
+        with pytest.raises(ValueError, match="must be in range 0-255"):
+            encode([0, 100, 300, 50], method="eq64")
+    
+    def test_decode_invalid_method(self):
+        """Test decoding with lossy methods raises error."""
+        data = np.random.randint(0, 256, 32, dtype=np.uint8)
+        encoded = encode(data, method="shq64")
+        
+        with pytest.raises(NotImplementedError):
+            decode(encoded, method="shq64")
+    
+    def test_method_specific_parameters(self):
+        """Test method-specific parameters."""
+        data = np.random.randint(0, 256, 64, dtype=np.uint8)
+        
+        # Test t8q64 with different k values
+        encoded_k4 = encode(data, method="t8q64", k=4)
+        encoded_k8 = encode(data, method="t8q64", k=8)
+        assert len(encoded_k4) == len(encoded_k8)  # Same output length
+        
+        # Test shq64 with different planes
+        encoded_p32 = encode(data, method="shq64", planes=32)
+        encoded_p64 = encode(data, method="shq64", planes=64)
+        assert len(encoded_p32) == len(encoded_p64)  # Same output length
+
+
+class TestInputValidation:
+    """Test input validation and error handling."""
+    
+    def test_empty_input(self):
+        """Test handling of empty input."""
+        with pytest.raises(ValueError):
+            encode([], method="eq64")
+    
+    def test_invalid_method(self):
+        """Test handling of invalid encoding method."""
+        data = [1, 2, 3, 4, 5]
+        with pytest.raises(ValueError, match="Unknown encoding method"):
+            encode(data, method="invalid_method")
+    
+    def test_decode_auto_detection(self):
+        """Test automatic method detection in decode."""
+        data = np.random.randint(0, 256, 32, dtype=np.uint8)
+        encoded = encode(data, method="eq64")
+        
+        # Should auto-detect eq64 from the string pattern
+        decoded = decode(encoded)
+        assert np.frombuffer(decoded, dtype=np.uint8).tolist() == data.tolist()
+    
+    def test_decode_auto_detection_failure(self):
+        """Test decode fails when method cannot be auto-detected."""
+        with pytest.raises(ValueError, match="Cannot auto-detect"):
+            decode("SomeRandomString")
+
+
+class TestDataTypes:
+    """Test handling of different data types."""
+    
+    def test_numpy_float_to_uint8(self):
+        """Test conversion from float arrays."""
+        # Test normalized float data [-1, 1]
+        float_data = np.random.randn(32)
+        encoded = encode(float_data, method="eq64")
+        assert isinstance(encoded, str)
+    
+    def test_numpy_different_dtypes(self):
+        """Test different numpy dtypes."""
+        data_uint8 = np.random.randint(0, 256, 32, dtype=np.uint8)
+        data_int32 = np.random.randint(0, 256, 32, dtype=np.int32)
+        data_float32 = np.random.randint(0, 256, 32).astype(np.float32)
+        
+        encoded_uint8 = encode(data_uint8, method="eq64")
+        encoded_int32 = encode(data_int32, method="eq64")
+        encoded_float32 = encode(data_float32, method="eq64")
+        
+        assert isinstance(encoded_uint8, str)
+        assert isinstance(encoded_int32, str)
+        assert isinstance(encoded_float32, str)
+
+
+class TestEdgeCases:
+    """Test edge cases and boundary conditions."""
+    
+    def test_single_byte(self):
+        """Test encoding single byte."""
+        encoded = encode([128], method="eq64")
+        decoded = decode(encoded, method="eq64")
+        assert decoded == bytes([128])
+    
+    def test_all_zeros(self):
+        """Test encoding all zeros."""
+        data = [0] * 32
+        encoded = encode(data, method="eq64")
+        decoded = decode(encoded, method="eq64")
+        assert decoded == bytes(data)
+    
+    def test_all_max_values(self):
+        """Test encoding all max values."""
+        data = [255] * 32
+        encoded = encode(data, method="eq64")
+        decoded = decode(encoded, method="eq64")
+        assert decoded == bytes(data)
+    
+    def test_large_embedding(self):
+        """Test encoding large embedding."""
+        data = np.random.randint(0, 256, 2048, dtype=np.uint8)
+        encoded = encode(data, method="eq64")
+        decoded = decode(encoded, method="eq64")
+        assert np.frombuffer(decoded, dtype=np.uint8).tolist() == data.tolist()
+
+
+class TestConsistency:
+    """Test consistency across multiple runs."""
+    
+    def test_deterministic_encoding(self):
+        """Test that encoding is deterministic."""
+        data = np.random.randint(0, 256, 64, dtype=np.uint8)
+        
+        # eq64 should be deterministic
+        encoded1 = encode(data, method="eq64")
+        encoded2 = encode(data, method="eq64")
+        assert encoded1 == encoded2
+        
+        # shq64 should be deterministic (uses fixed seed)
+        encoded1 = encode(data, method="shq64")
+        encoded2 = encode(data, method="shq64")
+        assert encoded1 == encoded2
+    
+    def test_method_independence(self):
+        """Test that different methods produce different results."""
+        data = np.random.randint(0, 256, 64, dtype=np.uint8)
+        
+        eq64_encoded = encode(data, method="eq64")
+        shq64_encoded = encode(data, method="shq64")
+        t8q64_encoded = encode(data, method="t8q64")
+        zoq64_encoded = encode(data, method="zoq64")
+        
+        # All should be different (with high probability)
+        encodings = [eq64_encoded, shq64_encoded, t8q64_encoded, zoq64_encoded]
+        assert len(set(encodings)) == len(encodings)
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

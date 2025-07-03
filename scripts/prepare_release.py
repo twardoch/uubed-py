@@ -33,10 +33,10 @@ def clean_dist():
 def build_package():
     """Build the package with maturin."""
     print("Building package with maturin...")
-    
+
     # Build source distribution
     run_command(["maturin", "sdist", "--out", "dist"])
-    
+
     # Build wheel for current platform
     run_command(["maturin", "build", "--release", "--out", "dist"])
 
@@ -48,17 +48,17 @@ def check_package():
 def test_install():
     """Test installation in a clean environment."""
     print("Testing installation...")
-    
+
     # Find the wheel file
     dist_path = Path("dist")
     wheel_files = list(dist_path.glob("*.whl"))
     if not wheel_files:
         print("No wheel file found!")
         return False
-    
+
     wheel_file = wheel_files[0]
     print(f"Testing wheel: {wheel_file}")
-    
+
     # Test installation (dry run)
     result = run_command(["pip", "install", "--dry-run", str(wheel_file)], check=False)
     if result.returncode == 0:
@@ -76,17 +76,17 @@ def upload_to_testpypi():
 def main():
     """Main function."""
     print("🚀 Preparing release for uubed...")
-    
+
     # Change to project root
     project_root = Path(__file__).parent.parent
     import os
     os.chdir(project_root)
-    
+
     try:
         clean_dist()
         build_package()
         check_package()
-        
+
         if test_install():
             print("\n✅ Package is ready for release!")
             print("\nNext steps:")
@@ -95,7 +95,7 @@ def main():
             print("3. Upload to PyPI: twine upload dist/*")
         else:
             print("\n❌ Package has issues, please fix before release")
-            
+
     except Exception as e:
         print(f"\n❌ Error during preparation: {e}")
         sys.exit(1)
