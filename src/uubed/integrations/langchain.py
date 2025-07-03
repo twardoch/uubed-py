@@ -218,126 +218,301 @@ class UubedEncoder:
                 raise UubedEncodingError(f"Failed to encode embedding: {e}") from e
 
 
-class UubedEmbeddings(Embeddings):
+def create_uubed_retriever(
+    vectorstore: VectorStore,
+    embeddings: Embeddings,
+    method: EncodingMethod = "shq64",
+    search_type: str = "similarity",
+    search_kwargs: Optional[Dict[str, Any]] = None,
+) -> VectorStore:
     """
-    A wrapper for existing LangChain `Embeddings` models that integrates uubed encoding.
+    Configures a LangChain `VectorStore` to use uubed encoding for query embeddings.
+
+    This function is designed to integrate uubed encoding into the search mechanism
+    of a LangChain `VectorStore`. It wraps the provided `embeddings` model with
+    `UubedEmbeddings` to ensure that any query embeddings generated for search
+    operations are first processed by uubed. This is particularly useful for vector
+    stores that can leverage uubed's compact or position-safe properties during search.
+
+    **Important Considerations:**
+    - The `return_encoded` parameter of the internal `UubedEmbeddings` wrapper is
+      set to `False`. This is because most vector stores expect numerical embeddings
+      for their internal similarity calculations, even if the underlying data might
+      be stored as uubed strings.
+    - This function modifies the `vectorstore` object in place by setting its
+      `embedding_function` attribute.
+
+    Args:
+        vectorstore (VectorStore): The base LangChain `VectorStore` instance to configure.
+                                   This object will have its `embedding_function` updated.
+        embeddings (Embeddings): The LangChain `Embeddings` model to use for generating
+                                 numerical embeddings before uubed encoding is applied.
+        method (EncodingMethod): The uubed encoding method to use for encoding query embeddings
+                                 during search operations. Defaults to "shq64".
+        search_type (str): The type of search to perform (e.g., "similarity", "mmr").
+                           This parameter is passed directly to `vectorstore.as_retriever()`
+                           when the retriever is created. Defaults to "similarity".
+        search_kwargs (Optional[Dict[str, Any]]): Additional keyword arguments to pass to
+                                                  `vectorstore.as_retriever()`. These can include
+                                                  parameters like `k` (number of results) or `filter`
+                                                  (metadata filtering). Defaults to `None`.
+
+    Returns:
+        VectorStore: The configured `VectorStore` instance, ready to be used as a retriever.
+                     Note that this is the same `vectorstore` object passed as input, but modified.
+
+    Example:
+        ```python
+        from langchain.vectorstores import Chroma
+        from langchain.embeddings import OpenAIEmbeddings
+        from uubed.integrations.langchain import create_uubed_retriever
+
+        # Initialize a base vector store (e.g., Chroma) and an embedding model
+        my_vectorstore = Chroma()
+        my_embeddings = OpenAIEmbeddings()
+
+        # Create a retriever that uses uubed encoding for queries
+        uubed_retriever = create_uubed_retriever(
+            my_vectorstore,
+            my_embeddings,
+            method="shq64",
+            search_kwargs={"k": 5} # Retrieve top 5 results
+        )
+
+        # Now, `uubed_retriever` can be used in LangChain chains or agents.
+        # When `uubed_retriever.get_relevant_documents()` is called, the query
+        # will first be embedded numerically, then uubed-encoded, and then
+        # passed to the underlying vector store's search mechanism.
+        ```
+    """
+    # Wrap the base embeddings with `UubedEmbeddings`. Crucially, `return_encoded` is set to `False`
+    # here. This is because the `VectorStore` typically expects numerical embeddings for its internal
+    # similarity calculations, even if the underlying data might be stored as uubed strings.
+    uubed_embeddings_wrapper: UubedEmbeddings = UubedEmbeddings(
+        embeddings,
+        method=method,
+        return_encoded=False  # Vector stores usually expect numerical embeddings for search
+    )
     
-    This class allows you to use any standard LangChain embedding model (e.g., OpenAIEmbeddings)
-    and automatically apply uubed encoding to the generated numerical embeddings.
-    It can either return the original numerical embeddings or the uubed-encoded strings.
+    # Assign the wrapped embeddings as the embedding function for the vector store.
+    # This modifies the `vectorstore` object in place, ensuring all subsequent embedding
+    # operations (e.g., for queries) go through the `uubed_embeddings_wrapper`.
+    vectorstore.embedding_function = uubed_embeddings_wrapper
     
-    Note: If `return_encoded` is `True`, ensure downstream LangChain components are compatible
-    with string-based embeddings, as most expect numerical vectors.
+    # Return the vector store configured as a retriever with specified search settings.
+    # `search_kwargs or {}` ensures that if `search_kwargs` is `None`, an empty dictionary is used.
+    return vectorstore.as_retriever(
+        search_type=search_type,
+        search_kwargs=search_kwargs or {}  # Ensure search_kwargs is a dict if None is passed.
+    )
+
+
+class UubedDocumentProcessor:
+    """
+    A utility class for processing documents with uubed encoding within LangChain pipelines.
+
+    This processor is designed to be used before documents are added to a vector database
+    or other storage solutions. It takes raw LangChain `Document` objects, generates their
+    numerical embeddings using a provided `Embeddings` model, and then encodes these
+    numerical embeddings into uubed strings. Optionally, it adds these uubed-encoded
+    strings to the document metadata. This prepares documents for efficient storage
+    and retrieval in systems that can leverage uubed's properties.
+
+    **Usage:**
+    ```python
+    from langchain.schema import Document
+    from langchain.embeddings import OpenAIEmbeddings
+    from uubed.integrations.langchain import UubedDocumentProcessor
+
+    # Initialize your embedding model
+    embedder = OpenAIEmbeddings()
+
+    # Initialize the document processor
+    processor = UubedDocumentProcessor(
+        embeddings=embedder,
+        method="eq64",
+        batch_size=50 # Process 50 documents at a time
+    )
+
+    # Sample documents
+    docs_to_process = [
+        Document(page_content="The quick brown fox jumps over the lazy dog."),
+        Document(page_content="Never underestimate the power of a good book."),
+        # ... more documents
+    ]
+
+    # Process the documents
+    processed_docs = processor.process(docs_to_process)
+
+    for doc in processed_docs:
+        print(f"Original Content: {doc.page_content[:30]}...")
+        print(f"Uubed Encoded: {doc.metadata.get('uubed_encoded')[:10]}...")
+        print("---")
+    ```
     """
     
     def __init__(
         self,
-        base_embeddings: Embeddings,
+        embeddings: Embeddings,
         method: EncodingMethod = "auto",
-        return_encoded: bool = False,
+        batch_size: int = 100,
         **encoder_kwargs: Any
     ):
         """
-        Initializes the UubedEmbeddings wrapper.
-        
+        Initializes the UubedDocumentProcessor.
+
         Args:
-            base_embeddings (Embeddings): The underlying LangChain `Embeddings` model to wrap.
-            method (EncodingMethod): The uubed encoding method to apply. Defaults to "auto".
-            return_encoded (bool): If `True`, `embed_documents` and `embed_query` will return
-                                   uubed-encoded strings instead of numerical embeddings.
-                                   Defaults to `False`.
-            **encoder_kwargs (Any): Additional keyword arguments to pass to the `uubed.api.encode` function.
+            embeddings (Embeddings): The LangChain `Embeddings` model to use for generating
+                                     numerical embeddings from document content. This model
+                                     should be capable of embedding text into numerical vectors.
+            method (EncodingMethod): The uubed encoding method to apply to the numerical embeddings.
+                                     Defaults to "auto".
+            batch_size (int): The number of documents to process in a single batch. This parameter
+                              influences memory usage and the efficiency of calls to the underlying
+                              embedding model. Defaults to 100.
+            **encoder_kwargs (Any): Additional keyword arguments to pass to the `UubedEncoder`
+                                    constructor. These will then be passed to `uubed.api.encode`.
         """
-        self.base_embeddings: Embeddings = base_embeddings
-        self.method: EncodingMethod = method
-        self.return_encoded: bool = return_encoded
-        self.encoder_kwargs: Dict[str, Any] = encoder_kwargs
-        # Initialize an internal UubedEncoder instance to handle the encoding logic.
+        self.embeddings: Embeddings = embeddings
+        # Initialize a `UubedEncoder` instance to handle the actual encoding of embeddings.
+        # The `add_to_metadata` and `metadata_key` for this encoder will be its defaults
+        # unless explicitly overridden via `encoder_kwargs` if `UubedEncoder` supported it.
         self.encoder: UubedEncoder = UubedEncoder(method=method, **encoder_kwargs)
+        self.batch_size: int = batch_size
     
-    def embed_documents(self, texts: List[str]) -> Union[List[List[float]], List[str]]:
+    def process(self, documents: List[Document]) -> List[Document]:
         """
-        Embeds a list of texts and optionally encodes the resulting embeddings.
-        
+        Processes a list of documents by generating numerical embeddings and applying uubed encoding.
+
+        This method iterates through the input `documents` in batches. For each batch,
+        it extracts the text content, generates numerical embeddings using the configured
+        `embeddings` model, and then uses the internal `UubedEncoder` to convert these
+        numerical embeddings into uubed strings. The uubed strings are then (optionally)
+        added to the document metadata.
+
         Args:
-            texts (List[str]): A list of text documents to embed.
-            
+            documents (List[Document]): A list of LangChain `Document` objects to process.
+
         Returns:
-            Union[List[List[float]], List[str]]: A list of numerical embeddings (if `return_encoded` is `False`)
-                                                 or a list of uubed-encoded strings (if `return_encoded` is `True`).
+            List[Document]: A new list of `Document` objects. Each document in this list
+                            will have its metadata updated (if configured in `UubedEncoder`)
+                            to include the uubed-encoded string of its embedding.
         """
-        # First, get the numerical embeddings from the base LangChain model.
-        embeddings: List[List[float]] = self.base_embeddings.embed_documents(texts)
+        processed_docs: List[Document] = []
         
-        if self.return_encoded:
-            # If `return_encoded` is True, encode each numerical embedding to a string.
-            return [self.encoder.encode_embedding(emb) for emb in embeddings]
+        # Process documents in batches for efficiency and to manage memory usage.
+        for i in range(0, len(documents), self.batch_size):
+            batch: List[Document] = documents[i:i + self.batch_size]
+            
+            # Extract page content from the batch of documents to generate embeddings.
+            texts: List[str] = [doc.page_content for doc in batch]
+            # Generate numerical embeddings for the batch of texts using the base embedding model.
+            embeddings: List[List[float]] = self.embeddings.embed_documents(texts)
+            
+            # Encode these numerical embeddings into uubed strings and integrate them back into the documents.
+            # The `encode_documents` method of `UubedEncoder` handles adding to metadata.
+            encoded_batch: List[Document] = self.encoder.encode_documents(batch, embeddings)
+            processed_docs.extend(encoded_batch)
         
-        # Otherwise, return the original numerical embeddings.
-        return embeddings
+        return processed_docs
     
-    def embed_query(self, text: str) -> Union[List[float], str]:
+    async def aprocess(self, documents: List[Document]) -> List[Document]:
         """
-        Embeds a single query text and optionally encodes the resulting embedding.
-        
+        Asynchronously processes a list of documents by generating embeddings and applying uubed encoding.
+
+        This method is the asynchronous counterpart to `process`. It performs the same
+        batch processing, numerical embedding generation, and uubed encoding, but it
+        uses the asynchronous `aembed_documents` method of the underlying `embeddings` model.
+
         Args:
-            text (str): The query text to embed.
-            
+            documents (List[Document]): A list of LangChain `Document` objects to process.
+
         Returns:
-            Union[List[float], str]: A numerical embedding (if `return_encoded` is `False`)
-                                     or a uubed-encoded string (if `return_encoded` is `True`).
+            List[Document]: A new list of `Document` objects, where each document's
+                            metadata (if configured in `UubedEncoder`) includes the
+                            uubed-encoded string of its embedding.
         """
-        # First, get the numerical embedding from the base LangChain model.
-        embedding: List[float] = self.base_embeddings.embed_query(text)
+        processed_docs: List[Document] = []
         
-        if self.return_encoded:
-            # If `return_encoded` is True, encode the numerical embedding to a string.
-            return self.encoder.encode_embedding(embedding)
+        # Process documents in batches asynchronously.
+        for i in range(0, len(documents), self.batch_size):
+            batch: List[Document] = documents[i:i + self.batch_size]
+            
+            # Extract page content for asynchronous embedding generation.
+            texts: List[str] = [doc.page_content for doc in batch]
+            # Asynchronously generate numerical embeddings for the batch.
+            embeddings: List[List[float]] = await self.embeddings.aembed_documents(texts)
+            
+            # Encode these embeddings and integrate them back into the documents.
+            encoded_batch: List[Document] = self.encoder.encode_documents(batch, embeddings)
+            processed_docs.extend(encoded_batch)
         
-        # Otherwise, return the original numerical embedding.
-        return embedding
+        return processed_docs
+
+
+def create_uubed_retriever(
+    vectorstore: VectorStore,
+    embeddings: Embeddings,
+    method: EncodingMethod = "shq64",
+    search_type: str = "similarity",
+    search_kwargs: Optional[Dict[str, Any]] = None,
+) -> VectorStore:
+    """
+    Creates a LangChain `VectorStore` configured to use uubed encoding for searches.
     
-    async def aembed_documents(self, texts: List[str]) -> Union[List[List[float]], List[str]]:
-        """
-        Asynchronously embeds a list of texts and optionally encodes the resulting embeddings.
-        
-        Args:
-            texts (List[str]): A list of text documents to embed.
-            
-        Returns:
-            Union[List[List[float]], List[str]]: A list of numerical embeddings (if `return_encoded` is `False`)
-                                                 or a list of uubed-encoded strings (if `return_encoded` is `True`).
-        """
-        # Asynchronously get numerical embeddings from the base LangChain model.
-        embeddings: List[List[float]] = await self.base_embeddings.aembed_documents(texts)
-        
-        if self.return_encoded:
-            # If `return_encoded` is True, encode each numerical embedding to a string.
-            return [self.encoder.encode_embedding(emb) for emb in embeddings]
-        
-        # Otherwise, return the original numerical embeddings.
-        return embeddings
+    This function is particularly useful for vector stores that can perform searches
+    based on string representations (e.g., by storing uubed-encoded strings directly)
+    or when uubed's position-safe properties are desired for similarity matching.
     
-    async def aembed_query(self, text: str) -> Union[List[float], str]:
-        """
-        Asynchronously embeds a single query text and optionally encodes the resulting embedding.
+    Args:
+        vectorstore (VectorStore): The base LangChain `VectorStore` instance to configure.
+        embeddings (Embeddings): The LangChain `Embeddings` model to use for generating
+                                 numerical embeddings before uubed encoding.
+        method (EncodingMethod): The uubed encoding method to use for encoding query embeddings
+                                 during search operations. Defaults to "shq64".
+        search_type (str): The type of search to perform (e.g., "similarity", "mmr").
+                           Passed to `vectorstore.as_retriever()`. Defaults to "similarity".
+        search_kwargs (Optional[Dict[str, Any]]): Additional keyword arguments to pass to
+                                                  `vectorstore.as_retriever()`. Defaults to `None`.
         
-        Args:
-            text (str): The query text to embed.
-            
-        Returns:
-            Union[List[float], str]: A numerical embedding (if `return_encoded` is `False`)
-                                     or a uubed-encoded string (if `return_encoded` is `True`).
-        """
-        # Asynchronously get the numerical embedding from the base LangChain model.
-        embedding: List[float] = await self.base_embeddings.aembed_query(text)
+    Returns:
+        VectorStore: The configured `VectorStore` instance, ready to be used as a retriever.
+                     Note: This function modifies the `vectorstore` object in place by setting
+                     its `embedding_function` attribute.
         
-        if self.return_encoded:
-            # If `return_encoded` is True, encode the numerical embedding to a string.
-            return self.encoder.encode_embedding(embedding)
-        
-        # Otherwise, return the original numerical embedding.
-        return embedding
+    Example:
+        >>> from langchain.vectorstores import Chroma
+        >>> from langchain.embeddings import OpenAIEmbeddings
+        >>> 
+        >>> # Initialize a base vector store and embedding model.
+        >>> vectorstore = Chroma()
+        >>> embeddings = OpenAIEmbeddings()
+        >>> 
+        >>> # Create a retriever that uses uubed encoding for queries.
+        >>> retriever = create_uubed_retriever(
+        ...     vectorstore,
+        ...     embeddings,
+        ...     method="shq64"
+        ... )
+    """
+    # Wrap the base embeddings with UubedEmbeddings. Crucially, `return_encoded` is False
+    # here because the vectorstore typically expects numerical embeddings for its internal
+    # similarity calculations, even if the underlying data might be stored as strings.
+    uubed_embeddings_wrapper: UubedEmbeddings = UubedEmbeddings(
+        embeddings,
+        method=method,
+        return_encoded=False # Vector stores usually expect numerical embeddings
+    )
+    
+    # Assign the wrapped embeddings as the embedding function for the vector store.
+    # This modifies the vectorstore object in place.
+    vectorstore.embedding_function = uubed_embeddings_wrapper
+    
+    # Return the vector store configured as a retriever with specified search settings.
+    return vectorstore.as_retriever(
+        search_type=search_type,
+        search_kwargs=search_kwargs or {} # Ensure search_kwargs is a dict.
+    )
 
 
 class UubedDocumentProcessor:

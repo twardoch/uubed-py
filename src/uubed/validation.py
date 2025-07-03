@@ -28,15 +28,31 @@ EmbeddingInput = Union[List[int], np.ndarray, bytes]
 def validate_encoding_method(method: str) -> str:
     """
     Validates and normalizes the provided encoding method string.
-    
+
+    This function ensures that the `method` string is a valid and recognized
+    uubed encoding method. It converts the input to lowercase and strips
+    whitespace for robust comparison.
+
     Args:
         method (str): The encoding method string to validate (e.g., "eq64", "shq64", "auto").
-        
+
     Returns:
         str: The normalized (lowercase, stripped) and validated method name.
-        
+
     Raises:
         UubedValidationError: If the method is not a string, is empty, or is not one of the recognized valid methods.
+
+    Example:
+        >>> from uubed.validation import validate_encoding_method
+        >>> validate_encoding_method("EQ64 ")
+        'eq64'
+        >>> validate_encoding_method("auto")
+        'auto'
+        >>> try:
+        ...     validate_encoding_method("invalid_method")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Unknown encoding method: 'invalid_method'. Expected one of: auto, eq64, mq64, shq64, t8q64, zoq64.
     """
     if not isinstance(method, str):
         raise validation_error(
@@ -60,27 +76,70 @@ def validate_encoding_method(method: str) -> str:
     return method
 
 
-def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarray:
+def validate_embedding_input(
+    embedding: EmbeddingInput,
+    method: str
+) -> np.ndarray:
     """
     Validates and normalizes an embedding input into a NumPy array of `uint8`.
-    
-    This function handles various input types (list of ints, NumPy array, bytes)
-    and performs necessary type conversions and value range checks.
-    
+
+    This function serves as a crucial preprocessing step for all encoding operations.
+    It accepts various input types for embeddings (list of integers, NumPy array,
+    or bytes) and converts them into a standardized `np.ndarray` with `dtype=np.uint8`.
+    It also performs comprehensive checks for `None` or empty inputs, unsupported types
+    or dtypes, and ensures that numerical values fall within the expected ranges.
+
     Args:
-        embedding (EmbeddingInput): The embedding to validate. Can be a list of integers,
-                                    a NumPy array (int or float), or bytes.
-        method (str): The encoding method. Used for method-specific dimension validation.
-        
+        embedding (EmbeddingInput): The embedding to validate and normalize. Supported types are:
+                                    - `List[int]`: A list of integers, expected to be in the range 0-255.
+                                    - `np.ndarray`: A NumPy array. Supported dtypes are `uint8`, `int` (values 0-255),
+                                      `float32`, or `float64` (values in [0, 1] or [0, 255]).
+                                    - `bytes`: A raw byte sequence.
+        method (str): The encoding method being used (e.g., "eq64", "shq64"). This is used
+                      for method-specific dimension validation, ensuring the embedding's size
+                      is appropriate for the chosen encoding algorithm.
+
     Returns:
         np.ndarray: The normalized embedding as a NumPy array with `dtype=np.uint8`.
-        
+                    Float values are scaled to 0-255 and converted to `uint8`.
+
     Raises:
         UubedValidationError: If the embedding is `None`, empty, has an unsupported type or dtype,
                               or contains values outside the expected range (0-255 for integers,
-                              [0, 1] or [0, 255] for floats).
+                              [0, 1] or [0, 255] for floats). Also raised if the embedding's size
+                              does not meet the requirements for the specified `method`.
+
+    Example:
+        >>> from uubed.validation import validate_embedding_input
+        >>> import numpy as np
+
+        >>> # Valid list of integers
+        >>> validate_embedding_input([10, 200, 50], "eq64")
+        array([ 10, 200,  50], dtype=uint8)
+
+        >>> # Valid NumPy array (float, normalized)
+        >>> validate_embedding_input(np.array([0.1, 0.5, 0.9], dtype=np.float32), "shq64")
+        array([ 25, 127, 229], dtype=uint8)
+
+        >>> # Valid bytes input
+        >>> validate_embedding_input(b'\x01\x02\xff', "zoq64")
+        array([  1,   2, 255], dtype=uint8)
+
+        >>> # Invalid input: None
+        >>> try:
+        ...     validate_embedding_input(None, "eq64")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Embedding cannot be None
+
+        >>> # Invalid input: out-of-range integer
+        >>> try:
+        ...     validate_embedding_input([10, 300, 50], "eq64")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Cannot convert embedding to uint8 array: Python int too large to convert to C unsigned char. Values must be in range 0-255.
     """
-    # Check for None or empty input, which are invalid.
+    # Step 1: Check for None or empty input, which are considered invalid states for an embedding.
     if embedding is None:
         raise validation_error(
             "Embedding cannot be None",
@@ -89,7 +148,7 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
             received="None"
         )
     
-    # Convert various input types to a NumPy array.
+    # Step 2: Convert various input types to a NumPy array for consistent processing.
     arr: np.ndarray
     if isinstance(embedding, (list, tuple)):
         if len(embedding) == 0:
@@ -100,7 +159,8 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
                 received="empty list/tuple"
             )
         try:
-            # Attempt to convert list/tuple to uint8 array. This will fail if values are out of range.
+            # Attempt to convert list/tuple to uint8 array. This will raise an error
+            # if values are outside the 0-255 range, as uint8 cannot represent them.
             arr = np.array(embedding, dtype=np.uint8)
         except (ValueError, OverflowError) as e:
             raise validation_error(
@@ -117,7 +177,7 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
                 expected="non-empty bytes",
                 received="empty bytes"
             )
-        # Convert bytes directly to a uint8 NumPy array.
+        # Convert bytes directly to a uint8 NumPy array. This is a direct and efficient conversion.
         arr = np.frombuffer(embedding, dtype=np.uint8)
     elif isinstance(embedding, np.ndarray):
         if embedding.size == 0:
@@ -128,7 +188,7 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
                 received="empty array"
             )
         
-        # Handle different NumPy array dtypes.
+        # Handle different NumPy array dtypes and convert to uint8 if necessary.
         if embedding.dtype != np.uint8:
             if embedding.dtype in [np.float32, np.float64]:
                 # Check if float values are within expected ranges ([0, 1] or [0, 255]).
@@ -146,7 +206,7 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
                         received=f"range [{embedding.min():.3f}, {embedding.max():.3f}]"
                     )
             elif np.issubdtype(embedding.dtype, np.integer):
-                # Check if integer values are within the 0-255 range.
+                # Check if integer values are within the 0-255 range for uint8 conversion.
                 if np.any((embedding < 0) | (embedding > 255)):
                     raise validation_error(
                         f"Integer embedding values must be in range [0, 255], got range [{embedding.min()}, {embedding.max()}]",
@@ -164,9 +224,10 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
                     received=f"dtype {embedding.dtype}"
                 )
         else:
-            # If already uint8, no conversion needed.
+            # If the array is already uint8, no conversion is needed.
             arr = embedding
     else:
+        # If the input type is not recognized, raise an error.
         raise validation_error(
             f"Unsupported embedding type: {type(embedding).__name__}",
             parameter="embedding",
@@ -174,31 +235,63 @@ def validate_embedding_input(embedding: EmbeddingInput, method: str) -> np.ndarr
             received=f"{type(embedding).__name__}"
         )
     
-    # Perform method-specific dimension validation.
+    # Step 3: Perform method-specific dimension validation.
+    # This ensures that the embedding's size is appropriate for the chosen encoding method.
     _validate_embedding_dimensions(arr, method)
     
     return arr
 
 
-def _validate_embedding_dimensions(embedding: np.ndarray, method: str) -> None:
+def _validate_embedding_dimensions(
+    embedding: np.ndarray,
+    method: str
+) -> None:
     """
-    Validates embedding dimensions against method-specific requirements.
-    
+    Validates the dimensions (size) of an embedding against method-specific requirements.
+
+    Each encoding method may have certain expectations or limitations regarding the
+    size of the input embedding. This internal helper function enforces these rules
+    to ensure compatibility and prevent errors during encoding.
+
     Args:
-        embedding (np.ndarray): The NumPy array representing the embedding.
-        method (str): The encoding method being used.
-        
+        embedding (np.ndarray): The NumPy array representing the embedding, already
+                                normalized to `dtype=np.uint8` by `validate_embedding_input`.
+        method (str): The encoding method being used (e.g., "eq64", "shq64").
+
     Raises:
         UubedValidationError: If the embedding size does not meet the requirements
-                              for the specified encoding method.
+                              for the specified encoding method (e.g., too small, too large).
+
+    Example:
+        >>> from uubed.validation import _validate_embedding_dimensions
+        >>> import numpy as np
+
+        >>> # Valid case for eq64
+        >>> _validate_embedding_dimensions(np.array([1, 2, 3], dtype=np.uint8), "eq64") # No error
+
+        >>> # Invalid case for zoq64 (too small)
+        >>> try:
+        ...     _validate_embedding_dimensions(np.array([1], dtype=np.uint8), "zoq64")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Embedding size (1) is too small for the 'zoq64' method.
+
+        >>> # Invalid case for shq64 (too small)
+        >>> try:
+        ...     _validate_embedding_dimensions(np.array(range(10), dtype=np.uint8), "shq64")
+        ... except Exception as e:
+        ...     print(e)
+        # Expected: Embedding size (10) is too small for the 'shq64' method.
     """
     if method == 'auto':
-        # Dimension validation is skipped for 'auto' method as it adapts to input.
+        # Dimension validation is skipped for 'auto' method as it dynamically adapts to input.
         return
     
     size: int = embedding.size
     
-    # Define method-specific dimension requirements (min_size, max_size, and descriptive constraints).
+    # Define method-specific dimension requirements.
+    # Each entry specifies: min_size, max_size (arbitrary upper limits to catch extreme inputs),
+    # and descriptive constraints for better error messages.
     dimension_requirements: Dict[str, Dict[str, Any]] = {
         'eq64': {
             'min_size': 1,
@@ -206,22 +299,22 @@ def _validate_embedding_dimensions(embedding: np.ndarray, method: str) -> None:
             'constraints': "any positive size"
         },
         'shq64': {
-            'min_size': 32,  # Minimum size for meaningful SimHash operations.
-            'max_size': 50000, # Arbitrary upper limit.
+            'min_size': 32,  # Minimum size for meaningful SimHash operations (e.g., 32 planes = 4 bytes).
+            'max_size': 50000, # Arbitrary upper limit to prevent very large, potentially inefficient inputs.
             'constraints': "typically 128, 256, 512, 768, 1024, or 1536"
         },
         't8q64': {
-            'min_size': 8,   # Must be at least 'k' (default k=8).
+            'min_size': 8,   # Must be at least 'k' (default k=8). Actual check for k vs. size is in api.py.
             'max_size': 50000, # Arbitrary upper limit.
             'constraints': "must be larger than k parameter"
         },
         'zoq64': {
-            'min_size': 2,   # Minimum for Z-order curve (e.g., 2D point).
+            'min_size': 2,   # Minimum for Z-order curve (e.g., 2D point). Needs at least 2 dimensions.
             'max_size': 10000, # Arbitrary upper limit.
             'constraints': "preferably powers of 2 or multiples thereof"
         },
         'mq64': {
-            'min_size': 1, # Matryoshka can handle various sizes.
+            'min_size': 1, # Matryoshka can handle various sizes, as it's hierarchical.
             'max_size': 100000, # Arbitrary upper limit.
             'constraints': "any positive size, typically with hierarchical structure"
         }
@@ -229,7 +322,7 @@ def _validate_embedding_dimensions(embedding: np.ndarray, method: str) -> None:
     
     if method in dimension_requirements:
         req = dimension_requirements[method]
-        # Check if embedding size is below the minimum requirement.
+        # Check if embedding size is below the minimum requirement for the method.
         if size < req['min_size']:
             raise validation_error(
                 f"Embedding size ({size}) is too small for the '{method}' method.",
@@ -237,7 +330,7 @@ def _validate_embedding_dimensions(embedding: np.ndarray, method: str) -> None:
                 expected=f"size >= {req['min_size']} ({req['constraints']})",
                 received=f"size {size}"
             )
-        # Check if embedding size is above the maximum allowed size.
+        # Check if embedding size is above the maximum allowed size for the method.
         if size > req['max_size']:
             raise validation_error(
                 f"Embedding size ({size}) is too large for the '{method}' method.",
