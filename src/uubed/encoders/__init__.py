@@ -9,6 +9,17 @@ from .shq64 import simhash_q64
 from .t8q64 import top_k_q64
 from .zoq64 import z_order_q64
 
+
+def get_available_encoders() -> list[str]:
+    """
+    Get a list of available encoding methods.
+    
+    Returns:
+        List of available encoding method names.
+    """
+    return ["eq64", "shq64", "t8q64", "zoq64", "mq64"]
+
+
 __all__ = [
     "q64_encode",
     "q64_decode",
@@ -17,4 +28,5 @@ __all__ = [
     "simhash_q64",
     "top_k_q64",
     "z_order_q64",
+    "get_available_encoders",
 ]

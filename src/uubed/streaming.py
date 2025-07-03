@@ -109,10 +109,10 @@ def encode_stream(
                         except Exception as e:
                             # Catch any encoding errors and re-raise with context about the failed embedding.
                             # Note: processed_count is incremented before encode, so it's the *next* embedding number.
-                    raise UubedEncodingError(
-                        f"Failed to encode embedding #{total_processed}: {str(e)}",
-                        suggestion="Check that all embeddings in the stream are valid and conform to expected formats."
-                    ) from e
+                            raise UubedEncodingError(
+                                f"Failed to encode embedding #{total_processed}: {str(e)}",
+                                suggestion="Check that all embeddings in the stream are valid and conform to expected formats."
+                            ) from e
                     batch = [] # Clear the batch after processing.
             
             # After the loop, process any remaining embeddings in the last (possibly incomplete) batch.
