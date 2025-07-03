@@ -1,5 +1,8 @@
 ## Python Implementation Tasks
 
+### High Priority
+- [ ] Fix test environment: `ModuleNotFoundError: No module named 'uubed'` when running tests.
+
 ### Advanced Configuration
 - [ ] Implement plugin system architecture
 - [ ] Add configuration schema validation
