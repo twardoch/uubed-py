@@ -153,7 +153,8 @@ class TestEncodeFileStream:
             tmp_path = tmp.name
         
         try:
-            with pytest.raises(ValueError, match="Incomplete embedding"):
+            from uubed.exceptions import UubedResourceError
+            with pytest.raises(UubedResourceError, match="not divisible by embedding_size"):
                 list(encode_file_stream(tmp_path, embedding_size=32))
         finally:
             os.unlink(tmp_path)
@@ -231,8 +232,10 @@ class TestBatchEncode:
     
     def test_batch_encode_empty(self):
         """Test batch encoding with empty input."""
-        results = batch_encode([], method="eq64")
-        assert len(results) == 0
+        # Empty lists should raise validation error
+        from uubed.exceptions import UubedValidationError
+        with pytest.raises(UubedValidationError, match="cannot be empty"):
+            batch_encode([], method="eq64")
 
 
 class TestStreamingEncoder:

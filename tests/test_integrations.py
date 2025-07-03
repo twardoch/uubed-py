@@ -119,7 +119,7 @@ class TestVectorDBConnectors:
             assert hasattr(connector, "encode_vector")
         
         # Test invalid connector type
-        with pytest.raises(ValueError, match="Unknown database type"):
+        with pytest.raises(ValueError, match="Unknown or unsupported database type"):
             get_connector("invalid_db")
     
     def test_mock_chroma_connector(self):
@@ -161,7 +161,10 @@ class TestVectorDBConnectors:
                 }
         
         # Test with mock
-        with patch('uubed.integrations.vectordb.chromadb') as mock_chromadb:
+        # Create a mock module for chromadb since it doesn't exist as an attribute
+        import sys
+        mock_chromadb = type(sys)('mock_chromadb')
+        with patch.dict('sys.modules', {'chromadb': mock_chromadb}):
             mock_chromadb.Client = MockChromaClient
             mock_chromadb.PersistentClient = MockChromaClient
             
@@ -172,13 +175,13 @@ class TestVectorDBConnectors:
             assert connector.create_collection("test_collection")
             
             # Test vector insertion
-            vectors = [np.random.randn(128) for _ in range(3)]
+            vectors = [np.random.rand(128) for _ in range(3)]  # Use rand() for [0,1] range
             documents = ["Doc 1", "Doc 2", "Doc 3"]
             
             connector.insert_vectors(vectors, documents)
             
             # Test search
-            query_vector = np.random.randn(128)
+            query_vector = np.random.rand(128)  # Use rand() for [0,1] range
             results = connector.search(query_vector, top_k=2)
             
             assert len(results) <= 2
@@ -189,7 +192,8 @@ class TestVectorDBConnectors:
         """Test that vector encoding is consistent across connectors."""
         from uubed.integrations.vectordb import get_connector
         
-        test_vector = np.random.randn(64)
+        # Use normalized float values in [0, 1] range
+        test_vector = np.random.rand(64)
         
         # Test that all connectors encode the same vector consistently
         connectors = []
@@ -258,7 +262,8 @@ class TestMatryoshkaIntegration:
         from uubed.matryoshka import MatryoshkaEncoder
         
         encoder = MatryoshkaEncoder([32, 64, 128])
-        embedding = np.random.randn(128)
+        # Use normalized float values in [0, 1] range
+        embedding = np.random.rand(128)
         
         # Test encoding all levels
         encoded_levels = encoder.encode_all_levels(embedding)

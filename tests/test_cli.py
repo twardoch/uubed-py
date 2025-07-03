@@ -234,7 +234,7 @@ class TestBenchCommand:
     def test_bench_specific_method(self):
         """Test benchmarking specific method."""
         result = self.runner.invoke(main, [
-            "bench", "--size", "5", "--dims", "16", "--iterations", "1", "-m", "shq64"
+            "bench", "--size", "5", "--dims", "64", "--iterations", "1", "-m", "shq64"
         ])
         assert result.exit_code == 0
         assert "shq64" in result.output

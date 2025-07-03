@@ -216,7 +216,7 @@ class TestValidationFunctions:
             # Invalid type
             with pytest.raises(UubedValidationError) as exc_info:
                 validate_file_path(123)
-            assert "must be string or Path" in str(exc_info.value)
+            assert "File path must be a string or Path object" in str(exc_info.value)
             
         finally:
             # Clean up
@@ -230,7 +230,7 @@ class TestValidationFunctions:
         # Excessive memory usage
         with pytest.raises(UubedResourceError) as exc_info:
             validate_memory_usage(2 * 1024 * 1024 * 1024, "test operation")  # 2GB
-        assert "memory usage too high" in str(exc_info.value)
+        assert "memory usage" in str(exc_info.value) and "too high" in str(exc_info.value)
     
     def test_estimate_memory_usage(self):
         """Test memory usage estimation."""
@@ -261,11 +261,12 @@ class TestEnhancedAPIErrorHandling:
         # Invalid k parameter for t8q64
         with pytest.raises(UubedValidationError) as exc_info:
             encode([1, 2, 3], method="t8q64", k=10)  # k >= embedding size
-        assert "must be smaller than embedding size" in str(exc_info.value)
+        assert "too small for the" in str(exc_info.value)
         
-        # Invalid planes parameter for shq64
+        # Invalid planes parameter for shq64 (use embedding large enough for shq64)
+        large_embedding = list(range(64))  # 64 elements, large enough for shq64
         with pytest.raises(UubedValidationError) as exc_info:
-            encode([1, 2, 3], method="shq64", planes=63)  # not multiple of 8
+            encode(large_embedding, method="shq64", planes=63)  # not multiple of 8
         assert "multiple of 8" in str(exc_info.value)
     
     def test_decode_validation_errors(self):
@@ -283,7 +284,7 @@ class TestEnhancedAPIErrorHandling:
         # Unsupported method
         with pytest.raises(UubedDecodingError) as exc_info:
             decode("test", method="shq64")
-        assert "not supported for shq64" in str(exc_info.value)
+        assert "not supported for" in str(exc_info.value) and "shq64" in str(exc_info.value)
     
     def test_auto_method_selection(self):
         """Test automatic method selection with validation."""

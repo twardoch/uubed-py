@@ -830,7 +830,7 @@ def validate_memory_usage(
     
     # Compare the estimated memory usage against the maximum allowed. If it exceeds, raise an error.
     if estimated_bytes > max_bytes:
-        raise resource_error(
+        raise UubedResourceError(
             f"Estimated memory usage ({estimated_bytes // (1024*1024)} MB) is too high for {operation}.",
             resource_type="memory",
             available=f"{max_bytes // (1024*1024)} MB",

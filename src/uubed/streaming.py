@@ -238,7 +238,7 @@ def encode_file_stream(
         file_size: int = input_path.stat().st_size
         if file_size % embedding_size != 0:
             remaining_bytes: int = file_size % embedding_size
-            raise resource_error(
+            raise UubedResourceError(
                 f"File size ({file_size} bytes) not divisible by embedding_size ({embedding_size} bytes).",
                 resource_type="file",
                 available=f"{file_size} bytes",

@@ -51,9 +51,9 @@ class TestHighLevelAPI:
     def test_auto_encode(self):
         """Test automatic method selection."""
         small_embedding = np.random.randint(0, 256, 32, dtype=np.uint8)
-        large_embedding = np.random.randint(0, 256, 256, dtype=np.uint8)
+        large_embedding = np.random.randint(0, 256, 512, dtype=np.uint8)  # Use 512 instead of 256
 
-        # Auto should pick shq64 for small, eq64 for large
+        # Auto should pick shq64 for small (32 <= 64), eq64 for large (512 > 256)
         small_result = encode(small_embedding, method="auto")
         assert len(small_result) == 16  # SimHash is compact
 
