@@ -2,7 +2,7 @@
 # this_file: src/uubed/streaming.py
 """Streaming API for encoding large datasets efficiently with comprehensive validation."""
 
-from typing import Iterator, Union, List, Optional, BinaryIO, Iterable, Any
+from typing import Iterator, Union, List, Optional, BinaryIO, Iterable, Any, Dict
 import numpy as np
 from pathlib import Path
 

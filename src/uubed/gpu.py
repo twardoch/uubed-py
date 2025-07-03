@@ -11,8 +11,9 @@ GPU is not available or for methods that do not significantly benefit from GPU.
 Requires: `pip install cupy-cuda11x` (or appropriate CUDA version for your system).
 """
 
-from typing import Union, List, Optional, Dict, Any, Iterator
+from typing import Union, List, Optional, Dict, Any, Iterator, Iterable
 import numpy as np
+import struct
 
 try:
     import cupy as cp
@@ -21,7 +22,7 @@ try:
 except ImportError:
     # If CuPy is not installed, set GPU_AVAILABLE to False and define dummy types.
     cp = None
-    CupyArray = type(None)  # type: ignore # Dummy type for type hints when CuPy is absent.
+    CupyArray = Any  # type: ignore # Dummy type for type hints when CuPy is absent.
     GPU_AVAILABLE: bool = False
 
 from .api import encode as cpu_encode
@@ -299,7 +300,6 @@ class GPUEncoder:
                     result |= bit << (j * 2 + bit_pos)
             
             # Pack the 32-bit integer result into 4 bytes.
-            import struct
             packed: bytes = struct.pack(">I", result) # '>I' for big-endian unsigned int.
             # Encode the packed bytes using the CPU-based q64 encoder.
             encoded: str = cpu_q64_encode(packed)
