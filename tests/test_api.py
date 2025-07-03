@@ -4,6 +4,7 @@
 import pytest
 import numpy as np
 from uubed.api import encode, decode, EncodingMethod
+from uubed.exceptions import UubedValidationError, UubedDecodingError
 
 
 class TestEncodeDecode:
@@ -66,7 +67,7 @@ class TestEncodeDecode:
     
     def test_invalid_input_values(self):
         """Test validation of input values."""
-        with pytest.raises(ValueError, match="must be in range 0-255"):
+        with pytest.raises(UubedValidationError, match="Values must be in range 0-255"):
             encode([0, 100, 300, 50], method="eq64")
     
     def test_decode_invalid_method(self):
@@ -74,7 +75,7 @@ class TestEncodeDecode:
         data = np.random.randint(0, 256, 32, dtype=np.uint8)
         encoded = encode(data, method="shq64")
         
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(UubedDecodingError, match="not supported for.*shq64"):
             decode(encoded, method="shq64")
     
     def test_method_specific_parameters(self):
@@ -97,13 +98,13 @@ class TestInputValidation:
     
     def test_empty_input(self):
         """Test handling of empty input."""
-        with pytest.raises(ValueError):
+        with pytest.raises(UubedValidationError, match="cannot be empty"):
             encode([], method="eq64")
     
     def test_invalid_method(self):
         """Test handling of invalid encoding method."""
         data = [1, 2, 3, 4, 5]
-        with pytest.raises(ValueError, match="Unknown encoding method"):
+        with pytest.raises(UubedValidationError, match="Unknown encoding method"):
             encode(data, method="invalid_method")
     
     def test_decode_auto_detection(self):
@@ -117,7 +118,7 @@ class TestInputValidation:
     
     def test_decode_auto_detection_failure(self):
         """Test decode fails when method cannot be auto-detected."""
-        with pytest.raises(ValueError, match="Cannot auto-detect"):
+        with pytest.raises(UubedDecodingError, match="Cannot auto-detect"):
             decode("SomeRandomString")
 
 
@@ -126,8 +127,8 @@ class TestDataTypes:
     
     def test_numpy_float_to_uint8(self):
         """Test conversion from float arrays."""
-        # Test normalized float data [-1, 1]
-        float_data = np.random.randn(32)
+        # Test normalized float data [0, 1] - validation requires this range
+        float_data = np.random.rand(32)  # Changed from randn to rand for [0,1] range
         encoded = encode(float_data, method="eq64")
         assert isinstance(encoded, str)
     
