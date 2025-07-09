@@ -1,0 +1,1167 @@
+{
+  "timestamp": 1751563022.490201,
+  "config": {
+    "embedding_sizes": [
+      32,
+      128,
+      256,
+      512,
+      768,
+      1024
+    ],
+    "methods": [
+      "eq64",
+      "shq64",
+      "t8q64",
+      "zoq64"
+    ],
+    "iterations": 100,
+    "native_available": false
+  },
+  "summary": {
+    "encode": {
+      "eq64": {
+        "avg_time_ms": 1.0837832259130664,
+        "avg_throughput": 3393.978487133052,
+        "avg_memory_peak_mb": 0.023227691650390625,
+        "data_points": 6
+      },
+      "shq64": {
+        "avg_time_ms": 0.8001609472557902,
+        "avg_throughput": 1555.2069322125199,
+        "avg_memory_peak_mb": 0.24469916025797525,
+        "data_points": 6
+      },
+      "t8q64": {
+        "avg_time_ms": 0.11271436941266678,
+        "avg_throughput": 8936.36348429109,
+        "avg_memory_peak_mb": 0.02384217580159505,
+        "data_points": 6
+      },
+      "zoq64": {
+        "avg_time_ms": 0.14523460636458668,
+        "avg_throughput": 7115.135889718141,
+        "avg_memory_peak_mb": 0.018682320912679035,
+        "data_points": 6
+      }
+    },
+    "validation": {
+      "input_validation": {
+        "avg_time_ms": 0.005057028611190617,
+        "avg_throughput": 197744.58024364666,
+        "avg_memory_peak_mb": 0.0050506591796875,
+        "data_points": 1
+      },
+      "method_validation": {
+        "avg_time_ms": 0.0031933520222082734,
+        "avg_throughput": 313150.56813200255,
+        "avg_memory_peak_mb": 0.004460334777832031,
+        "data_points": 1
+      }
+    },
+    "batch_encode": {
+      "eq64": {
+        "avg_time_ms": 1580.8228821191005,
+        "avg_throughput": 632.5819364782317,
+        "avg_memory_peak_mb": 1.047286033630371,
+        "data_points": 1
+      }
+    },
+    "stream_encode": {
+      "eq64_batch_100": {
+        "avg_time_ms": 1528.8374096597545,
+        "avg_throughput": 654.0917913714263,
+        "avg_memory_peak_mb": 1.0416975021362305,
+        "data_points": 1
+      },
+      "eq64_batch_500": {
+        "avg_time_ms": 1297.122437711223,
+        "avg_throughput": 770.9372461126363,
+        "avg_memory_peak_mb": 1.0447721481323242,
+        "data_points": 1
+      },
+      "eq64_batch_1000": {
+        "avg_time_ms": 1231.6650779225165,
+        "avg_throughput": 811.9090310547147,
+        "avg_memory_peak_mb": 1.0491971969604492,
+        "data_points": 1
+      }
+    }
+  },
+  "detailed_results": [
+    {
+      "operation": "encode",
+      "method": "eq64",
+      "input_size": 32,
+      "iterations": 100,
+      "avg_time_ms": 0.08565237687435001,
+      "throughput_ops_per_sec": 11675.099238249699,
+      "memory_peak_mb": 0.01780414581298828,
+      "cpu_percent": 96.1
+    },
+    {
+      "operation": "encode",
+      "method": "eq64",
+      "input_size": 128,
+      "iterations": 100,
+      "avg_time_ms": 0.19705086306203157,
+      "throughput_ops_per_sec": 5074.831870618096,
+      "memory_peak_mb": 0.016386985778808594,
+      "cpu_percent": 99.9
+    },
+    {
+      "operation": "encode",
+      "method": "eq64",
+      "input_size": 256,
+      "iterations": 100,
+      "avg_time_ms": 0.5367154313717037,
+      "throughput_ops_per_sec": 1863.1847372904158,
+      "memory_peak_mb": 0.018729209899902344,
+      "cpu_percent": 99.9
+    },
+    {
+      "operation": "encode",
+      "method": "eq64",
+      "input_size": 512,
+      "iterations": 100,
+      "avg_time_ms": 1.1985215020831674,
+      "throughput_ops_per_sec": 834.3613345792176,
+      "memory_peak_mb": 0.023879051208496094,
+      "cpu_percent": 99.6
+    },
+    {
+      "operation": "encode",
+      "method": "eq64",
+      "input_size": 768,
+      "iterations": 100,
+      "avg_time_ms": 1.8758491397602484,
+      "throughput_ops_per_sec": 533.0919095806445,
+      "memory_peak_mb": 0.028296470642089844,
+      "cpu_percent": 99.7
+    },
+    {
+      "operation": "encode",
+      "method": "eq64",
+      "input_size": 1024,
+      "iterations": 100,
+      "avg_time_ms": 2.6089100423268974,
+      "throughput_ops_per_sec": 383.3018324802399,
+      "memory_peak_mb": 0.034270286560058594,
+      "cpu_percent": 99.4
+    },
+    {
+      "operation": "encode",
+      "method": "shq64",
+      "input_size": 32,
+      "iterations": 100,
+      "avg_time_ms": 0.37875536014325917,
+      "throughput_ops_per_sec": 2640.226661404246,
+      "memory_peak_mb": 0.03328514099121094,
+      "cpu_percent": 97.2
+    },
+    {
+      "operation": "encode",
+      "method": "shq64",
+      "input_size": 128,
+      "iterations": 100,
+      "avg_time_ms": 0.45644863799680024,
+      "throughput_ops_per_sec": 2190.8269994816155,
+      "memory_peak_mb": 0.08055877685546875,
+      "cpu_percent": 99.8
+    },
+    {
+      "operation": "encode",
+      "method": "shq64",
+      "input_size": 256,
+      "iterations": 100,
+      "avg_time_ms": 0.5846995784668252,
+      "throughput_ops_per_sec": 1710.2800084483697,
+      "memory_peak_mb": 0.1448507308959961,
+      "cpu_percent": 99.6
+    },
+    {
+      "operation": "encode",
+      "method": "shq64",
+      "input_size": 512,
+      "iterations": 100,
+      "avg_time_ms": 0.8515879983315244,
+      "throughput_ops_per_sec": 1174.2767652424084,
+      "memory_peak_mb": 0.27402400970458984,
+      "cpu_percent": 102.4
+    },
+    {
+      "operation": "encode",
+      "method": "shq64",
+      "input_size": 768,
+      "iterations": 100,
+      "avg_time_ms": 1.0805256507592276,
+      "throughput_ops_per_sec": 925.4754843601847,
+      "memory_peak_mb": 0.4031667709350586,
+      "cpu_percent": 101.8
+    },
+    {
+      "operation": "encode",
+      "method": "shq64",
+      "input_size": 1024,
+      "iterations": 100,
+      "avg_time_ms": 1.4489484578371048,
+      "throughput_ops_per_sec": 690.1556743382953,
+      "memory_peak_mb": 0.5323095321655273,
+      "cpu_percent": 100.5
+    },
+    {
+      "operation": "encode",
+      "method": "t8q64",
+      "input_size": 32,
+      "iterations": 100,
+      "avg_time_ms": 0.1028562942519784,
+      "throughput_ops_per_sec": 9722.302434406103,
+      "memory_peak_mb": 0.020216941833496094,
+      "cpu_percent": 97.9
+    },
+    {
+      "operation": "encode",
+      "method": "t8q64",
+      "input_size": 128,
+      "iterations": 100,
+      "avg_time_ms": 0.1015753363026306,
+      "throughput_ops_per_sec": 9844.909565651145,
+      "memory_peak_mb": 0.021033287048339844,
+      "cpu_percent": 99.9
+    },
+    {
+      "operation": "encode",
+      "method": "t8q64",
+      "input_size": 256,
+      "iterations": 100,
+      "avg_time_ms": 0.10843505966477096,
+      "throughput_ops_per_sec": 9222.109556554116,
+      "memory_peak_mb": 0.022154808044433594,
+      "cpu_percent": 99.3
+    },
+    {
+      "operation": "encode",
+      "method": "t8q64",
+      "input_size": 512,
+      "iterations": 100,
+      "avg_time_ms": 0.11487819836474955,
+      "throughput_ops_per_sec": 8704.871892444742,
+      "memory_peak_mb": 0.024352073669433594,
+      "cpu_percent": 99.7
+    },
+    {
+      "operation": "encode",
+      "method": "t8q64",
+      "input_size": 768,
+      "iterations": 100,
+      "avg_time_ms": 0.11890276742633432,
+      "throughput_ops_per_sec": 8410.233181658665,
+      "memory_peak_mb": 0.026549339294433594,
+      "cpu_percent": 99.9
+    },
+    {
+      "operation": "encode",
+      "method": "t8q64",
+      "input_size": 1024,
+      "iterations": 100,
+      "avg_time_ms": 0.129638560465537,
+      "throughput_ops_per_sec": 7713.754275031764,
+      "memory_peak_mb": 0.028746604919433594,
+      "cpu_percent": 99.7
+    },
+    {
+      "operation": "encode",
+      "method": "zoq64",
+      "input_size": 32,
+      "iterations": 100,
+      "avg_time_ms": 0.10784450452774763,
+      "throughput_ops_per_sec": 9272.609711352581,
+      "memory_peak_mb": 0.015862464904785156,
+      "cpu_percent": 100.0
+    },
+    {
+      "operation": "encode",
+      "method": "zoq64",
+      "input_size": 128,
+      "iterations": 100,
+      "avg_time_ms": 0.13277561985887587,
+      "throughput_ops_per_sec": 7531.503155947431,
+      "memory_peak_mb": 0.015699386596679688,
+      "cpu_percent": 99.6
+    },
+    {
+      "operation": "encode",
+      "method": "zoq64",
+      "input_size": 256,
+      "iterations": 100,
+      "avg_time_ms": 0.1248448441037908,
+      "throughput_ops_per_sec": 8009.942318231752,
+      "memory_peak_mb": 0.016570091247558594,
+      "cpu_percent": 100.0
+    },
+    {
+      "operation": "encode",
+      "method": "zoq64",
+      "input_size": 512,
+      "iterations": 100,
+      "avg_time_ms": 0.15329770918469876,
+      "throughput_ops_per_sec": 6523.2546873558495,
+      "memory_peak_mb": 0.018736839294433594,
+      "cpu_percent": 99.7
+    },
+    {
+      "operation": "encode",
+      "method": "zoq64",
+      "input_size": 768,
+      "iterations": 100,
+      "avg_time_ms": 0.17092159716412425,
+      "throughput_ops_per_sec": 5850.635710124852,
+      "memory_peak_mb": 0.021574974060058594,
+      "cpu_percent": 99.7
+    },
+    {
+      "operation": "encode",
+      "method": "zoq64",
+      "input_size": 1024,
+      "iterations": 100,
+      "avg_time_ms": 0.18172336334828287,
+      "throughput_ops_per_sec": 5502.869755296377,
+      "memory_peak_mb": 0.023650169372558594,
+      "cpu_percent": 99.7
+    },
+    {
+      "operation": "validation",
+      "method": "input_validation",
+      "input_size": 512,
+      "iterations": 100,
+      "avg_time_ms": 0.005057028611190617,
+      "throughput_ops_per_sec": 197744.58024364666,
+      "memory_peak_mb": 0.0050506591796875,
+      "cpu_percent": 99.9
+    },
+    {
+      "operation": "validation",
+      "method": "method_validation",
+      "input_size": 0,
+      "iterations": 100,
+      "avg_time_ms": 0.0031933520222082734,
+      "throughput_ops_per_sec": 313150.56813200255,
+      "memory_peak_mb": 0.004460334777832031,
+      "cpu_percent": 99.5
+    },
+    {
+      "operation": "batch_encode",
+      "method": "eq64",
+      "input_size": 512000,
+      "iterations": 100,
+      "avg_time_ms": 1580.8228821191005,
+      "throughput_ops_per_sec": 632.5819364782317,
+      "memory_peak_mb": 1.047286033630371,
+      "cpu_percent": 97.0
+    },
+    {
+      "operation": "stream_encode",
+      "method": "eq64_batch_100",
+      "input_size": 512000,
+      "iterations": 100,
+      "avg_time_ms": 1528.8374096597545,
+      "throughput_ops_per_sec": 654.0917913714263,
+      "memory_peak_mb": 1.0416975021362305,
+      "cpu_percent": 98.9
+    },
+    {
+      "operation": "stream_encode",
+      "method": "eq64_batch_500",
+      "input_size": 512000,
+      "iterations": 100,
+      "avg_time_ms": 1297.122437711223,
+      "throughput_ops_per_sec": 770.9372461126363,
+      "memory_peak_mb": 1.0447721481323242,
+      "cpu_percent": 99.1
+    },
+    {
+      "operation": "stream_encode",
+      "method": "eq64_batch_1000",
+      "input_size": 512000,
+      "iterations": 100,
+      "avg_time_ms": 1231.6650779225165,
+      "throughput_ops_per_sec": 811.9090310547147,
+      "memory_peak_mb": 1.0491971969604492,
+      "cpu_percent": 99.3
+    }
+  ],
+  "bottlenecks": {
+    "slowest_operations": [
+      {
+        "operation": "batch_encode",
+        "method": "eq64",
+        "input_size": 512000,
+        "avg_time_ms": 1580.8228821191005
+      },
+      {
+        "operation": "stream_encode",
+        "method": "eq64_batch_100",
+        "input_size": 512000,
+        "avg_time_ms": 1528.8374096597545
+      },
+      {
+        "operation": "stream_encode",
+        "method": "eq64_batch_500",
+        "input_size": 512000,
+        "avg_time_ms": 1297.122437711223
+      },
+      {
+        "operation": "stream_encode",
+        "method": "eq64_batch_1000",
+        "input_size": 512000,
+        "avg_time_ms": 1231.6650779225165
+      },
+      {
+        "operation": "encode",
+        "method": "eq64",
+        "input_size": 1024,
+        "avg_time_ms": 2.6089100423268974
+      },
+      {
+        "operation": "encode",
+        "method": "eq64",
+        "input_size": 768,
+        "avg_time_ms": 1.8758491397602484
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 1024,
+        "avg_time_ms": 1.4489484578371048
+      },
+      {
+        "operation": "encode",
+        "method": "eq64",
+        "input_size": 512,
+        "avg_time_ms": 1.1985215020831674
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 768,
+        "avg_time_ms": 1.0805256507592276
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 512,
+        "avg_time_ms": 0.8515879983315244
+      }
+    ],
+    "memory_intensive_operations": [
+      {
+        "operation": "stream_encode",
+        "method": "eq64_batch_1000",
+        "input_size": 512000,
+        "memory_peak_mb": 1.0491971969604492
+      },
+      {
+        "operation": "batch_encode",
+        "method": "eq64",
+        "input_size": 512000,
+        "memory_peak_mb": 1.047286033630371
+      },
+      {
+        "operation": "stream_encode",
+        "method": "eq64_batch_500",
+        "input_size": 512000,
+        "memory_peak_mb": 1.0447721481323242
+      },
+      {
+        "operation": "stream_encode",
+        "method": "eq64_batch_100",
+        "input_size": 512000,
+        "memory_peak_mb": 1.0416975021362305
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 1024,
+        "memory_peak_mb": 0.5323095321655273
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 768,
+        "memory_peak_mb": 0.4031667709350586
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 512,
+        "memory_peak_mb": 0.27402400970458984
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 256,
+        "memory_peak_mb": 0.1448507308959961
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 128,
+        "memory_peak_mb": 0.08055877685546875
+      },
+      {
+        "operation": "encode",
+        "method": "eq64",
+        "input_size": 1024,
+        "memory_peak_mb": 0.034270286560058594
+      }
+    ],
+    "cpu_intensive_operations": [
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 512,
+        "cpu_percent": 102.4
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 768,
+        "cpu_percent": 101.8
+      },
+      {
+        "operation": "encode",
+        "method": "shq64",
+        "input_size": 1024,
+        "cpu_percent": 100.5
+      },
+      {
+        "operation": "encode",
+        "method": "zoq64",
+        "input_size": 32,
+        "cpu_percent": 100.0
+      },
+      {
+        "operation": "encode",
+        "method": "zoq64",
+        "input_size": 256,
+        "cpu_percent": 100.0
+      },
+      {
+        "operation": "encode",
+        "method": "eq64",
+        "input_size": 128,
+        "cpu_percent": 99.9
+      },
+      {
+        "operation": "encode",
+        "method": "eq64",
+        "input_size": 256,
+        "cpu_percent": 99.9
+      },
+      {
+        "operation": "encode",
+        "method": "t8q64",
+        "input_size": 128,
+        "cpu_percent": 99.9
+      },
+      {
+        "operation": "encode",
+        "method": "t8q64",
+        "input_size": 768,
+        "cpu_percent": 99.9
+      },
+      {
+        "operation": "validation",
+        "method": "input_validation",
+        "input_size": 512,
+        "cpu_percent": 99.9
+      }
+    ],
+    "recommendations": [
+      "Native implementation not available. Install the native extension for better performance."
+    ]
+  },
+  "detailed_profiles": {
+    "function_calls": [
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py:36(encode)",
+        "call_count": 100,
+        "total_time": 0.0005252140000000001,
+        "cumulative_time": 0.052011797000000005,
+        "per_call_time": 5.252140000000001e-06,
+        "per_call_cumulative": 0.0005201179700000001
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py:56(q64_encode)",
+        "call_count": 100,
+        "total_time": 0.033469851,
+        "cumulative_time": 0.05021719,
+        "per_call_time": 0.00033469851,
+        "per_call_cumulative": 0.0005021719
+      },
+      {
+        "function": "~:0(<method 'append' of 'list' objects>)",
+        "call_count": 102400,
+        "total_time": 0.015933798000000002,
+        "cumulative_time": 0.015933798000000002,
+        "per_call_time": 1.5560349609375002e-07,
+        "per_call_cumulative": 1.5560349609375002e-07
+      },
+      {
+        "function": "~:0(<method 'join' of 'str' objects>)",
+        "call_count": 100,
+        "total_time": 0.000793327,
+        "cumulative_time": 0.000793327,
+        "per_call_time": 7.93327e-06,
+        "per_call_cumulative": 7.93327e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py:79(validate_embedding_input)",
+        "call_count": 100,
+        "total_time": 0.00020000100000000003,
+        "cumulative_time": 0.00039572,
+        "per_call_time": 2.00001e-06,
+        "per_call_cumulative": 3.9572e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py:343(validate_method_parameters)",
+        "call_count": 100,
+        "total_time": 0.000215297,
+        "cumulative_time": 0.000243932,
+        "per_call_time": 2.15297e-06,
+        "per_call_cumulative": 2.4393200000000002e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py:28(validate_encoding_method)",
+        "call_count": 100,
+        "total_time": 0.000135489,
+        "cumulative_time": 0.00020199600000000002,
+        "per_call_time": 1.35489e-06,
+        "per_call_cumulative": 2.0199600000000003e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/config.py:226(get_encoding_params)",
+        "call_count": 100,
+        "total_time": 7.096400000000001e-05,
+        "cumulative_time": 0.000188609,
+        "per_call_time": 7.096400000000001e-07,
+        "per_call_cumulative": 1.8860900000000002e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py:842(estimate_memory_usage)",
+        "call_count": 100,
+        "total_time": 0.000115693,
+        "cumulative_time": 0.00014097300000000002,
+        "per_call_time": 1.15693e-06,
+        "per_call_cumulative": 1.4097300000000002e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py:245(_validate_embedding_dimensions)",
+        "call_count": 100,
+        "total_time": 0.00013427,
+        "cumulative_time": 0.00013427,
+        "per_call_time": 1.3427e-06,
+        "per_call_cumulative": 1.3427e-06
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/config.py:151(get)",
+        "call_count": 100,
+        "total_time": 7.5708e-05,
+        "cumulative_time": 0.000117645,
+        "per_call_time": 7.5708e-07,
+        "per_call_cumulative": 1.17645e-06
+      },
+      {
+        "function": "~:0(<built-in method builtins.isinstance>)",
+        "call_count": 500,
+        "total_time": 9.8053e-05,
+        "cumulative_time": 9.8053e-05,
+        "per_call_time": 1.9610600000000002e-07,
+        "per_call_cumulative": 1.9610600000000002e-07
+      },
+      {
+        "function": "~:0(<method 'tobytes' of 'numpy.ndarray' objects>)",
+        "call_count": 100,
+        "total_time": 5.8326000000000004e-05,
+        "cumulative_time": 5.8326000000000004e-05,
+        "per_call_time": 5.8326e-07,
+        "per_call_cumulative": 5.8326e-07
+      },
+      {
+        "function": "~:0(<method 'split' of 'str' objects>)",
+        "call_count": 100,
+        "total_time": 4.1937e-05,
+        "cumulative_time": 4.1937e-05,
+        "per_call_time": 4.1937000000000003e-07,
+        "per_call_cumulative": 4.1937000000000003e-07
+      },
+      {
+        "function": "~:0(<method 'keys' of 'dict' objects>)",
+        "call_count": 100,
+        "total_time": 2.8635000000000003e-05,
+        "cumulative_time": 2.8635000000000003e-05,
+        "per_call_time": 2.8635e-07,
+        "per_call_cumulative": 2.8635e-07
+      },
+      {
+        "function": "~:0(<method 'lower' of 'str' objects>)",
+        "call_count": 100,
+        "total_time": 2.6481000000000003e-05,
+        "cumulative_time": 2.6481000000000003e-05,
+        "per_call_time": 2.6481000000000005e-07,
+        "per_call_cumulative": 2.6481000000000005e-07
+      },
+      {
+        "function": "~:0(<method 'get' of 'dict' objects>)",
+        "call_count": 100,
+        "total_time": 2.5280000000000002e-05,
+        "cumulative_time": 2.5280000000000002e-05,
+        "per_call_time": 2.5280000000000004e-07,
+        "per_call_cumulative": 2.5280000000000004e-07
+      },
+      {
+        "function": "~:0(<method 'strip' of 'str' objects>)",
+        "call_count": 100,
+        "total_time": 2.3636000000000002e-05,
+        "cumulative_time": 2.3636000000000002e-05,
+        "per_call_time": 2.3636000000000003e-07,
+        "per_call_cumulative": 2.3636000000000003e-07
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py:782(validate_memory_usage)",
+        "call_count": 100,
+        "total_time": 2.1848e-05,
+        "cumulative_time": 2.1848e-05,
+        "per_call_time": 2.1848e-07,
+        "per_call_cumulative": 2.1848e-07
+      },
+      {
+        "function": "/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/config.py:255(get_config)",
+        "call_count": 100,
+        "total_time": 1.7989e-05,
+        "cumulative_time": 1.7989e-05,
+        "per_call_time": 1.7989e-07,
+        "per_call_cumulative": 1.7989e-07
+      },
+      {
+        "function": "~:0(<method 'disable' of '_lsprof.Profiler' objects>)",
+        "call_count": 1,
+        "total_time": 1.7368e-05,
+        "cumulative_time": 1.7368e-05,
+        "per_call_time": 1.7368e-05,
+        "per_call_cumulative": 1.7368e-05
+      }
+    ],
+    "memory_patterns": {
+      "eq64_128": {
+        "peak_memory_mb": 0.00284576416015625,
+        "current_memory_mb": 0.00028324127197265625,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 0.00028324127197265625,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/tracemalloc.py\", line 551",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          }
+        ]
+      },
+      "eq64_512": {
+        "peak_memory_mb": 0.01165771484375,
+        "current_memory_mb": 0.0015878677368164062,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 0.0010156631469726562,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 316",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 311",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 306",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 301",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 295",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          }
+        ]
+      },
+      "eq64_1024": {
+        "peak_memory_mb": 0.023040771484375,
+        "current_memory_mb": 0.0025644302368164062,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 0.0019922256469726562,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 316",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 311",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 306",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 301",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 295",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          }
+        ]
+      },
+      "shq64_128": {
+        "peak_memory_mb": 0.06974124908447266,
+        "current_memory_mb": 0.0034341812133789062,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 138",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 131",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 306",
+            "size_mb": 0.00017547607421875,
+            "count": 2
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 316",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 311",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 301",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 295",
+            "size_mb": 0.00011444091796875,
+            "count": 1
+          },
+          {
+            "file": "  File \"<frozen abc>\", line 117",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/shq64.py\", line 45",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/multiarray.py\", line 188",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          }
+        ]
+      },
+      "shq64_512": {
+        "peak_memory_mb": 0.2623748779296875,
+        "current_memory_mb": 0.0025873184204101562,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 138",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 131",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 306",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/shq64.py\", line 119",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 472",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/_ufunc_config.py\", line 485",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 5.435943603515625e-05,
+            "count": 1
+          }
+        ]
+      },
+      "shq64_1024": {
+        "peak_memory_mb": 0.5206756591796875,
+        "current_memory_mb": 0.0025873184204101562,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 138",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 131",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 306",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/shq64.py\", line 119",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 472",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/_ufunc_config.py\", line 485",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 5.435943603515625e-05,
+            "count": 1
+          }
+        ]
+      },
+      "t8q64_128": {
+        "peak_memory_mb": 0.01078033447265625,
+        "current_memory_mb": 0.004029273986816406,
+        "top_allocations": [
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 131",
+            "size_mb": 0.0012054443359375,
+            "count": 11
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 138",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/fromnumeric.py\", line 57",
+            "size_mb": 0.0011444091796875,
+            "count": 10
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/t8q64.py\", line 33",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/fromnumeric.py\", line 875",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/fromnumeric.py\", line 871",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/fromnumeric.py\", line 51",
+            "size_mb": 6.866455078125e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 394",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 301",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          }
+        ]
+      },
+      "t8q64_512": {
+        "peak_memory_mb": 0.01337432861328125,
+        "current_memory_mb": 0.0029535293579101562,
+        "top_allocations": [
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/fromnumeric.py\", line 57",
+            "size_mb": 0.00102996826171875,
+            "count": 9
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 131",
+            "size_mb": 0.00086212158203125,
+            "count": 8
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 138",
+            "size_mb": 0.00080108642578125,
+            "count": 7
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 394",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 301",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 296",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 5.435943603515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 900",
+            "size_mb": 2.288818359375e-05,
+            "count": 1
+          }
+        ]
+      },
+      "t8q64_1024": {
+        "peak_memory_mb": 0.016510009765625,
+        "current_memory_mb": 0.0016946792602539062,
+        "top_allocations": [
+          {
+            "file": "  File \"/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/numpy/_core/fromnumeric.py\", line 57",
+            "size_mb": 0.00080108642578125,
+            "count": 7
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 138",
+            "size_mb": 0.00034332275390625,
+            "count": 3
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/api.py\", line 131",
+            "size_mb": 0.0002899169921875,
+            "count": 3
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/scripts/profile_performance.py\", line 474",
+            "size_mb": 6.103515625e-05,
+            "count": 2
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 394",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 301",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 296",
+            "size_mb": 6.103515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/encoders/q64.py\", line 120",
+            "size_mb": 5.435943603515625e-05,
+            "count": 1
+          },
+          {
+            "file": "  File \"/Users/adam/Developer/vcs/github.twardoch/pub/uubed-project/uubed-py/src/uubed/validation.py\", line 900",
+            "size_mb": 2.288818359375e-05,
+            "count": 1
+          }
+        ]
+      }
+    }
+  }
+}
