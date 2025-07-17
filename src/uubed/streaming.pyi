@@ -2,12 +2,15 @@
 # this_file: src/uubed/streaming.pyi
 """Type stubs for uubed.streaming module."""
 
-from typing import Iterator, List, Union, Optional, Any, BinaryIO
+from collections.abc import Iterator
+from typing import Any, BinaryIO, List, Optional, Union
+
 import numpy as np
+
 from .api import EncodingMethod
 
 def encode_stream(
-    embeddings: Iterator[Union[List[int], np.ndarray, bytes]],
+    embeddings: Iterator[list[int] | np.ndarray | bytes],
     method: EncodingMethod = "auto",
     batch_size: int = 100,
     progress: bool = False,
@@ -54,7 +57,7 @@ def encode_file_stream(
 
 def decode_stream(
     encoded_strings: Iterator[str],
-    method: Optional[EncodingMethod] = None,
+    method: EncodingMethod | None = None,
     batch_size: int = 100,
     progress: bool = False
 ) -> Iterator[bytes]:
@@ -73,10 +76,10 @@ def decode_stream(
     ...
 
 def batch_encode(
-    embeddings: List[Union[List[int], np.ndarray, bytes]],
+    embeddings: list[list[int] | np.ndarray | bytes],
     method: EncodingMethod = "auto",
     **kwargs
-) -> List[str]:
+) -> list[str]:
     """
     Batch encode multiple embeddings efficiently.
 
@@ -92,7 +95,7 @@ def batch_encode(
 
 class StreamingEncoder:
     """Context manager for streaming encoding operations."""
-    
+
     def __init__(
         self,
         method: EncodingMethod = "auto",
@@ -100,15 +103,15 @@ class StreamingEncoder:
         progress: bool = False,
         **kwargs
     ) -> None: ...
-    
-    def __enter__(self) -> "StreamingEncoder": ...
+
+    def __enter__(self) -> StreamingEncoder: ...
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None: ...
-    
+
     def encode_stream(
         self,
-        embeddings: Iterator[Union[List[int], np.ndarray, bytes]]
+        embeddings: Iterator[list[int] | np.ndarray | bytes]
     ) -> Iterator[str]: ...
-    
+
     def encode_file_stream(
         self,
         file_path: str,

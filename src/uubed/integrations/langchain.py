@@ -31,15 +31,16 @@ This module requires `langchain` to be installed. If it's not found, an `ImportE
 will be raised with instructions on how to install it.
 """
 
-from typing import List, Dict, Any, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import numpy as np
 
 try:
     # Import necessary LangChain components. These are optional dependencies.
-    from langchain.schema import Document
     from langchain.embeddings.base import Embeddings
-    from langchain.vectorstores.base import VectorStore
+    from langchain.schema import Document
     from langchain.schema.embeddings import Embeddings as EmbeddingsProtocol
+    from langchain.vectorstores.base import VectorStore
 except ImportError:
     # Raise an ImportError if LangChain is not installed, guiding the user.
     raise ImportError(
@@ -47,7 +48,7 @@ except ImportError:
         "Install it with: `pip install langchain`"
     )
 
-from ..api import encode, decode, EncodingMethod
+from ..api import EncodingMethod, decode, encode
 from ..streaming import encode_stream
 
 
@@ -94,7 +95,7 @@ class UubedEncoder:
         print(f"Encoded Hash: {doc.metadata.get(\'uubed_hash\')[:10]}...\n")
     ```
     """
-    
+
     def __init__(
         self,
         method: EncodingMethod = "auto",
@@ -123,13 +124,13 @@ class UubedEncoder:
         self.method: EncodingMethod = method
         self.add_to_metadata: bool = add_to_metadata
         self.metadata_key: str = metadata_key
-        self.encoder_kwargs: Dict[str, Any] = encoder_kwargs
-    
+        self.encoder_kwargs: dict[str, Any] = encoder_kwargs
+
     def encode_documents(
         self,
-        documents: List[Document],
-        embeddings: List[List[float]]
-    ) -> List[Document]:
+        documents: list[Document],
+        embeddings: list[list[float]]
+    ) -> list[Document]:
         """
         Encodes a list of numerical embedding vectors and optionally integrates them into document metadata.
 
@@ -158,20 +159,20 @@ class UubedEncoder:
                 f"Number of documents ({len(documents)}) must match "
                 f"number of embeddings ({len(embeddings)})."
             )
-        
-        encoded_docs: List[Document] = []
+
+        encoded_docs: list[Document] = []
         # Iterate through documents and their corresponding embeddings using `zip` for parallel processing.
-        for doc, embedding_list in zip(documents, embeddings):
+        for doc, embedding_list in zip(documents, embeddings, strict=False):
             # Convert the embedding list to a NumPy array. Using `float32` is common for embeddings.
             # The `uubed.api.encode` function is designed to handle this conversion and normalization internally.
             embedding_array: np.ndarray = np.array(embedding_list, dtype=np.float32)
-            
+
             # Encode the numerical embedding into a uubed string using the configured method and keyword arguments.
             encoded_string: str = self.encode_embedding(embedding_list) # Use encode_embedding for consistency and error handling
-            
+
             if self.add_to_metadata:
                 # Create a copy of the document's metadata to avoid modifying the original `Document` object in place.
-                new_metadata: Dict[str, Any] = doc.metadata.copy()
+                new_metadata: dict[str, Any] = doc.metadata.copy()
                 new_metadata[self.metadata_key] = encoded_string
                 # Create a new `Document` object with the updated metadata.
                 new_doc: Document = Document(
@@ -182,10 +183,10 @@ class UubedEncoder:
             else:
                 # If not configured to add to metadata, simply append the original document to the result list.
                 encoded_docs.append(doc)
-        
+
         return encoded_docs
-    
-    def encode_embedding(self, embedding: List[float]) -> str:
+
+    def encode_embedding(self, embedding: list[float]) -> str:
         """
         Encodes a single numerical embedding vector into a uubed string.
 
@@ -205,7 +206,7 @@ class UubedEncoder:
         # Convert the embedding list to a NumPy array. `uubed.api.encode` handles normalization
         # from float to uint8 internally based on the configured method.
         embedding_array: np.ndarray = np.array(embedding, dtype=np.float32)
-        
+
         # Encode the embedding using the configured method and kwargs.
         try:
             return encode(embedding_array, method=self.method, **self.encoder_kwargs)
@@ -214,8 +215,7 @@ class UubedEncoder:
             # as a more specific `UubedEncodingError` or `UubedValidationError` for clarity.
             if isinstance(e, (UubedValidationError, UubedEncodingError)):
                 raise  # Re-raise directly if it's already a uubed-specific error.
-            else:
-                raise UubedEncodingError(f"Failed to encode embedding: {e}") from e
+            raise UubedEncodingError(f"Failed to encode embedding: {e}") from e
 
 
 def create_uubed_retriever(
@@ -223,7 +223,7 @@ def create_uubed_retriever(
     embeddings: Embeddings,
     method: EncodingMethod = "shq64",
     search_type: str = "similarity",
-    search_kwargs: Optional[Dict[str, Any]] = None,
+    search_kwargs: dict[str, Any] | None = None,
 ) -> VectorStore:
     """
     Configures a LangChain `VectorStore` to use uubed encoding for query embeddings.
@@ -293,12 +293,12 @@ def create_uubed_retriever(
         method=method,
         return_encoded=False  # Vector stores usually expect numerical embeddings for search
     )
-    
+
     # Assign the wrapped embeddings as the embedding function for the vector store.
     # This modifies the `vectorstore` object in place, ensuring all subsequent embedding
     # operations (e.g., for queries) go through the `uubed_embeddings_wrapper`.
     vectorstore.embedding_function = uubed_embeddings_wrapper
-    
+
     # Return the vector store configured as a retriever with specified search settings.
     # `search_kwargs or {}` ensures that if `search_kwargs` is `None`, an empty dictionary is used.
     return vectorstore.as_retriever(
@@ -350,7 +350,7 @@ class UubedDocumentProcessor:
         print("---")
     ```
     """
-    
+
     def __init__(
         self,
         embeddings: Embeddings,
@@ -379,8 +379,8 @@ class UubedDocumentProcessor:
         # unless explicitly overridden via `encoder_kwargs` if `UubedEncoder` supported it.
         self.encoder: UubedEncoder = UubedEncoder(method=method, **encoder_kwargs)
         self.batch_size: int = batch_size
-    
-    def process(self, documents: List[Document]) -> List[Document]:
+
+    def process(self, documents: list[Document]) -> list[Document]:
         """
         Processes a list of documents by generating numerical embeddings and applying uubed encoding.
 
@@ -398,25 +398,25 @@ class UubedDocumentProcessor:
                             will have its metadata updated (if configured in `UubedEncoder`)
                             to include the uubed-encoded string of its embedding.
         """
-        processed_docs: List[Document] = []
-        
+        processed_docs: list[Document] = []
+
         # Process documents in batches for efficiency and to manage memory usage.
         for i in range(0, len(documents), self.batch_size):
-            batch: List[Document] = documents[i:i + self.batch_size]
-            
+            batch: list[Document] = documents[i:i + self.batch_size]
+
             # Extract page content from the batch of documents to generate embeddings.
-            texts: List[str] = [doc.page_content for doc in batch]
+            texts: list[str] = [doc.page_content for doc in batch]
             # Generate numerical embeddings for the batch of texts using the base embedding model.
-            embeddings: List[List[float]] = self.embeddings.embed_documents(texts)
-            
+            embeddings: list[list[float]] = self.embeddings.embed_documents(texts)
+
             # Encode these numerical embeddings into uubed strings and integrate them back into the documents.
             # The `encode_documents` method of `UubedEncoder` handles adding to metadata.
-            encoded_batch: List[Document] = self.encoder.encode_documents(batch, embeddings)
+            encoded_batch: list[Document] = self.encoder.encode_documents(batch, embeddings)
             processed_docs.extend(encoded_batch)
-        
+
         return processed_docs
-    
-    async def aprocess(self, documents: List[Document]) -> List[Document]:
+
+    async def aprocess(self, documents: list[Document]) -> list[Document]:
         """
         Asynchronously processes a list of documents by generating embeddings and applying uubed encoding.
 
@@ -432,21 +432,21 @@ class UubedDocumentProcessor:
                             metadata (if configured in `UubedEncoder`) includes the
                             uubed-encoded string of its embedding.
         """
-        processed_docs: List[Document] = []
-        
+        processed_docs: list[Document] = []
+
         # Process documents in batches asynchronously.
         for i in range(0, len(documents), self.batch_size):
-            batch: List[Document] = documents[i:i + self.batch_size]
-            
+            batch: list[Document] = documents[i:i + self.batch_size]
+
             # Extract page content for asynchronous embedding generation.
-            texts: List[str] = [doc.page_content for doc in batch]
+            texts: list[str] = [doc.page_content for doc in batch]
             # Asynchronously generate numerical embeddings for the batch.
-            embeddings: List[List[float]] = await self.embeddings.aembed_documents(texts)
-            
+            embeddings: list[list[float]] = await self.embeddings.aembed_documents(texts)
+
             # Encode these embeddings and integrate them back into the documents.
-            encoded_batch: List[Document] = self.encoder.encode_documents(batch, embeddings)
+            encoded_batch: list[Document] = self.encoder.encode_documents(batch, embeddings)
             processed_docs.extend(encoded_batch)
-        
+
         return processed_docs
 
 
@@ -455,7 +455,7 @@ def create_uubed_retriever(
     embeddings: Embeddings,
     method: EncodingMethod = "shq64",
     search_type: str = "similarity",
-    search_kwargs: Optional[Dict[str, Any]] = None,
+    search_kwargs: dict[str, Any] | None = None,
 ) -> VectorStore:
     """
     Creates a LangChain `VectorStore` configured to use uubed encoding for searches.
@@ -503,11 +503,11 @@ def create_uubed_retriever(
         method=method,
         return_encoded=False # Vector stores usually expect numerical embeddings
     )
-    
+
     # Assign the wrapped embeddings as the embedding function for the vector store.
     # This modifies the vectorstore object in place.
     vectorstore.embedding_function = uubed_embeddings_wrapper
-    
+
     # Return the vector store configured as a retriever with specified search settings.
     return vectorstore.as_retriever(
         search_type=search_type,
@@ -558,7 +558,7 @@ class UubedDocumentProcessor:
         print("---")
     ```
     """
-    
+
     def __init__(
         self,
         embeddings: Embeddings,
@@ -587,8 +587,8 @@ class UubedDocumentProcessor:
         # unless explicitly overridden via `encoder_kwargs` if `UubedEncoder` supported it.
         self.encoder: UubedEncoder = UubedEncoder(method=method, **encoder_kwargs)
         self.batch_size: int = batch_size
-    
-    def process(self, documents: List[Document]) -> List[Document]:
+
+    def process(self, documents: list[Document]) -> list[Document]:
         """
         Processes a list of documents by generating numerical embeddings and applying uubed encoding.
 
@@ -606,25 +606,25 @@ class UubedDocumentProcessor:
                             will have its metadata updated (if configured in `UubedEncoder`)
                             to include the uubed-encoded string of its embedding.
         """
-        processed_docs: List[Document] = []
-        
+        processed_docs: list[Document] = []
+
         # Process documents in batches for efficiency and to manage memory usage.
         for i in range(0, len(documents), self.batch_size):
-            batch: List[Document] = documents[i:i + self.batch_size]
-            
+            batch: list[Document] = documents[i:i + self.batch_size]
+
             # Extract page content from the batch of documents to generate embeddings.
-            texts: List[str] = [doc.page_content for doc in batch]
+            texts: list[str] = [doc.page_content for doc in batch]
             # Generate numerical embeddings for the batch of texts using the base embedding model.
-            embeddings: List[List[float]] = self.embeddings.embed_documents(texts)
-            
+            embeddings: list[list[float]] = self.embeddings.embed_documents(texts)
+
             # Encode these numerical embeddings into uubed strings and integrate them back into the documents.
             # The `encode_documents` method of `UubedEncoder` handles adding to metadata.
-            encoded_batch: List[Document] = self.encoder.encode_documents(batch, embeddings)
+            encoded_batch: list[Document] = self.encoder.encode_documents(batch, embeddings)
             processed_docs.extend(encoded_batch)
-        
+
         return processed_docs
-    
-    async def aprocess(self, documents: List[Document]) -> List[Document]:
+
+    async def aprocess(self, documents: list[Document]) -> list[Document]:
         """
         Asynchronously processes a list of documents by generating embeddings and applying uubed encoding.
 
@@ -640,19 +640,19 @@ class UubedDocumentProcessor:
                             metadata (if configured in `UubedEncoder`) includes the
                             uubed-encoded string of its embedding.
         """
-        processed_docs: List[Document] = []
-        
+        processed_docs: list[Document] = []
+
         # Process documents in batches asynchronously.
         for i in range(0, len(documents), self.batch_size):
-            batch: List[Document] = documents[i:i + self.batch_size]
-            
+            batch: list[Document] = documents[i:i + self.batch_size]
+
             # Extract page content for asynchronous embedding generation.
-            texts: List[str] = [doc.page_content for doc in batch]
+            texts: list[str] = [doc.page_content for doc in batch]
             # Asynchronously generate numerical embeddings for the batch.
-            embeddings: List[List[float]] = await self.embeddings.aembed_documents(texts)
-            
+            embeddings: list[list[float]] = await self.embeddings.aembed_documents(texts)
+
             # Encode these embeddings and integrate them back into the documents.
-            encoded_batch: List[Document] = self.encoder.encode_documents(batch, embeddings)
+            encoded_batch: list[Document] = self.encoder.encode_documents(batch, embeddings)
             processed_docs.extend(encoded_batch)
-        
+
         return processed_docs

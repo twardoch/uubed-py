@@ -25,9 +25,11 @@ is highly effective when only a few dimensions carry most of the information.
 - **Magnitude-Based Selection:** Relies on the magnitude of values to determine importance, which might not always align with semantic importance in all embedding types.
 """
 
-import numpy as np
-from .q64 import q64_encode
 from typing import List, Union
+
+import numpy as np
+
+from .q64 import q64_encode
 
 
 def top_k_q64(
@@ -95,13 +97,13 @@ def top_k_q64(
 
     # Sort the selected indices to ensure a consistent and reproducible order.
     # This is crucial for the encoded string to be deterministic and for proper decoding/comparison.
-    sorted_indices: List[int] = sorted(top_k_indices.tolist())
+    sorted_indices: list[int] = sorted(top_k_indices.tolist())
 
     # Clamp indices to fit within a single byte (0-255).
     # This step is a safeguard, as indices should naturally be within this range
     # if the embedding size is <= 256. If an original index is > 255, information
     # about its exact position is lost, but its presence in the top-k is retained.
-    clamped_indices: List[int] = [min(idx, 255) for idx in sorted_indices]
+    clamped_indices: list[int] = [min(idx, 255) for idx in sorted_indices]
 
     # Ensure the list of indices has exactly `k` elements.
     # This padding is typically not needed if `k` is validated against `embedding_array.size`,

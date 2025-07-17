@@ -8,47 +8,47 @@ position-dependent alphabets that prevent false matches.
 """
 
 from .__version__ import __version__
-from .api import encode, decode
-from .streaming import (
-    encode_stream,
-    encode_file_stream,
-    decode_stream,
-    batch_encode,
-    StreamingEncoder,
+from .api import decode, encode
+from .config import (
+    create_default_config,
+    get_config,
+    get_setting,
+    load_config,
+    set_setting,
 )
 from .exceptions import (
-    UubedError,
-    UubedValidationError,
-    UubedEncodingError,
-    UubedDecodingError,
-    UubedResourceError,
-    UubedConnectionError,
     UubedConfigurationError,
+    UubedConnectionError,
+    UubedDecodingError,
+    UubedEncodingError,
+    UubedError,
+    UubedResourceError,
+    UubedValidationError,
+)
+from .streaming import (
+    StreamingEncoder,
+    batch_encode,
+    decode_stream,
+    encode_file_stream,
+    encode_stream,
 )
 from .validation import (
-    validate_encoding_method,
+    estimate_memory_usage,
     validate_embedding_input,
-    validate_method_parameters,
+    validate_encoding_method,
     validate_file_path,
     validate_memory_usage,
-    estimate_memory_usage,
-)
-from .config import (
-    get_config,
-    load_config,
-    get_setting,
-    set_setting,
-    create_default_config,
+    validate_method_parameters,
 )
 
 # Optional imports with graceful fallback
 try:
     from .gpu import (
-        is_gpu_available,
-        get_gpu_info,
-        gpu_encode_batch,
         GPUStreamingEncoder,
         benchmark_gpu_vs_cpu,
+        get_gpu_info,
+        gpu_encode_batch,
+        is_gpu_available,
     )
     _GPU_AVAILABLE = True
 except ImportError:
@@ -101,11 +101,11 @@ __all__ = [
 # Add GPU functions if available
 if _GPU_AVAILABLE:
     __all__.extend([
-        "is_gpu_available",
-        "get_gpu_info",
-        "gpu_encode_batch",
         "GPUStreamingEncoder",
         "benchmark_gpu_vs_cpu",
+        "get_gpu_info",
+        "gpu_encode_batch",
+        "is_gpu_available",
     ])
 
 # Add Matryoshka functions if available

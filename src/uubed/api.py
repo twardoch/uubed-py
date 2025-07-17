@@ -2,39 +2,35 @@
 # this_file: src/uubed/api.py
 """High-level API for uubed encoding with comprehensive validation and error handling."""
 
-from typing import Union, List, Literal, Optional, Any, Dict, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+
 import numpy as np
+
+from .config import get_config
+from .exceptions import UubedDecodingError, UubedEncodingError, UubedValidationError, encoding_error, validation_error
 from .native_wrapper import (
-    q64_encode_native,
+    is_native_available,
+    mq64_decode_native,
+    mq64_encode_native,
     q64_decode_native,
+    q64_encode_native,
     simhash_q64_native,
     top_k_q64_native,
     z_order_q64_native,
-    mq64_encode_native,
-    mq64_decode_native,
-    is_native_available,
-)
-from .exceptions import (
-    UubedValidationError,
-    UubedEncodingError,
-    UubedDecodingError,
-    encoding_error,
-    validation_error
 )
 from .validation import (
-    validate_encoding_method,
-    validate_embedding_input,
-    validate_method_parameters,
     estimate_memory_usage,
-    validate_memory_usage
+    validate_embedding_input,
+    validate_encoding_method,
+    validate_memory_usage,
+    validate_method_parameters,
 )
-from .config import get_config
 
 EncodingMethod = Literal["eq64", "shq64", "t8q64", "zoq64", "mq64", "auto"]
 
 
 def encode(
-    embedding: Union[List[int], np.ndarray, bytes],
+    embedding: list[int] | np.ndarray | bytes,
     method: EncodingMethod = "auto",
     **kwargs: Any
 ) -> str:
@@ -127,15 +123,15 @@ def encode(
         # Keyword arguments (`kwargs`) always take precedence over values loaded from the configuration.
         config = get_config()
         if method != "auto": # Apply config parameters only if a specific method is chosen
-            config_params: Dict[str, Any] = config.get_encoding_params(method)
-            merged_kwargs: Dict[str, Any] = {**config_params, **kwargs}
+            config_params: dict[str, Any] = config.get_encoding_params(method)
+            merged_kwargs: dict[str, Any] = {**config_params, **kwargs}
         else:
             # If method is still "auto" (no global default), only use explicitly provided kwargs.
             merged_kwargs = kwargs
 
         # Step 5: Validate method-specific parameters.
         # This ensures parameters like 'k' for t8q64 or 'planes' for shq64 are valid for the chosen method.
-        validated_params: Dict[str, Any] = validate_method_parameters(method, **merged_kwargs)
+        validated_params: dict[str, Any] = validate_method_parameters(method, **merged_kwargs)
 
         # Step 6: Final dynamic auto-selection if method is still "auto".
         # If no default was configured and "auto" is still active, determine the best method
@@ -172,30 +168,29 @@ def encode(
         try:
             if method == "eq64":
                 return q64_encode_native(embedding_bytes)
-            elif method == "shq64":
+            if method == "shq64":
                 planes: int = validated_params.get("planes", 64)
                 return simhash_q64_native(embedding_bytes, planes=planes)
-            elif method == "t8q64":
+            if method == "t8q64":
                 k: int = validated_params.get("k", 8)
                 return top_k_q64_native(embedding_bytes, k=k)
-            elif method == "zoq64":
+            if method == "zoq64":
                 return z_order_q64_native(embedding_bytes)
-            elif method == "mq64":
+            if method == "mq64":
                 # mq64 encoding supports an optional 'levels' parameter for hierarchical encoding.
-                levels: Optional[List[int]] = validated_params.get("levels", None)
+                levels: list[int] | None = validated_params.get("levels")
                 return mq64_encode_native(embedding_bytes, levels)
-            else:
-                # This case should ideally be unreachable due to prior validation of 'method'.
-                raise encoding_error(
-                    f"Unsupported encoding method: {method}",
-                    method=method,
-                    suggestion="Ensure a valid encoding method is selected or configured."
-                )
+            # This case should ideally be unreachable due to prior validation of 'method'.
+            raise encoding_error(
+                f"Unsupported encoding method: {method}",
+                method=method,
+                suggestion="Ensure a valid encoding method is selected or configured."
+            )
         except Exception as e:
             # Catch any exception originating from native calls and re-raise it
             # as a `UubedEncodingError` for standardized error handling.
             raise encoding_error(
-                f"Native encoding failed: {str(e)}",
+                f"Native encoding failed: {e!s}",
                 method=method,
                 suggestion="Check if the native extension is properly installed and compatible with your system."
             ) from e
@@ -211,7 +206,7 @@ def encode(
         # and wrap them in a `UubedEncodingError` for consistent error reporting.
         # Safely access 'method' if it was defined before the exception occurred.
         raise encoding_error(
-            f"An unexpected error occurred during encoding: {str(e)}",
+            f"An unexpected error occurred during encoding: {e!s}",
             method=method if 'method' in locals() else "unknown",
             suggestion="Please report this issue with the full traceback to the developers."
         ) from e
@@ -259,28 +254,25 @@ def _auto_select_method(embedding: np.ndarray) -> str:
     if size <= 16:
         # For very small embeddings, SimHash (shq64) offers good compactness.
         return "shq64"
-    elif size <= 64:
+    if size <= 64:
         # For small embeddings, consider sparsity to choose between Top-K and SimHash.
         if sparsity < 0.3:  # If significantly sparse, Top-K is efficient.
             return "t8q64"
-        else:
-            # Otherwise, SimHash provides general compression.
-            return "shq64"
-    elif size <= 256:
+        # Otherwise, SimHash provides general compression.
+        return "shq64"
+    if size <= 256:
         # For medium embeddings, a more detailed decision based on sparsity and common sizes.
         if sparsity < 0.2:  # If very sparse, Top-K is still a strong candidate.
             return "t8q64"
-        elif size in [128, 256]:  # For common embedding dimensions, SimHash is often a good default.
+        if size in [128, 256]:  # For common embedding dimensions, SimHash is often a good default.
             return "shq64"
-        else:
-            # Fallback to lossless encoding for other medium-sized, non-sparse embeddings.
-            return "eq64"
-    else:
-        # For large embeddings, prioritize lossless encoding to preserve all information.
+        # Fallback to lossless encoding for other medium-sized, non-sparse embeddings.
         return "eq64"
+    # For large embeddings, prioritize lossless encoding to preserve all information.
+    return "eq64"
 
 
-def decode(encoded: str, method: Optional[EncodingMethod] = None) -> bytes:
+def decode(encoded: str, method: EncodingMethod | None = None) -> bytes:
     """
     Decodes an encoded string back to its original bytes representation.
 
@@ -348,7 +340,7 @@ def decode(encoded: str, method: Optional[EncodingMethod] = None) -> bytes:
         # Dispatch the decoding task to the appropriate native decoder.
         # Similar to encoding, native calls are wrapped for robust error handling.
         try:
-            decoded_result: Union[bytes, List[int]] # Type hint for decoded_result
+            decoded_result: bytes | list[int] # Type hint for decoded_result
             if method == "mq64":
                 decoded_result = mq64_decode_native(encoded)
             else: # Assumed to be eq64 if not mq64 and passed previous check
@@ -358,7 +350,7 @@ def decode(encoded: str, method: Optional[EncodingMethod] = None) -> bytes:
         except Exception as e:
             # Catch any exception from native calls and re-raise as a specific decoding error.
             raise UubedDecodingError(
-                f"Native decoding failed: {str(e)}",
+                f"Native decoding failed: {e!s}",
                 method=method,
                 encoded_string=encoded,
                 suggestion="Check if the encoded string is valid and matches the specified method. "
@@ -378,7 +370,7 @@ def decode(encoded: str, method: Optional[EncodingMethod] = None) -> bytes:
         # Catch any other unexpected exceptions during the decoding process
         # and wrap them in a UubedDecodingError for consistent error handling.
         raise UubedDecodingError(
-            f"An unexpected error occurred during decoding: {str(e)}",
+            f"An unexpected error occurred during decoding: {e!s}",
             method=method if 'method' in locals() else "unknown", # Safely access 'method'
             encoded_string=encoded if 'encoded' in locals() else "unknown", # Safely access 'encoded'
             suggestion="Please report this issue with the full traceback."

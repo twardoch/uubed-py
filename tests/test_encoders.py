@@ -2,9 +2,10 @@
 # this_file: tests/test_encoders.py
 """Test suite for uubed encoders."""
 
-import pytest
 import numpy as np
-from uubed import encode, decode
+import pytest
+
+from uubed import decode, encode
 from uubed.encoders import q64
 from uubed.exceptions import UubedValidationError
 
@@ -102,8 +103,8 @@ class TestLocalityPreservation:
         different_hash = encode(different, method="shq64")
 
         # Count character differences
-        similar_diff = sum(a != b for a, b in zip(base_hash, similar_hash))
-        different_diff = sum(a != b for a, b in zip(base_hash, different_hash))
+        similar_diff = sum(a != b for a, b in zip(base_hash, similar_hash, strict=False))
+        different_diff = sum(a != b for a, b in zip(base_hash, different_hash, strict=False))
 
         # Similar embeddings should have fewer differences
         assert similar_diff < different_diff

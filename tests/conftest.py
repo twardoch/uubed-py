@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Test configuration and fixtures."""
 
-import pytest
 import tempfile
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+import pytest
 
 
 @pytest.fixture
@@ -48,7 +49,7 @@ def sample_embeddings_file():
         np.random.randint(0, 256, 64, dtype=np.uint8)
         for _ in range(5)
     ]
-    
+
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         for emb in embeddings:
             tmp.write(emb.tobytes())
@@ -76,11 +77,11 @@ def pytest_collection_modifyitems(config, items):
         # Mark GPU tests
         if "gpu" in item.nodeid.lower():
             item.add_marker(pytest.mark.gpu)
-        
+
         # Mark integration tests
         if "integration" in item.nodeid.lower():
             item.add_marker(pytest.mark.integration)
-        
+
         # Mark slow tests (benchmarks, large data tests)
         if any(keyword in item.name.lower() for keyword in ["bench", "large", "performance"]):
             item.add_marker(pytest.mark.slow)

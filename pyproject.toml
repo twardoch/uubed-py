@@ -11,7 +11,7 @@
 #------------------------------------------------------------------------------
 [project]
 name = 'uubed' # Package name on PyPI
-version = "1.0.2"
+dynamic = ["version"]
 description = "High-performance, position-safe embedding encoding"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -70,7 +70,7 @@ Repository = "https://github.com/twardoch/uubed.git"
 uubed = "uubed.cli:main"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 #------------------------------------------------------------------------------
@@ -83,6 +83,9 @@ packages = ["src/uubed"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uubed"]
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -301,16 +304,15 @@ ignore = [
     'S106', # Possible hardcoded password - often false positives
     'S107', # Possible hardcoded password - often false positives
     'S110', # try-except-pass - sometimes valid for suppressing exceptions
-    'SIM102'
-    # Nested if statements - sometimes more readable than combined conditions
+    'SIM102', # Nested if statements - sometimes more readable than combined conditions
 ]
 # Rules that should not be automatically fixed
 unfixable = [
     'F401', # Don't automatically remove unused imports - may be needed later
 
 ]
-# Configure extend-exclude to ignore specific directories
-extend-exclude = [".git", ".venv", "venv", "dist", "build"]
+# Configure exclude to ignore specific directories
+exclude = [".git", ".venv", "venv", "dist", "build"]
 
 # isort configuration within Ruff
 [tool.ruff.lint.isort]
@@ -318,7 +320,7 @@ known-first-party = ['uubed'] # Treat as first-party imports for sorting
 
 # flake8-tidy-imports configuration within Ruff
 [tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = 'all' # Ban all relative imports for consistency
+# ban-relative-imports = 'all' # Allow relative imports in package modules
 
 # Per-file rule exceptions
 [tool.ruff.lint.per-file-ignores]
@@ -326,6 +328,11 @@ ban-relative-imports = 'all' # Ban all relative imports for consistency
 'tests/**/*' = [
     'PLR2004', # Allow magic values in tests for readability
     'S101', # Allow assertions in tests
-    'TID252'
-    # Allow relative imports in tests for convenience
+    'TID252', # Allow relative imports in tests for convenience
+    'PLC0415', # Allow imports inside functions in tests
+    'F401', # Allow unused imports in tests
+]
+# Allow relative imports in package modules
+'src/uubed/**/*' = [
+    'TID252', # Allow relative imports in package modules
 ]

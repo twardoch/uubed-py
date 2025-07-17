@@ -36,8 +36,9 @@ nearest neighbor searches in vector databases.
 """
 
 import struct
-from .q64 import q64_encode
 from typing import List, Union
+
+from .q64 import q64_encode
 
 
 def z_order_q64(embedding: bytes) -> str:
@@ -75,7 +76,7 @@ def z_order_q64(embedding: bytes) -> str:
     # Example: For a byte value of 213 (0b11010101):
     #   (213 >> 6) -> 0b00000011 (3)
     #   (3 & 0b11) -> 0b00000011 (3)
-    quantized: List[int] = [(b >> 6) & 0b11 for b in embedding]
+    quantized: list[int] = [(b >> 6) & 0b11 for b in embedding]
 
     # Step 2: Interleave bits for the first 16 dimensions to form a single Z-order integer.
     # The Z-order curve (Morton code) is constructed by interleaving the bits of the
@@ -97,7 +98,7 @@ def z_order_q64(embedding: bytes) -> str:
     # Step 3: Pack the 32-bit Z-order integer into 4 bytes.
     # ">I" specifies big-endian (network byte order) for an unsigned integer.
     packed: bytes = struct.pack(">I", result)
-    
+
     # Step 4: Encode the 4 resulting bytes into an 8-character q64 string.
     # The q64 encoding converts each byte into two base64-like characters.
     return q64_encode(packed)

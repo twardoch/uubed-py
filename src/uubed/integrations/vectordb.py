@@ -29,13 +29,14 @@ and then use its methods (`connect`, `create_collection`, `insert_vectors`, `sea
 without needing to manually encode/decode uubed strings for each operation.
 """
 
-from typing import List, Dict, Any, Optional, Union, Tuple
-import numpy as np
 from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ..api import encode, decode, EncodingMethod
+import numpy as np
+
+from ..api import EncodingMethod, decode, encode
+from ..exceptions import UubedResourceError, UubedValidationError, resource_error, validation_error
 from ..streaming import encode_stream
-from ..exceptions import UubedValidationError, UubedResourceError, validation_error, resource_error
 
 
 class VectorDBConnector(ABC):
@@ -51,7 +52,7 @@ class VectorDBConnector(ABC):
     `create_collection`, `insert_vectors`, `search`) according to the specifics
     of their respective vector database APIs.
     """
-    
+
     def __init__(self, encoding_method: EncodingMethod = "auto", **encoding_kwargs: Any):
         """
         Initializes the base connector with a default uubed encoding method and keyword arguments.
@@ -69,8 +70,8 @@ class VectorDBConnector(ABC):
                                      `k` for "t8q64" or `planes` for "shq64".
         """
         self.encoding_method: EncodingMethod = encoding_method
-        self.encoding_kwargs: Dict[str, Any] = encoding_kwargs
-    
+        self.encoding_kwargs: dict[str, Any] = encoding_kwargs
+
     @abstractmethod
     def connect(self, **kwargs: Any) -> Any:
         """Abstract method: Connects to the underlying vector database.
@@ -90,7 +91,7 @@ class VectorDBConnector(ABC):
                  depends on the specific database implementation.
         """
         pass
-    
+
     @abstractmethod
     def create_collection(self, name: str, **kwargs: Any) -> Any:
         """Abstract method: Creates a new collection, index, or class in the database.
@@ -111,9 +112,9 @@ class VectorDBConnector(ABC):
                  on the specific database implementation.
         """
         pass
-    
+
     @abstractmethod
-    def insert_vectors(self, vectors: List[Union[List[float], np.ndarray]], metadata: Optional[List[Dict[str, Any]]] = None, **kwargs: Any) -> None:
+    def insert_vectors(self, vectors: list[list[float] | np.ndarray], metadata: list[dict[str, Any]] | None = None, **kwargs: Any) -> None:
         """Abstract method: Inserts vectors into the database.
 
         Subclasses must implement this method to handle the batch insertion of
@@ -134,9 +135,9 @@ class VectorDBConnector(ABC):
                             `ids` for specifying unique identifiers for each vector).
         """
         pass
-    
+
     @abstractmethod
-    def search(self, query_vector: Union[List[float], np.ndarray], top_k: int = 10, **kwargs: Any) -> List[Dict[str, Any]]:
+    def search(self, query_vector: list[float] | np.ndarray, top_k: int = 10, **kwargs: Any) -> list[dict[str, Any]]:
         """Abstract method: Searches for similar vectors in the database.
 
         Subclasses must implement this method to perform a similarity search
@@ -162,8 +163,8 @@ class VectorDBConnector(ABC):
                                   - `uubed_encoded`: The uubed-encoded string of the matched vector.
         """
         pass
-    
-    def encode_vector(self, vector: Union[List[float], np.ndarray]) -> str:
+
+    def encode_vector(self, vector: list[float] | np.ndarray) -> str:
         """
         Encodes a numerical vector using the configured uubed encoding method.
 
@@ -270,7 +271,7 @@ class PineconeConnector(VectorDBConnector):
         print(f"  ID: {res['id']}, Score: {res['score']:.4f}, Encoded: {res['uubed_encoded'][:10]}..., Source: {res['metadata'].get('source')}")
     ```
     """
-    
+
     def __init__(self, encoding_method: EncodingMethod = "shq64", **encoding_kwargs: Any):
         """
         Initializes the PineconeConnector.
@@ -283,9 +284,9 @@ class PineconeConnector(VectorDBConnector):
                                      during vector encoding (e.g., `planes` for SimHash).
         """
         super().__init__(encoding_method, **encoding_kwargs)
-        self.client: Optional[Any] = None  # Pinecone client instance, initialized upon connection.
-        self.index: Optional[Any] = None   # Pinecone index object, initialized upon collection creation.
-    
+        self.client: Any | None = None  # Pinecone client instance, initialized upon connection.
+        self.index: Any | None = None   # Pinecone index object, initialized upon collection creation.
+
     def connect(self, api_key: str, environment: str, **kwargs: Any) -> bool:
         """
         Connects to the Pinecone service.
@@ -310,12 +311,12 @@ class PineconeConnector(VectorDBConnector):
             import pinecone
         except ImportError:
             raise ImportError("Pinecone client required: `pip install pinecone-client`")
-        
+
         # Initialize the Pinecone connection. This sets up the global Pinecone context.
         pinecone.init(api_key=api_key, environment=environment, **kwargs)
         self.client = pinecone  # Store the pinecone module as the client.
         return True
-    
+
     def create_collection(self, name: str, dimension: int, metric: str = "cosine", **kwargs: Any) -> Any:
         """
         Creates a new Pinecone index (collection) if it doesn't already exist.
@@ -343,7 +344,7 @@ class PineconeConnector(VectorDBConnector):
         """
         if not self.client:
             raise RuntimeError("Not connected to Pinecone. Call `connect()` first.")
-        
+
         # Check if the index already exists to avoid recreation errors and unnecessary operations.
         if name not in self.client.list_indexes():
             self.client.create_index(
@@ -352,17 +353,17 @@ class PineconeConnector(VectorDBConnector):
                 metric=metric,
                 **kwargs
             )
-        
+
         # Connect to the specific index. This returns an Index object that can be used for data operations.
         self.index = self.client.Index(name)
         return self.index
-    
+
     def insert_vectors(
         self,
-        vectors: List[Union[List[float], np.ndarray]],
-        metadata: Optional[List[Dict[str, Any]]] = None,
+        vectors: list[list[float] | np.ndarray],
+        metadata: list[dict[str, Any]] | None = None,
         batch_size: int = 100,
-        ids: Optional[List[str]] = None
+        ids: list[str] | None = None
     ) -> None:
         """
         Inserts vectors into the Pinecone index, with uubed encoding stored in metadata.
@@ -393,11 +394,11 @@ class PineconeConnector(VectorDBConnector):
         """
         if not self.index:
             raise RuntimeError("No Pinecone index selected. Call `create_collection()` first.")
-        
+
         # Initialize metadata list if not provided, ensuring it matches the vectors' length.
         if metadata is None:
             metadata = [{} for _ in vectors]
-        
+
         # Validate that the lengths of input lists are consistent.
         if ids is not None and len(ids) != len(vectors):
             raise ValueError("Number of provided IDs must match the number of vectors.")
@@ -410,32 +411,32 @@ class PineconeConnector(VectorDBConnector):
             batch_vectors = vectors[i:i + batch_size]
             batch_metadata = metadata[i:i + batch_size]
             batch_ids = ids[i:i + batch_size] if ids else None
-            
+
             # Prepare data in the format expected by Pinecone's upsert method:
             # List of (id, vector_values, metadata_dict) tuples.
-            upsert_data: List[Tuple[str, List[float], Dict[str, Any]]] = []
-            for j, (vector, meta) in enumerate(zip(batch_vectors, batch_metadata)):
+            upsert_data: list[tuple[str, list[float], dict[str, Any]]] = []
+            for j, (vector, meta) in enumerate(zip(batch_vectors, batch_metadata, strict=False)):
                 # Generate a unique ID if not explicitly provided for the current batch item.
                 vector_id: str = batch_ids[j] if batch_ids else f"vec_{i+j}"
-                
+
                 # Encode the numerical vector into a uubed string using the configured method.
                 encoded_uubed: str = self.encode_vector(vector)
-                
+
                 # Create a copy of the original metadata and add the uubed-encoded string
                 # and the encoding method to it. This ensures the original metadata is not modified.
-                meta_with_encoding: Dict[str, Any] = meta.copy()
+                meta_with_encoding: dict[str, Any] = meta.copy()
                 meta_with_encoding["uubed_encoded"] = encoded_uubed
                 meta_with_encoding["encoding_method"] = self.encoding_method
-                
+
                 # Ensure the vector is a list of floats, as required by Pinecone's API.
-                vector_list: List[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
-                
+                vector_list: list[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
+
                 upsert_data.append((vector_id, vector_list, meta_with_encoding))
-            
+
             # Perform the batch upsert operation to Pinecone.
             self.index.upsert(vectors=upsert_data)
-    
-    def search(self, query_vector: Union[List[float], np.ndarray], top_k: int = 10, **kwargs: Any) -> List[Dict[str, Any]]:
+
+    def search(self, query_vector: list[float] | np.ndarray, top_k: int = 10, **kwargs: Any) -> list[dict[str, Any]]:
         """
         Searches the Pinecone index for similar vectors.
 
@@ -463,10 +464,10 @@ class PineconeConnector(VectorDBConnector):
         """
         if not self.index:
             raise RuntimeError("No Pinecone index selected. Call `create_collection()` first.")
-        
+
         # Ensure the query vector is a list of floats, as required by Pinecone's API.
-        query_vector_list: List[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
-        
+        query_vector_list: list[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
+
         # Perform the query against the Pinecone index.
         # `include_metadata=True` is crucial to retrieve the stored uubed_encoded string.
         results = self.index.query(
@@ -475,7 +476,7 @@ class PineconeConnector(VectorDBConnector):
             include_metadata=True, # Always include metadata to retrieve uubed_encoded string.
             **kwargs
         )
-        
+
         # Format the results into a list of dictionaries for consistent output.
         return [
             {
@@ -513,7 +514,7 @@ class WeaviateConnector(VectorDBConnector):
         >>> for res in results:
         ...     print(f"Content: {res['properties']['content']}, Certainty: {res['certainty']:.4f}")
     """
-    
+
     def __init__(self, encoding_method: EncodingMethod = "t8q64", **encoding_kwargs: Any):
         """
         Initializes the WeaviateConnector.
@@ -523,9 +524,9 @@ class WeaviateConnector(VectorDBConnector):
             **encoding_kwargs (Any): Additional keyword arguments for the uubed encoder.
         """
         super().__init__(encoding_method, **encoding_kwargs)
-        self.client: Optional[Any] = None # Weaviate client instance.
-        self.class_name: Optional[str] = None # Currently selected class name.
-    
+        self.client: Any | None = None # Weaviate client instance.
+        self.class_name: str | None = None # Currently selected class name.
+
     def connect(self, url: str = "http://localhost:8080", **kwargs: Any) -> bool:
         """
         Connects to the Weaviate instance.
@@ -544,11 +545,11 @@ class WeaviateConnector(VectorDBConnector):
             import weaviate
         except ImportError:
             raise ImportError("Weaviate client required: `pip install weaviate-client`")
-        
+
         self.client = weaviate.Client(url, **kwargs)
         return self.client.is_ready()
-    
-    def create_collection(self, name: str, properties: List[str], **kwargs: Any) -> bool:
+
+    def create_collection(self, name: str, properties: list[str], **kwargs: Any) -> bool:
         """
         Creates a new Weaviate class (collection) if it doesn't already exist.
 
@@ -565,9 +566,9 @@ class WeaviateConnector(VectorDBConnector):
         """
         if not self.client:
             raise RuntimeError("Not connected to Weaviate. Call `connect()` first.")
-        
+
         # Define the schema for the new class, including uubed-specific properties.
-        class_schema: Dict[str, Any] = {
+        class_schema: dict[str, Any] = {
             "class": name,
             "properties": [
                 {"name": prop, "dataType": ["text"]} for prop in properties
@@ -577,18 +578,18 @@ class WeaviateConnector(VectorDBConnector):
             ],
             **kwargs
         }
-        
+
         # Check if the class already exists before attempting to create it.
         if not self.client.schema.exists(name):
             self.client.schema.create_class(class_schema)
-        
+
         self.class_name = name
         return True
-    
+
     def insert_vectors(
         self,
-        vectors: List[Union[List[float], np.ndarray]],
-        properties: List[Dict[str, Any]],
+        vectors: list[list[float] | np.ndarray],
+        properties: list[dict[str, Any]],
         batch_size: int = 100
     ) -> None:
         """
@@ -608,36 +609,36 @@ class WeaviateConnector(VectorDBConnector):
         """
         if not self.client or not self.class_name:
             raise RuntimeError("Not connected to Weaviate or no class selected. Call `connect()` and `create_collection()` first.")
-        
+
         if len(vectors) != len(properties):
             raise ValueError("Number of vectors must match number of properties.")
 
         # Use Weaviate's batch context manager for efficient insertions.
         with self.client.batch as batch:
             batch.batch_size = batch_size
-            
-            for vector, props in zip(vectors, properties):
+
+            for vector, props in zip(vectors, properties, strict=False):
                 # Encode the vector using uubed and add to properties.
                 encoded_uubed: str = self.encode_vector(vector)
-                props_with_encoding: Dict[str, Any] = props.copy()
+                props_with_encoding: dict[str, Any] = props.copy()
                 props_with_encoding["uubed_encoded"] = encoded_uubed
                 props_with_encoding["encoding_method"] = self.encoding_method
-                
+
                 # Ensure vector is a list of floats for Weaviate.
-                vector_list: List[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
-                
+                vector_list: list[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
+
                 batch.add_data_object(
                     data_object=props_with_encoding,
                     class_name=self.class_name,
                     vector=vector_list
                 )
-    
+
     def search(
         self,
-        query_vector: Union[List[float], np.ndarray],
+        query_vector: list[float] | np.ndarray,
         top_k: int = 10,
-        where_filter: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+        where_filter: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """
         Searches the Weaviate database for similar vectors.
 
@@ -656,20 +657,20 @@ class WeaviateConnector(VectorDBConnector):
         """
         if not self.client or not self.class_name:
             raise RuntimeError("Not connected to Weaviate or no class selected. Call `connect()` and `create_collection()` first.")
-        
+
         # Ensure query vector is a list of floats for Weaviate.
-        query_vector_list: List[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
-        
+        query_vector_list: list[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
+
         # Build the Weaviate query.
         query = self.client.query.get(self.class_name).with_near_vector({
             "vector": query_vector_list
         }).with_limit(top_k).with_additional(["certainty", "distance"])
-        
+
         if where_filter:
             query = query.with_where(where_filter)
-        
+
         results = query.do()
-        
+
         # Extract and format the search results.
         return [
             {
@@ -707,7 +708,7 @@ class QdrantConnector(VectorDBConnector):
         >>> for res in results:
         ...     print(f"ID: {res['id']}, Score: {res['score']:.4f}, Source: {res['payload']['source']}")
     """
-    
+
     def __init__(self, encoding_method: EncodingMethod = "zoq64", **encoding_kwargs: Any):
         """
         Initializes the QdrantConnector.
@@ -717,9 +718,9 @@ class QdrantConnector(VectorDBConnector):
             **encoding_kwargs (Any): Additional keyword arguments for the uubed encoder.
         """
         super().__init__(encoding_method, **encoding_kwargs)
-        self.client: Optional[Any] = None # Qdrant client instance.
-        self.collection_name: Optional[str] = None # Currently selected collection name.
-    
+        self.client: Any | None = None # Qdrant client instance.
+        self.collection_name: str | None = None # Currently selected collection name.
+
     def connect(self, host: str = "localhost", port: int = 6333, **kwargs: Any) -> bool:
         """
         Connects to the Qdrant service.
@@ -739,10 +740,10 @@ class QdrantConnector(VectorDBConnector):
             from qdrant_client import QdrantClient
         except ImportError:
             raise ImportError("Qdrant client required: `pip install qdrant-client`")
-        
+
         self.client = QdrantClient(host=host, port=port, **kwargs)
         return True
-    
+
     def create_collection(self, name: str, vector_size: int, distance: str = "Cosine", **kwargs: Any) -> bool:
         """
         Creates a new Qdrant collection if it doesn't already exist.
@@ -761,16 +762,16 @@ class QdrantConnector(VectorDBConnector):
         """
         if not self.client:
             raise RuntimeError("Not connected to Qdrant. Call `connect()` first.")
-        
-        from qdrant_client.http.models import VectorParams, Distance
-        
+
+        from qdrant_client.http.models import Distance, VectorParams
+
         # Map string distance names to Qdrant Distance enums.
-        distance_map: Dict[str, Distance] = {
+        distance_map: dict[str, Distance] = {
             "Cosine": Distance.COSINE,
             "Euclidean": Distance.EUCLID,
             "Dot": Distance.DOT,
         }
-        
+
         # Use `recreate_collection` for simplicity in examples, but be aware it deletes existing data.
         # For production, consider `create_collection` (which fails if exists) or `update_collection`.
         try:
@@ -787,16 +788,16 @@ class QdrantConnector(VectorDBConnector):
             # we assume it might already exist or handle it silently for this example.
             # In a real application, more specific error handling would be needed.
             pass
-        
+
         self.collection_name = name
         return True
-    
+
     def insert_vectors(
         self,
-        vectors: List[Union[List[float], np.ndarray]],
-        payloads: Optional[List[Dict[str, Any]]] = None,
+        vectors: list[list[float] | np.ndarray],
+        payloads: list[dict[str, Any]] | None = None,
         batch_size: int = 100,
-        ids: Optional[List[Union[int, str]]] = None
+        ids: list[int | str] | None = None
     ) -> None:
         """
         Inserts vectors into the Qdrant collection, with uubed encoding stored in payloads.
@@ -815,12 +816,12 @@ class QdrantConnector(VectorDBConnector):
         """
         if not self.client or not self.collection_name:
             raise RuntimeError("Not connected to Qdrant or no collection selected. Call `connect()` and `create_collection()` first.")
-        
+
         from qdrant_client.http.models import PointStruct
-        
+
         if payloads is None:
             payloads = [{} for _ in vectors]
-        
+
         if ids is not None and len(ids) != len(vectors):
             raise ValueError("Number of provided IDs must match the number of vectors.")
 
@@ -829,39 +830,39 @@ class QdrantConnector(VectorDBConnector):
             batch_vectors = vectors[i:i + batch_size]
             batch_payloads = payloads[i:i + batch_size]
             batch_ids = ids[i:i + batch_size] if ids else None
-            
-            points: List[PointStruct] = []
-            for j, (vector, payload) in enumerate(zip(batch_vectors, batch_payloads)):
+
+            points: list[PointStruct] = []
+            for j, (vector, payload) in enumerate(zip(batch_vectors, batch_payloads, strict=False)):
                 # Generate a unique ID if not provided.
-                point_id: Union[int, str] = batch_ids[j] if batch_ids else i + j
-                
+                point_id: int | str = batch_ids[j] if batch_ids else i + j
+
                 # Encode the vector using uubed and add to payload.
                 encoded_uubed: str = self.encode_vector(vector)
-                payload_with_encoding: Dict[str, Any] = payload.copy()
+                payload_with_encoding: dict[str, Any] = payload.copy()
                 payload_with_encoding["uubed_encoded"] = encoded_uubed
                 payload_with_encoding["encoding_method"] = self.encoding_method
-                
+
                 # Ensure vector is a list of floats for Qdrant.
-                vector_list: List[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
-                
+                vector_list: list[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
+
                 points.append(PointStruct(
                     id=point_id,
                     vector=vector_list,
                     payload=payload_with_encoding
                 ))
-            
+
             self.client.upsert(
                 collection_name=self.collection_name,
                 points=points
             )
-    
+
     def search(
         self,
-        query_vector: Union[List[float], np.ndarray],
+        query_vector: list[float] | np.ndarray,
         top_k: int = 10,
-        score_threshold: Optional[float] = None,
+        score_threshold: float | None = None,
         **kwargs: Any
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Searches the Qdrant collection for similar vectors.
 
@@ -880,10 +881,10 @@ class QdrantConnector(VectorDBConnector):
         """
         if not self.client or not self.collection_name:
             raise RuntimeError("Not connected to Qdrant or no collection selected. Call `connect()` and `create_collection()` first.")
-        
+
         # Ensure query vector is a list of floats for Qdrant.
-        query_vector_list: List[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
-        
+        query_vector_list: list[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
+
         results = self.client.search(
             collection_name=self.collection_name,
             query_vector=query_vector_list,
@@ -891,7 +892,7 @@ class QdrantConnector(VectorDBConnector):
             score_threshold=score_threshold,
             **kwargs
         )
-        
+
         # Extract and format the search results.
         return [
             {
@@ -932,7 +933,7 @@ class ChromaConnector(VectorDBConnector):
         >>> for res in results:
         ...     print(f"Document: {res['document']}, Distance: {res['distance']:.4f}")
     """
-    
+
     def __init__(self, encoding_method: EncodingMethod = "eq64", **encoding_kwargs: Any):
         """
         Initializes the ChromaConnector.
@@ -942,10 +943,10 @@ class ChromaConnector(VectorDBConnector):
             **encoding_kwargs (Any): Additional keyword arguments for the uubed encoder.
         """
         super().__init__(encoding_method, **encoding_kwargs)
-        self.client: Optional[Any] = None # ChromaDB client instance.
-        self.collection: Optional[Any] = None # ChromaDB collection object.
-    
-    def connect(self, path: Optional[str] = None, **kwargs: Any) -> bool:
+        self.client: Any | None = None # ChromaDB client instance.
+        self.collection: Any | None = None # ChromaDB collection object.
+
+    def connect(self, path: str | None = None, **kwargs: Any) -> bool:
         """
         Connects to the ChromaDB instance.
 
@@ -964,14 +965,14 @@ class ChromaConnector(VectorDBConnector):
             import chromadb
         except ImportError:
             raise ImportError("ChromaDB required: `pip install chromadb`")
-        
+
         if path:
             self.client = chromadb.PersistentClient(path=path, **kwargs)
         else:
             self.client = chromadb.Client(**kwargs)
-        
+
         return True
-    
+
     def create_collection(self, name: str, **kwargs: Any) -> Any:
         """
         Creates a new ChromaDB collection if it doesn't already exist.
@@ -988,22 +989,22 @@ class ChromaConnector(VectorDBConnector):
         """
         if not self.client:
             raise RuntimeError("Not connected to ChromaDB. Call `connect()` first.")
-        
+
         try:
             self.collection = self.client.create_collection(name=name, **kwargs)
         except Exception:
             # If create_collection fails (e.g., due to collection already existing),
             # try to get the existing collection.
             self.collection = self.client.get_collection(name=name)
-        
+
         return self.collection
-    
+
     def insert_vectors(
         self,
-        vectors: List[Union[List[float], np.ndarray]],
-        documents: List[str],
-        metadatas: Optional[List[Dict[str, Any]]] = None,
-        ids: Optional[List[str]] = None
+        vectors: list[list[float] | np.ndarray],
+        documents: list[str],
+        metadatas: list[dict[str, Any]] | None = None,
+        ids: list[str] | None = None
     ) -> None:
         """
         Inserts vectors, documents, and metadata into the ChromaDB collection.
@@ -1024,46 +1025,46 @@ class ChromaConnector(VectorDBConnector):
         """
         if not self.collection:
             raise RuntimeError("No ChromaDB collection selected. Call `create_collection()` first.")
-        
+
         if metadatas is None:
             metadatas = [{} for _ in vectors]
-        
+
         if ids is None:
             ids = [f"doc_{i}" for i in range(len(vectors))]
-        
+
         # Validate consistent lengths across all input lists.
         if not (len(vectors) == len(documents) == len(metadatas) == len(ids)):
             raise ValueError("All input lists (vectors, documents, metadatas, ids) must have the same length.")
 
-        enhanced_metadatas: List[Dict[str, Any]] = []
-        enhanced_vectors: List[List[float]] = []
-        
-        for vector, metadata in zip(vectors, metadatas):
+        enhanced_metadatas: list[dict[str, Any]] = []
+        enhanced_vectors: list[list[float]] = []
+
+        for vector, metadata in zip(vectors, metadatas, strict=False):
             # Encode the vector using uubed and add to metadata.
             encoded_uubed: str = self.encode_vector(vector)
-            enhanced_metadata: Dict[str, Any] = metadata.copy()
+            enhanced_metadata: dict[str, Any] = metadata.copy()
             enhanced_metadata["uubed_encoded"] = encoded_uubed
             enhanced_metadata["encoding_method"] = self.encoding_method
             enhanced_metadatas.append(enhanced_metadata)
-            
+
             # Ensure vector is a list of floats for ChromaDB.
-            vector_list: List[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
+            vector_list: list[float] = vector.tolist() if isinstance(vector, np.ndarray) else vector
             enhanced_vectors.append(vector_list)
-        
+
         self.collection.add(
             embeddings=enhanced_vectors,
             documents=documents,
             metadatas=enhanced_metadatas,
             ids=ids
         )
-    
+
     def search(
         self,
-        query_vector: Union[List[float], np.ndarray],
+        query_vector: list[float] | np.ndarray,
         top_k: int = 10,
-        where: Optional[Dict[str, Any]] = None,
+        where: dict[str, Any] | None = None,
         **kwargs: Any
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Searches the ChromaDB collection for similar vectors.
 
@@ -1083,10 +1084,10 @@ class ChromaConnector(VectorDBConnector):
         """
         if not self.collection:
             raise RuntimeError("No ChromaDB collection selected. Call `create_collection()` first.")
-        
+
         # Ensure query vector is a list of floats for ChromaDB.
-        query_vector_list: List[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
-        
+        query_vector_list: list[float] = query_vector.tolist() if isinstance(query_vector, np.ndarray) else query_vector
+
         results = self.collection.query(
             query_embeddings=[query_vector_list],
             n_results=top_k,
@@ -1094,7 +1095,7 @@ class ChromaConnector(VectorDBConnector):
             include=["documents", "metadatas", "distances"], # Always include these for comprehensive results.
             **kwargs
         )
-        
+
         # Extract and format the search results.
         # ChromaDB returns results in a nested list structure, so we flatten it.
         return [
@@ -1109,7 +1110,7 @@ class ChromaConnector(VectorDBConnector):
                 results["ids"][0],
                 results["documents"][0],
                 results["metadatas"][0],
-                results["distances"][0]
+                results["distances"][0], strict=False
             )
         ]
 
@@ -1131,15 +1132,15 @@ def get_connector(db_type: str, **kwargs: Any) -> VectorDBConnector:
     Raises:
         ValueError: If an unknown or unsupported `db_type` is specified.
     """
-    connectors: Dict[str, type[VectorDBConnector]] = {
+    connectors: dict[str, type[VectorDBConnector]] = {
         "pinecone": PineconeConnector,
         "weaviate": WeaviateConnector,
         "qdrant": QdrantConnector,
         "chroma": ChromaConnector,
     }
-    
+
     db_type_lower = db_type.lower()
     if db_type_lower not in connectors:
         raise ValueError(f"Unknown or unsupported database type: '{db_type}'. Expected one of: {', '.join(sorted(connectors.keys()))}.")
-    
+
     return connectors[db_type_lower](**kwargs)

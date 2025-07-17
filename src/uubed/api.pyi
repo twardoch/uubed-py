@@ -2,13 +2,14 @@
 # this_file: src/uubed/api.pyi
 """Type stubs for uubed.api module."""
 
-from typing import Union, List, Literal, Optional
+from typing import List, Literal, Optional, TypeAlias, Union
+
 import numpy as np
 
-EncodingMethod = Literal["eq64", "shq64", "t8q64", "zoq64", "auto"]
+EncodingMethod: TypeAlias = Literal["eq64", "shq64", "t8q64", "zoq64", "auto"]
 
 def encode(
-    embedding: Union[List[int], np.ndarray, bytes],
+    embedding: list[int] | np.ndarray | bytes,
     method: EncodingMethod = "auto",
     **kwargs
 ) -> str:
@@ -31,7 +32,7 @@ def encode(
     """
     ...
 
-def decode(encoded: str, method: Optional[EncodingMethod] = None) -> bytes:
+def decode(encoded: str, method: EncodingMethod | None = None) -> bytes:
     """
     Decode encoded string back to bytes with comprehensive validation.
 

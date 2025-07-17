@@ -33,11 +33,11 @@ at the correct positional alignment.
   not reduce the size of the data; in fact, it doubles the size (2 characters per byte).
 """
 
-from typing import Union, List, Dict, Tuple
+from typing import Dict, List, Tuple, Union
 
 # Define the four position-dependent alphabets for Q64 encoding.
 # Each alphabet is used based on the position of the character modulo 4.
-ALPHABETS: List[str] = [
+ALPHABETS: list[str] = [
     "ABCDEFGHIJKLMNOP",  # Used when position % 4 == 0
     "QRSTUVWXYZabcdef",  # Used when position % 4 == 1
     "ghijklmnopqrstuv",  # Used when position % 4 == 2
@@ -47,14 +47,14 @@ ALPHABETS: List[str] = [
 # Pre-compute a reverse lookup table for efficient decoding.
 # This maps each character to a tuple: (expected_alphabet_index, nibble_value).
 # This allows for O(1) lookup during decoding and helps validate character positions.
-REV_LOOKUP: Dict[str, Tuple[int, int]] = {}
+REV_LOOKUP: dict[str, tuple[int, int]] = {}
 for idx, alphabet in enumerate(ALPHABETS):
     for char_idx, char in enumerate(alphabet):
         REV_LOOKUP[char] = (idx, char_idx)
 
 
 def q64_encode(
-    data: Union[bytes, List[int]]
+    data: bytes | list[int]
 ) -> str:
     """
     Encodes a byte sequence or a list of integers into a position-safe q64 string.
@@ -96,7 +96,7 @@ def q64_encode(
     if isinstance(data, list):
         data = bytes(data)
 
-    result: List[str] = []
+    result: list[str] = []
     pos: int = 0  # Initialize the current character position in the output string.
 
     # Step 2: Iterate through each byte in the input data.
@@ -181,7 +181,7 @@ def q64_decode(
     if len(encoded) % 2 != 0:
         raise ValueError("q64 encoded string length must be even (2 characters per byte).")
 
-    nibbles: List[int] = []
+    nibbles: list[int] = []
     # Step 2: Iterate through each character in the encoded string with its position.
     for pos, char in enumerate(encoded):
         try:
@@ -212,4 +212,4 @@ def q64_decode(
     # to reconstruct the original byte. The `bytes()` constructor then converts this generator
     # expression into a byte sequence.
     iterator = iter(nibbles)
-    return bytes((hi << 4) | lo for hi, lo in zip(iterator, iterator))
+    return bytes((hi << 4) | lo for hi, lo in zip(iterator, iterator, strict=False))
