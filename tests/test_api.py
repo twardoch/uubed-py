@@ -67,7 +67,7 @@ class TestEncodeDecode:
     
     def test_invalid_input_values(self):
         """Test validation of input values."""
-        with pytest.raises(UubedValidationError, match="Values must be in range 0-255"):
+        with pytest.raises(UubedValidationError, match="overflow"):
             encode([0, 100, 300, 50], method="eq64")
     
     def test_decode_invalid_method(self):

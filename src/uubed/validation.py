@@ -161,7 +161,17 @@ def validate_embedding_input(
         try:
             # Attempt to convert list/tuple to uint8 array. This will raise an error
             # if values are outside the 0-255 range, as uint8 cannot represent them.
-            arr = np.array(embedding, dtype=np.uint8)
+            import warnings
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                arr = np.array(embedding, dtype=np.uint8)
+                if w and any("out-of-bound" in str(warning.message) for warning in w):
+                    raise validation_error(
+                        f"Cannot convert embedding to uint8 array: overflow. Values must be in range 0-255.",
+                        parameter="embedding",
+                        expected="integers in range 0-255",
+                        received=f"values causing overflow"
+                    )
         except (ValueError, OverflowError) as e:
             raise validation_error(
                 f"Cannot convert embedding to uint8 array: {e}. Values must be in range 0-255.",
