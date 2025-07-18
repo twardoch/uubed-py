@@ -3,8 +3,8 @@
 """Encoders package for uubed - High-performance encoding for embedding vectors."""
 
 # Import encoders for convenient access
-from .q64 import q64_encode, q64_decode
-from .eq64 import eq64_encode, eq64_decode
+from .eq64 import eq64_decode, eq64_encode
+from .q64 import q64_decode, q64_encode
 from .shq64 import simhash_q64
 from .t8q64 import top_k_q64
 from .zoq64 import z_order_q64
@@ -21,12 +21,12 @@ def get_available_encoders() -> list[str]:
 
 
 __all__ = [
-    "q64_encode",
-    "q64_decode",
-    "eq64_encode",
     "eq64_decode",
+    "eq64_encode",
+    "get_available_encoders",
+    "q64_decode",
+    "q64_encode",
     "simhash_q64",
     "top_k_q64",
     "z_order_q64",
-    "get_available_encoders",
 ]

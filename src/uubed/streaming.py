@@ -2,28 +2,25 @@
 # this_file: src/uubed/streaming.py
 """Streaming API for encoding large datasets efficiently with comprehensive validation."""
 
-from typing import Iterator, Union, List, Optional, BinaryIO, Iterable, Any, Dict
-import numpy as np
+from collections.abc import Iterable, Iterator
 from pathlib import Path
+from typing import Any, BinaryIO, Dict, List, Optional, Union
 
-from .api import encode, decode, EncodingMethod
-from .exceptions import (
-    UubedValidationError,
-    UubedResourceError,
-    validation_error,
-    resource_error
-)
+import numpy as np
+
+from .api import EncodingMethod, decode, encode
+from .exceptions import UubedResourceError, UubedValidationError, resource_error, validation_error
 from .validation import (
-    validate_encoding_method,
+    estimate_memory_usage,
     validate_batch_parameters,
+    validate_encoding_method,
     validate_file_path,
     validate_memory_usage,
-    estimate_memory_usage
 )
 
 
 def encode_stream(
-    embeddings: Iterable[Union[bytes, List[int], np.ndarray]],
+    embeddings: Iterable[bytes | list[int] | np.ndarray],
     method: EncodingMethod = "auto",
     batch_size: int = 1000,
     **kwargs: Any
@@ -79,7 +76,7 @@ def encode_stream(
         method = validate_encoding_method(method)
         validated_params = validate_batch_parameters(batch_size=batch_size)
         batch_size = validated_params["batch_size"]
-        
+
         # Ensure the 'embeddings' input is not None, as it must be an iterable.
         if embeddings is None:
             raise validation_error(
@@ -88,16 +85,16 @@ def encode_stream(
                 expected="iterable of embeddings",
                 received="None"
             )
-        
+
         # Initialize a list to hold the current batch of embeddings.
-        batch: List[Union[bytes, List[int], np.ndarray]] = []
+        batch: list[bytes | list[int] | np.ndarray] = []
         total_processed: int = 0 # Keep track of total embeddings processed for error context.
-        
+
         try:
             # Iterate through the provided embeddings iterable.
             for embedding in embeddings:
                 batch.append(embedding)
-                
+
                 # When the batch reaches the specified size, process it.
                 if len(batch) >= batch_size:
                     # Process each embedding in the current batch.
@@ -110,11 +107,11 @@ def encode_stream(
                             # Catch any encoding errors and re-raise with context about the failed embedding.
                             # Note: processed_count is incremented before encode, so it's the *next* embedding number.
                             raise UubedEncodingError(
-                                f"Failed to encode embedding #{total_processed}: {str(e)}",
+                                f"Failed to encode embedding #{total_processed}: {e!s}",
                                 suggestion="Check that all embeddings in the stream are valid and conform to expected formats."
                             ) from e
                     batch = [] # Clear the batch after processing.
-            
+
             # After the loop, process any remaining embeddings in the last (possibly incomplete) batch.
             for emb in batch:
                 try:
@@ -123,19 +120,19 @@ def encode_stream(
                 except Exception as e:
                     # Catch any encoding errors for remaining embeddings and re-raise with context.
                     raise UubedEncodingError(
-                        f"Failed to encode embedding #{total_processed}: {str(e)}",
+                        f"Failed to encode embedding #{total_processed}: {e!s}",
                         suggestion="Check that all embeddings in the stream are valid and conform to expected formats."
                     ) from e
-                    
+
         except TypeError as e:
             # Specifically catch TypeError if 'embeddings' is not iterable, providing a clearer error message.
             raise validation_error(
-                f"Embeddings parameter is not iterable: {str(e)}",
+                f"Embeddings parameter is not iterable: {e!s}",
                 parameter="embeddings",
                 expected="iterable of embeddings (list, generator, etc.)",
                 received=f"{type(embeddings).__name__}"
             ) from e
-            
+
     except UubedValidationError:
         # Re-raise validation errors directly as they are specific and informative.
         raise
@@ -143,15 +140,15 @@ def encode_stream(
         # Catch any other unexpected errors during the streaming process
         # and wrap them in a UubedResourceError for consistent error handling.
         raise UubedResourceError(
-            f"An unexpected error occurred during streaming encoding: {str(e)}",
+            f"An unexpected error occurred during streaming encoding: {e!s}",
             resource_type="stream",
             suggestion="Check input data format, available memory, and ensure the underlying encoder is functioning correctly."
         ) from e
 
 
 def encode_file_stream(
-    input_path: Union[str, Path],
-    output_path: Optional[Union[str, Path]] = None,
+    input_path: str | Path,
+    output_path: str | Path | None = None,
     method: EncodingMethod = "auto",
     embedding_size: int = 768,
     **kwargs: Any
@@ -202,7 +199,7 @@ def encode_file_stream(
     try:
         # Validate the encoding method.
         method = validate_encoding_method(method)
-        
+
         # Validate the embedding_size parameter.
         if not isinstance(embedding_size, int):
             raise validation_error(
@@ -211,7 +208,7 @@ def encode_file_stream(
                 expected="positive integer (bytes per embedding)",
                 received=f"{type(embedding_size).__name__}"
             )
-        
+
         if embedding_size <= 0:
             raise validation_error(
                 "embedding_size must be positive",
@@ -219,7 +216,7 @@ def encode_file_stream(
                 expected="positive integer (typically 128-1536)",
                 received=f"{embedding_size}"
             )
-        
+
         if embedding_size > 100000: # Arbitrary upper limit to prevent extreme values.
             raise validation_error(
                 "embedding_size too large",
@@ -227,13 +224,13 @@ def encode_file_stream(
                 expected="<= 100000 for reasonable processing",
                 received=f"{embedding_size}"
             )
-        
+
         # Validate input and output file paths.
         input_path = validate_file_path(input_path, check_exists=True, check_readable=True)
-        
+
         if output_path is not None:
             output_path = validate_file_path(output_path, check_exists=False, check_writable=True)
-        
+
         # Perform checks on the input file size to ensure it's consistent with embedding_size.
         file_size: int = input_path.stat().st_size
         if file_size % embedding_size != 0:
@@ -245,7 +242,7 @@ def encode_file_stream(
                 required=f"multiple of {embedding_size} bytes",
                 suggestion=f"File has {remaining_bytes} extra bytes. Check if embedding_size is correct or if the file is corrupted."
             )
-        
+
         num_embeddings: int = file_size // embedding_size
         if num_embeddings == 0:
             raise resource_error(
@@ -254,14 +251,14 @@ def encode_file_stream(
                 available=f"{file_size} bytes",
                 required=f">= {embedding_size} bytes"
             )
-        
+
         # Estimate and validate memory usage per embedding to prevent excessive memory allocation.
         memory_estimate: int = estimate_memory_usage(1, embedding_size, method)  # Per embedding
         validate_memory_usage(memory_estimate, f"file streaming with {method}")
-        
+
         # Initialize a counter for processed embeddings.
         processed_count: int = 0
-        
+
         # Open the input file in binary read mode.
         with open(input_path, "rb") as f:
             if output_path:
@@ -273,7 +270,7 @@ def encode_file_stream(
                         if not embedding_bytes_read:
                             # Break loop if end of file is reached.
                             break
-                        
+
                         # Check if the read chunk has the expected size.
                         if len(embedding_bytes_read) != embedding_size:
                             raise resource_error(
@@ -283,7 +280,7 @@ def encode_file_stream(
                                 required=f"{embedding_size} bytes",
                                 suggestion="File may be truncated or embedding_size may be incorrect. Ensure the binary file is correctly formed."
                             )
-                        
+
                         try:
                             # Encode the read embedding bytes.
                             encoded: str = encode(embedding_bytes_read, method=method, **kwargs)
@@ -294,7 +291,7 @@ def encode_file_stream(
                         except Exception as e:
                             # Catch and re-raise any encoding errors with context.
                             raise UubedEncodingError(
-                                f"Failed to encode embedding #{processed_count} from file: {str(e)}",
+                                f"Failed to encode embedding #{processed_count} from file: {e!s}",
                                 suggestion="Check embedding data format within the file and the provided encoding parameters."
                             ) from e
             else:
@@ -303,7 +300,7 @@ def encode_file_stream(
                     embedding_bytes_read = f.read(embedding_size)
                     if not embedding_bytes_read:
                         break
-                    
+
                     if len(embedding_bytes_read) != embedding_size:
                         raise resource_error(
                             f"Incomplete embedding read at position {processed_count + 1}. Expected {embedding_size} bytes, got {len(embedding_bytes_read)} bytes.",
@@ -312,17 +309,17 @@ def encode_file_stream(
                             required=f"{embedding_size} bytes",
                             suggestion="File may be truncated or embedding_size may be incorrect. Ensure the binary file is correctly formed."
                         )
-                    
+
                     try:
                         processed_count += 1
                         yield encode(embedding_bytes_read, method=method, **kwargs)
                     except Exception as e:
                         # Catch and re-raise any encoding errors with context.
                         raise UubedValidationError(
-                            f"Failed to encode embedding #{processed_count} from file: {str(e)}",
+                            f"Failed to encode embedding #{processed_count} from file: {e!s}",
                             suggestion="Check embedding data format within the file and the provided encoding parameters."
                         ) from e
-                        
+
     except UubedValidationError:
         # Re-raise validation errors directly.
         raise
@@ -333,7 +330,7 @@ def encode_file_stream(
         # Catch any other unexpected errors during file streaming
         # and wrap them in a UubedResourceError for consistent error handling.
         raise UubedResourceError(
-            f"An unexpected error occurred during file streaming: {str(e)}",
+            f"An unexpected error occurred during file streaming: {e!s}",
             resource_type="file",
             suggestion="Check file permissions, file format, and ensure the underlying encoder is functioning correctly."
         ) from e
@@ -341,7 +338,7 @@ def encode_file_stream(
 
 def decode_stream(
     encoded_strings: Iterable[str],
-    method: Optional[EncodingMethod] = None,
+    method: EncodingMethod | None = None,
 ) -> Iterator[bytes]:
     """
     Decode a stream of encoded strings back to their original byte representations.
@@ -373,11 +370,11 @@ def decode_stream(
 
 
 def batch_encode(
-    embeddings: List[Union[bytes, List[int], np.ndarray]],
+    embeddings: list[bytes | list[int] | np.ndarray],
     method: EncodingMethod = "auto",
-    n_workers: Optional[int] = None,
+    n_workers: int | None = None,
     **kwargs: Any
-) -> List[str]:
+) -> list[str]:
     """
     Encode a list of embedding vectors in a batch with comprehensive validation and error handling.
     
@@ -417,7 +414,7 @@ def batch_encode(
     try:
         # Validate the encoding method.
         method = validate_encoding_method(method)
-        
+
         # Validate that 'embeddings' is a non-empty list.
         if not isinstance(embeddings, list):
             raise validation_error(
@@ -426,7 +423,7 @@ def batch_encode(
                 expected="list of embeddings",
                 received=f"{type(embeddings).__name__}"
             )
-        
+
         if len(embeddings) == 0:
             raise validation_error(
                 "embeddings list cannot be empty",
@@ -434,7 +431,7 @@ def batch_encode(
                 expected="non-empty list of embeddings",
                 received="empty list"
             )
-        
+
         # Validate the 'n_workers' parameter, though it's currently unused.
         if n_workers is not None:
             if not isinstance(n_workers, int):
@@ -451,27 +448,25 @@ def batch_encode(
                     expected="positive integer",
                     received=f"{n_workers}"
                 )
-        
+
         # Estimate and validate memory usage for the entire batch.
         # This assumes all embeddings in the batch are of similar size to the first one.
         if embeddings:
-            first_emb: Union[bytes, List[int], np.ndarray] = embeddings[0]
+            first_emb: bytes | list[int] | np.ndarray = embeddings[0]
             emb_size: int
             if isinstance(first_emb, np.ndarray):
                 emb_size = first_emb.size
-            elif isinstance(first_emb, (list, tuple)):
-                emb_size = len(first_emb)
-            elif isinstance(first_emb, bytes):
+            elif isinstance(first_emb, (list, tuple)) or isinstance(first_emb, bytes):
                 emb_size = len(first_emb)
             else:
                 # Fallback for unexpected types, a conservative estimate.
-                emb_size = 256  
-            
+                emb_size = 256
+
             memory_estimate: int = estimate_memory_usage(len(embeddings), emb_size, method)
             validate_memory_usage(memory_estimate, f"batch encoding {len(embeddings)} embeddings")
-        
+
         # Process each embedding in the list sequentially.
-        results: List[str] = []
+        results: list[str] = []
         for i, emb in enumerate(embeddings):
             try:
                 # Encode the individual embedding. The `encode` function handles its own validation.
@@ -480,12 +475,12 @@ def batch_encode(
             except Exception as e:
                 # Catch any encoding errors and re-raise with context about the failed embedding.
                 raise UubedEncodingError(
-                    f"Failed to encode embedding #{i} of {len(embeddings)}: {str(e)}",
+                    f"Failed to encode embedding #{i} of {len(embeddings)}: {e!s}",
                     suggestion="Check that all embeddings in the batch are valid and uniform in format."
                 ) from e
-        
+
         return results
-        
+
     except UubedValidationError:
         # Re-raise validation errors directly.
         raise
@@ -496,7 +491,7 @@ def batch_encode(
         # Catch any other unexpected errors during batch encoding
         # and wrap them in a UubedResourceError for consistent error handling.
         raise UubedResourceError(
-            f"An unexpected error occurred during batch encoding: {str(e)}",
+            f"An unexpected error occurred during batch encoding: {e!s}",
             resource_type="memory", # Assuming memory is the most common resource issue for batches.
             suggestion="Check input data format, available memory, and ensure the underlying encoder is functioning correctly."
         ) from e
@@ -527,10 +522,10 @@ class StreamingEncoder:
         ...     result = encoder.encode(embedding)
         ...     print(f"Result: {result[:50]}...")
     """
-    
+
     def __init__(
         self,
-        output_path: Optional[Union[str, Path]] = None,
+        output_path: str | Path | None = None,
         method: EncodingMethod = "auto",
         **kwargs: Any
     ):
@@ -562,7 +557,7 @@ class StreamingEncoder:
             # Validate and store the output file path. If provided, ensure it's a valid
             # path and that the application has write permissions to it.
             if output_path is not None:
-                self.output_path: Optional[Path] = validate_file_path(
+                self.output_path: Path | None = validate_file_path(
                     output_path,
                     check_exists=False,  # We don't expect the file to exist yet
                     check_writable=True  # But we must be able to write to its directory
@@ -571,10 +566,10 @@ class StreamingEncoder:
                 self.output_path = None
 
             # Store any additional keyword arguments. These will be passed to the `encode` function.
-            self.kwargs: Dict[str, Any] = kwargs
+            self.kwargs: dict[str, Any] = kwargs
 
             # Initialize internal state variables.
-            self.output_file: Optional[BinaryIO] = None  # File handle for writing, initialized in __enter__.
+            self.output_file: BinaryIO | None = None  # File handle for writing, initialized in __enter__.
             self.encoded_count: int = 0  # Counter for successfully encoded embeddings.
             self._is_open: bool = False  # Internal flag to track if the encoder is active within a context.
 
@@ -585,7 +580,7 @@ class StreamingEncoder:
             # Catch any other unexpected exceptions during the initialization process
             # and wrap them in a UubedValidationError for consistent error handling.
             raise UubedValidationError(
-                f"Failed to initialize StreamingEncoder: {str(e)}",
+                f"Failed to initialize StreamingEncoder: {e!s}",
                 suggestion="Check output path permissions, encoding parameters, and ensure valid inputs."
             ) from e
 
@@ -616,12 +611,12 @@ class StreamingEncoder:
             # Catch any exception that occurs during file opening and re-raise it
             # as a UubedResourceError, providing context about the failure.
             raise resource_error(
-                f"Cannot open output file '{self.output_path}': {str(e)}",
+                f"Cannot open output file '{self.output_path}': {e!s}",
                 resource_type="file",
                 suggestion="Check file permissions, ensure the path is valid, and verify disk space."
             ) from e
 
-    def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception], exc_tb: Optional[Any]) -> None:
+    def __exit__(self, exc_type: type | None, exc_val: Exception | None, exc_tb: Any | None) -> None:
         """
         Exits the runtime context related to this object.
 
@@ -649,7 +644,7 @@ class StreamingEncoder:
             finally:
                 self.output_file = None  # Explicitly clear the file handle.
 
-    def encode(self, embedding: Union[bytes, List[int], np.ndarray]) -> str:
+    def encode(self, embedding: bytes | list[int] | np.ndarray) -> str:
         """
         Encodes a single embedding using the configured method.
 
@@ -696,7 +691,7 @@ class StreamingEncoder:
                 except Exception as e:
                     # Catch any file writing errors and re-raise them as a resource error.
                     raise resource_error(
-                        f"Failed to write encoded data to output file: {str(e)}",
+                        f"Failed to write encoded data to output file: {e!s}",
                         resource_type="file",
                         suggestion="Check disk space, file permissions, and ensure the output path is valid."
                     ) from e
@@ -719,7 +714,7 @@ class StreamingEncoder:
             # So, `self.encoded_count` is the index of the *next* embedding to be processed.
             # Therefore, `self.encoded_count` is the correct index for the currently failing embedding.
             raise UubedEncodingError(
-                f"An unexpected error occurred while encoding embedding #{self.encoded_count}: {str(e)}",
+                f"An unexpected error occurred while encoding embedding #{self.encoded_count}: {e!s}",
                 method=self.method,
                 suggestion="Check the format of the embedding and the encoding parameters. Report this issue if it persists."
             ) from e
@@ -752,7 +747,7 @@ class StreamingEncoder:
         """
         return self._is_open
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         Retrieves a dictionary of operational statistics for the StreamingEncoder instance.
 

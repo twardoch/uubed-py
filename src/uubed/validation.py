@@ -9,20 +9,15 @@ batch processing configurations, file paths, memory usage, and GPU parameters.
 """
 
 import sys
-from typing import Any, Union, List, Tuple, Optional, Dict, TypeVar
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+
 import numpy as np
 
-from .exceptions import (
-    UubedValidationError, 
-    UubedResourceError,
-    validation_error,
-    resource_error
-)
-
+from .exceptions import UubedResourceError, UubedValidationError, resource_error, validation_error
 
 # Type definitions for embedding inputs to improve readability and type checking.
-EmbeddingInput = Union[List[int], np.ndarray, bytes]
+EmbeddingInput = Union[list[int], np.ndarray, bytes]
 
 
 def validate_encoding_method(method: str) -> str:
@@ -61,10 +56,10 @@ def validate_encoding_method(method: str) -> str:
             expected="string (eq64, shq64, t8q64, zoq64, mq64, or auto)",
             received=f"{type(method).__name__}"
         )
-    
+
     method = method.lower().strip()
     valid_methods: set[str] = {'eq64', 'shq64', 't8q64', 'zoq64', 'mq64', 'auto'}
-    
+
     if method not in valid_methods:
         raise validation_error(
             f"Unknown encoding method: '{method}'",
@@ -72,7 +67,7 @@ def validate_encoding_method(method: str) -> str:
             expected="one of: " + ", ".join(sorted(valid_methods)),
             received=method
         )
-    
+
     return method
 
 
@@ -147,7 +142,7 @@ def validate_embedding_input(
             expected="array-like of integers 0-255, or bytes",
             received="None"
         )
-    
+
     # Step 2: Convert various input types to a NumPy array for consistent processing.
     arr: np.ndarray
     if isinstance(embedding, (list, tuple)):
@@ -167,23 +162,23 @@ def validate_embedding_input(
                 arr = np.array(embedding, dtype=np.uint8)
                 if w and any("out-of-bound" in str(warning.message) for warning in w):
                     raise validation_error(
-                        f"Cannot convert embedding to uint8 array: overflow. Values must be in range 0-255.",
+                        "Cannot convert embedding to uint8 array: overflow. Values must be in range 0-255.",
                         parameter="embedding",
                         expected="integers in range 0-255",
-                        received=f"values causing overflow"
+                        received="values causing overflow"
                     )
         except (ValueError, OverflowError) as e:
             raise validation_error(
                 f"Cannot convert embedding to uint8 array: {e}. Values must be in range 0-255.",
                 parameter="embedding",
                 expected="integers in range 0-255",
-                received=f"values causing overflow/error: {str(e)}"
+                received=f"values causing overflow/error: {e!s}"
             )
     elif isinstance(embedding, bytes):
         if len(embedding) == 0:
             raise validation_error(
                 "Embedding cannot be empty",
-                parameter="embedding", 
+                parameter="embedding",
                 expected="non-empty bytes",
                 received="empty bytes"
             )
@@ -197,7 +192,7 @@ def validate_embedding_input(
                 expected="non-empty numpy array",
                 received="empty array"
             )
-        
+
         # Handle different NumPy array dtypes and convert to uint8 if necessary.
         if embedding.dtype != np.uint8:
             if embedding.dtype in [np.float32, np.float64]:
@@ -244,11 +239,11 @@ def validate_embedding_input(
             expected="list, tuple, bytes, or numpy array",
             received=f"{type(embedding).__name__}"
         )
-    
+
     # Step 3: Perform method-specific dimension validation.
     # This ensures that the embedding's size is appropriate for the chosen encoding method.
     _validate_embedding_dimensions(arr, method)
-    
+
     return arr
 
 
@@ -296,13 +291,13 @@ def _validate_embedding_dimensions(
     if method == 'auto':
         # Dimension validation is skipped for 'auto' method as it dynamically adapts to input.
         return
-    
+
     size: int = embedding.size
-    
+
     # Define method-specific dimension requirements.
     # Each entry specifies: min_size, max_size (arbitrary upper limits to catch extreme inputs),
     # and descriptive constraints for better error messages.
-    dimension_requirements: Dict[str, Dict[str, Any]] = {
+    dimension_requirements: dict[str, dict[str, Any]] = {
         'eq64': {
             'min_size': 1,
             'max_size': 100000,  # A reasonable upper limit to prevent excessively large inputs.
@@ -329,7 +324,7 @@ def _validate_embedding_dimensions(
             'constraints': "any positive size, typically with hierarchical structure"
         }
     }
-    
+
     if method in dimension_requirements:
         req = dimension_requirements[method]
         # Check if embedding size is below the minimum requirement for the method.
@@ -344,7 +339,7 @@ def _validate_embedding_dimensions(
         if size > req['max_size']:
             raise validation_error(
                 f"Embedding size ({size}) is too large for the '{method}' method.",
-                parameter="embedding", 
+                parameter="embedding",
                 expected=f"size <= {req['max_size']} ({req['constraints']})",
                 received=f"size {size}"
             )
@@ -353,7 +348,7 @@ def _validate_embedding_dimensions(
 def validate_method_parameters(
     method: str,
     **kwargs: Any
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Validates method-specific parameters passed as keyword arguments.
 
@@ -401,8 +396,8 @@ def validate_method_parameters(
         ...     print(e)
         # Expected: Unknown parameters for 'eq64' method: some_param
     """
-    validated_params: Dict[str, Any] = {}
-    
+    validated_params: dict[str, Any] = {}
+
     if method == 'shq64':
         # Validate 'planes' parameter for shq64 method.
         planes: int = kwargs.get('planes', 64) # Default value for planes if not provided.
@@ -417,7 +412,7 @@ def validate_method_parameters(
             raise validation_error(
                 "'planes' parameter must be positive",
                 parameter="planes",
-                expected="positive integer, multiple of 8", 
+                expected="positive integer, multiple of 8",
                 received=f"{planes}"
             )
         if planes % 8 != 0:
@@ -435,7 +430,7 @@ def validate_method_parameters(
                 received=f"{planes}"
             )
         validated_params['planes'] = planes
-    
+
     elif method == 't8q64':
         # Validate 'k' parameter for t8q64 method.
         k: int = kwargs.get('k', 8) # Default value for k if not provided.
@@ -455,7 +450,7 @@ def validate_method_parameters(
             )
         if k > 1000:
             raise validation_error(
-                "'k' parameter too large", 
+                "'k' parameter too large",
                 parameter="k",
                 expected="<= 1000 for reasonable performance",
                 received=f"{k}"
@@ -464,7 +459,7 @@ def validate_method_parameters(
 
     elif method == 'mq64':
         # Validate 'levels' parameter for mq64 method.
-        levels: Optional[List[int]] = kwargs.get('levels', None)
+        levels: list[int] | None = kwargs.get('levels')
         if levels is not None:
             if not isinstance(levels, list) or not all(isinstance(l, int) and l > 0 for l in levels):
                 raise validation_error(
@@ -481,10 +476,10 @@ def validate_method_parameters(
                     received=f"{levels}"
                 )
         validated_params['levels'] = levels
-    
+
     # Define known parameters for each method to catch unknown/unsupported arguments.
     # This helps in providing clear error messages for misconfigured parameters.
-    known_params: Dict[str, set[str]] = {
+    known_params: dict[str, set[str]] = {
         'shq64': {'planes'},
         't8q64': {'k'},
         'mq64': {'levels'},
@@ -492,7 +487,7 @@ def validate_method_parameters(
         'zoq64': set(), # zoq64 has no specific parameters.
         'auto': set()   # 'auto' method does not have specific parameters.
     }
-    
+
     # Check for any unknown parameters provided for the given method.
     if method in known_params:
         unknown_params: set[str] = set(kwargs.keys()) - known_params[method]
@@ -503,14 +498,14 @@ def validate_method_parameters(
                 expected=f"valid parameters: {', '.join(known_params[method]) or 'none'}",
                 received=f"unknown: {', '.join(unknown_params)}"
             )
-    
+
     return validated_params
 
 
 def validate_batch_parameters(
-    batch_size: Optional[int] = None, 
-    max_memory_mb: Optional[int] = None
-) -> Dict[str, Any]:
+    batch_size: int | None = None,
+    max_memory_mb: int | None = None
+) -> dict[str, Any]:
     """
     Validates parameters related to batch processing operations.
 
@@ -558,8 +553,8 @@ def validate_batch_parameters(
         ...     print(e)
         # Expected: 'max_memory_mb' must be an integer
     """
-    validated: Dict[str, Any] = {}
-    
+    validated: dict[str, Any] = {}
+
     if batch_size is not None:
         if not isinstance(batch_size, int):
             raise validation_error(
@@ -583,7 +578,7 @@ def validate_batch_parameters(
                 received=f"{batch_size}"
             )
         validated['batch_size'] = batch_size
-    
+
     if max_memory_mb is not None:
         if not isinstance(max_memory_mb, int):
             raise validation_error(
@@ -600,12 +595,12 @@ def validate_batch_parameters(
                 received=f"{max_memory_mb}"
             )
         validated['max_memory_mb'] = max_memory_mb
-    
+
     return validated
 
 
 def validate_file_path(
-    path: Union[str, Path], 
+    path: str | Path,
     check_exists: bool = True,
     check_readable: bool = True,
     check_writable: bool = False
@@ -687,9 +682,9 @@ def validate_file_path(
             expected="string or pathlib.Path",
             received=f"{type(path).__name__}"
         )
-    
+
     path_obj: Path = Path(path)
-    
+
     # Step 1: Check if the path exists if required.
     if check_exists and not path_obj.exists():
         raise resource_error(
@@ -697,7 +692,7 @@ def validate_file_path(
             resource_type="file",
             suggestion="Check the provided path for typos or ensure the file/directory exists."
         )
-    
+
     # Step 2: If checking for existence and readability, ensure it's a file.
     # This prevents attempting to read directories as files.
     if check_exists and check_readable and not path_obj.is_file():
@@ -706,7 +701,7 @@ def validate_file_path(
             resource_type="file",
             suggestion="The path exists but is not a regular file. Provide a path to a file."
         )
-    
+
     # Step 3: Check if the file is readable if required.
     if check_exists and check_readable:
         try:
@@ -726,7 +721,7 @@ def validate_file_path(
                 resource_type="file",
                 suggestion="Ensure the file is not corrupted, locked, or in an inaccessible state."
             ) from e
-    
+
     # Step 4: Check if the file or its parent directory is writable if required.
     if check_writable:
         if path_obj.exists():
@@ -785,14 +780,14 @@ def validate_file_path(
                     resource_type="directory",
                     suggestion="Ensure there is sufficient disk space and no other issues preventing file creation."
                 ) from e
-    
+
     return path_obj
 
 
 def validate_memory_usage(
-    estimated_bytes: int, 
+    estimated_bytes: int,
     operation: str = "operation",
-    max_bytes: Optional[int] = None
+    max_bytes: int | None = None
 ) -> None:
     """
     Validates that an operation's estimated memory usage does not exceed a specified limit.
@@ -837,7 +832,7 @@ def validate_memory_usage(
     # Set a default maximum memory limit if not explicitly provided. (1GB)
     if max_bytes is None:
         max_bytes = 1024 * 1024 * 1024  # 1 GB in bytes
-    
+
     # Compare the estimated memory usage against the maximum allowed. If it exceeds, raise an error.
     if estimated_bytes > max_bytes:
         raise UubedResourceError(
@@ -850,7 +845,7 @@ def validate_memory_usage(
 
 
 def estimate_memory_usage(
-    embedding_count: int, 
+    embedding_count: int,
     embedding_size: int,
     method: str
 ) -> int:
@@ -891,10 +886,10 @@ def estimate_memory_usage(
     """
     # Calculate the base memory consumption for storing the raw embeddings.
     base_memory: int = embedding_count * embedding_size
-    
+
     # Define multipliers to account for method-specific overhead.
     # These are approximate values based on typical memory patterns for each encoding type.
-    method_multipliers: Dict[str, float] = {
+    method_multipliers: dict[str, float] = {
         'eq64': 2.0,    # Lossless encoding often involves string conversion, roughly doubling size.
         'shq64': 1.5,   # SimHash involves matrix operations, but output is compact.
         't8q64': 1.2,   # Top-k involves sorting/selection, relatively low overhead.
@@ -902,15 +897,15 @@ def estimate_memory_usage(
         'mq64': 2.5,    # Matryoshka might have higher overhead due to hierarchical processing and string concatenation.
         'auto': 2.5     # Assume worst-case overhead for auto-detection to be safe.
     }
-    
+
     # Retrieve the appropriate multiplier for the given method, defaulting to 2.0 if not found.
     multiplier: float = method_multipliers.get(method, 2.0)
-    
+
     # Return the estimated total memory usage, rounded to an integer.
     return int(base_memory * multiplier)
 
 
-def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
+def validate_gpu_parameters(device_id: int | None = None) -> dict[str, Any]:
     """
     Validates GPU-related parameters and checks for GPU availability.
 
@@ -966,8 +961,8 @@ def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
         >>> #     print(e)
         # Expected: GPU device 99 not available.
     """
-    validated: Dict[str, Any] = {}
-    
+    validated: dict[str, Any] = {}
+
     # Step 1: Attempt to import `cupy` to check for GPU availability.
     try:
         import cupy as cp
@@ -979,7 +974,7 @@ def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
             resource_type="gpu",
             suggestion="Install CuPy: `pip install cupy-cuda11x` (or appropriate CUDA version for your system)."
         )
-    
+
     # Step 2: If a specific `device_id` is provided, validate it.
     if device_id is not None:
         if not isinstance(device_id, int):
@@ -992,11 +987,11 @@ def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
         if device_id < 0:
             raise validation_error(
                 "'device_id' must be non-negative",
-                parameter="device_id", 
+                parameter="device_id",
                 expected="non-negative integer",
                 received=f"{device_id}"
             )
-        
+
         # Step 3: Check if the specified `device_id` corresponds to an actually available GPU.
         try:
             # Get the total number of available CUDA devices reported by CuPy.
@@ -1016,7 +1011,7 @@ def validate_gpu_parameters(device_id: Optional[int] = None) -> Dict[str, Any]:
                 resource_type="gpu",
                 suggestion="Ensure CUDA drivers are correctly installed and the GPU is functioning."
             ) from e
-        
+
         validated['device_id'] = device_id
-    
+
     return validated

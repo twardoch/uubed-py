@@ -37,9 +37,11 @@ likely to have the same sign, leading to similar (or identical) SimHash codes.
   of the generated hyperplanes. A fixed seed is used for reproducibility.
 """
 
-import numpy as np
-from .q64 import q64_encode
 from typing import List, Union
+
+import numpy as np
+
+from .q64 import q64_encode
 
 
 def simhash_q64(
@@ -140,7 +142,7 @@ def simhash_q64(
     # Pack the individual bits into 8-bit bytes.
     # This loop iterates through the `bits` array, taking 8 bits at a time
     # to construct each byte. The bits are arranged from most significant (MSB) to least significant (LSB).
-    byte_data: List[int] = []
+    byte_data: list[int] = []
     for i in range(0, len(bits), 8):
         byte_val: int = 0
         # For each group of 8 bits, construct a single byte.

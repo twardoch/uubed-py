@@ -35,11 +35,12 @@ encoded data or the ability to perfectly reconstruct the original bytes.
   an encoding scheme for representation.
 """
 
-from .q64 import q64_encode, q64_decode
-from typing import Union, List
+from typing import List, Union
+
+from .q64 import q64_decode, q64_encode
 
 
-def eq64_encode(data: Union[bytes, List[int]]) -> str:
+def eq64_encode(data: bytes | list[int]) -> str:
     """
     Encodes a byte sequence or a list of integers into an Eq64 string with dot separators.
 
@@ -78,7 +79,7 @@ def eq64_encode(data: Union[bytes, List[int]]) -> str:
     # Step 2: Insert dots into the base_encoded string for visual readability.
     # The dots are inserted every 8 characters. A list of characters is used
     # for efficient string building, then joined at the end.
-    result: List[str] = []
+    result: list[str] = []
     for i, char in enumerate(base_encoded):
         # Insert a dot before every 8th character, but not at the very beginning of the string.
         if i > 0 and i % 8 == 0:

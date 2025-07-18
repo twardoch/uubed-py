@@ -32,11 +32,13 @@ retrieval and comparison at different resolutions.
   for very large embeddings or numerous levels.
 """
 from typing import List, Optional, Union
-from .q64 import q64_encode, q64_decode
+
+from .q64 import q64_decode, q64_encode
+
 
 def mq64_encode(
-    data: Union[bytes, bytearray],
-    levels: Optional[List[int]] = None
+    data: bytes | bytearray,
+    levels: list[int] | None = None
 ) -> str:
     """
     Encodes input data into a Matryoshka QuadB64 (Mq64) string.
@@ -90,14 +92,14 @@ def mq64_encode(
         levels.append(length) # Always include the full length as the last level.
 
     # Encode each specified level (prefix) of the data.
-    parts: List[str] = []
+    parts: list[str] = []
     for lvl in levels:
         # Only encode levels that are less than or equal to the actual data length.
         if lvl <= length:
             # Encode the prefix of the data up to the current level's length.
             # q64_encode handles the conversion of bytes to q64 string.
             parts.append(q64_encode(data[:lvl]))
-    
+
     # Join the encoded parts with a colon to form the final Mq64 string.
     return ":".join(parts)
 
@@ -146,12 +148,12 @@ def mq64_decode(
     """
     # Split the encoded string by the colon delimiter to get individual q64 segments.
     # If the input string is empty, `segments` will be an empty list.
-    segments: List[str] = encoded.split(':') if encoded else []
+    segments: list[str] = encoded.split(':') if encoded else []
 
     # If there are any segments, decode the last one. The last segment typically
     # represents the most detailed or full encoding of the original data.
     if segments:
         return q64_decode(segments[-1])  # Decode the last (full) level using the base q64 decoder.
-    
+
     # If no segments are found (e.g., empty input string), return an empty bytes object.
     return b''

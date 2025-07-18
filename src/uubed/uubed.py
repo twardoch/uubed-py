@@ -11,10 +11,10 @@ for embedding encoding is implemented in other modules (e.g., `api.py`, `encoder
 Created by Adam Twardoch
 """
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-import logging
 
 __version__ = "0.1.0"
 
@@ -43,16 +43,16 @@ class Config:
                                             Defaults to `None`.
     """
     name: str
-    value: Union[str, int, float]
-    options: Optional[Dict[str, Any]] = None
+    value: str | int | float
+    options: dict[str, Any] | None = None
 
 
 def process_data(
-    data: List[Any],
-    config: Optional[Config] = None,
+    data: list[Any],
+    config: Config | None = None,
     *, # Enforce keyword-only arguments after this point
     debug: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Processes the input data according to specified configuration.
 
@@ -110,9 +110,9 @@ def process_data(
     # - Applying transformations based on `config.value` or `config.options`.
     # - Performing calculations or analyses.
     # - Storing results in the `result` dictionary.
-    
+
     # Placeholder result.
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
     logger.info("Data processing logic is a placeholder and returned an empty result.")
     return result
 
@@ -132,7 +132,7 @@ def main() -> None:
             value="example_value",
             options={"setting_a": 123, "setting_b": "abc"}
         )
-        
+
         # Example data for processing. Using non-empty data to avoid immediate ValueError.
         example_data = ["item1", "item2", "item3"]
 
@@ -152,7 +152,7 @@ def main() -> None:
         # Catch and log any unexpected exceptions that occur during the main execution flow.
         logger.error("An unexpected error occurred in main execution: %s", str(e), exc_info=True)
         # Re-raise the exception after logging for external handling or debugging.
-        raise 
+        raise
 
 
 if __name__ == "__main__":

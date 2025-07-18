@@ -4,18 +4,18 @@ Custom exception hierarchy for uubed package.
 Provides detailed error messages with user guidance and error codes for programmatic handling.
 """
 
-from typing import Optional, Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class UubedError(Exception):
     """Base exception for all uubed-related errors."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        suggestion: Optional[str] = None, 
-        error_code: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        self,
+        message: str,
+        suggestion: str | None = None,
+        error_code: str | None = None,
+        context: dict[str, Any] | None = None
     ):
         """
         Initialize a UubedError.
@@ -29,27 +29,27 @@ class UubedError(Exception):
         self.suggestion = suggestion
         self.error_code = error_code
         self.context = context or {}
-        
+
         # Format the complete error message
         full_message = message
         if suggestion:
             full_message += f"\n\nSuggestion: {suggestion}"
         if error_code:
             full_message += f"\nError Code: {error_code}"
-            
+
         super().__init__(full_message)
 
 
 class UubedValidationError(UubedError):
     """Raised when input validation fails."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        parameter: Optional[str] = None,
-        expected: Optional[str] = None,
-        received: Optional[str] = None,
-        suggestion: Optional[str] = None
+        self,
+        message: str,
+        parameter: str | None = None,
+        expected: str | None = None,
+        received: str | None = None,
+        suggestion: str | None = None
     ):
         """
         Initialize a validation error.
@@ -68,13 +68,13 @@ class UubedValidationError(UubedError):
             context['expected'] = expected
         if received:
             context['received'] = received
-            
+
         # Enhanced message with parameter details
         if parameter and expected and received:
             enhanced_message = f"{message}\nParameter '{parameter}': expected {expected}, got {received}"
         else:
             enhanced_message = message
-            
+
         super().__init__(
             enhanced_message,
             suggestion=suggestion,
@@ -85,13 +85,13 @@ class UubedValidationError(UubedError):
 
 class UubedEncodingError(UubedError):
     """Raised when encoding operations fail."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        method: Optional[str] = None,
-        embedding_shape: Optional[tuple] = None,
-        suggestion: Optional[str] = None
+        self,
+        message: str,
+        method: str | None = None,
+        embedding_shape: tuple | None = None,
+        suggestion: str | None = None
     ):
         """
         Initialize an encoding error.
@@ -107,13 +107,13 @@ class UubedEncodingError(UubedError):
             context['method'] = method
         if embedding_shape:
             context['embedding_shape'] = embedding_shape
-            
+
         # Enhanced message with method details
         if method:
             enhanced_message = f"Encoding failed with method '{method}': {message}"
         else:
             enhanced_message = f"Encoding failed: {message}"
-            
+
         super().__init__(
             enhanced_message,
             suggestion=suggestion,
@@ -124,13 +124,13 @@ class UubedEncodingError(UubedError):
 
 class UubedDecodingError(UubedError):
     """Raised when decoding operations fail."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        method: Optional[str] = None,
-        encoded_string: Optional[str] = None,
-        suggestion: Optional[str] = None
+        self,
+        message: str,
+        method: str | None = None,
+        encoded_string: str | None = None,
+        suggestion: str | None = None
     ):
         """
         Initialize a decoding error.
@@ -150,13 +150,13 @@ class UubedDecodingError(UubedError):
                 context['encoded_string'] = encoded_string[:100] + "..."
             else:
                 context['encoded_string'] = encoded_string
-                
+
         # Enhanced message with method details
         if method:
             enhanced_message = f"Decoding failed with method '{method}': {message}"
         else:
             enhanced_message = f"Decoding failed: {message}"
-            
+
         super().__init__(
             enhanced_message,
             suggestion=suggestion,
@@ -167,14 +167,14 @@ class UubedDecodingError(UubedError):
 
 class UubedResourceError(UubedError):
     """Raised when resource management fails (memory, files, GPU, etc.)."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        resource_type: Optional[str] = None,
-        available: Optional[str] = None,
-        required: Optional[str] = None,
-        suggestion: Optional[str] = None
+        self,
+        message: str,
+        resource_type: str | None = None,
+        available: str | None = None,
+        required: str | None = None,
+        suggestion: str | None = None
     ):
         """
         Initialize a resource error.
@@ -193,13 +193,13 @@ class UubedResourceError(UubedError):
             context['available'] = available
         if required:
             context['required'] = required
-            
+
         # Enhanced message with resource details
         if resource_type and available and required:
             enhanced_message = f"{message}\n{resource_type}: required {required}, available {available}"
         else:
             enhanced_message = message
-            
+
         super().__init__(
             enhanced_message,
             suggestion=suggestion,
@@ -210,13 +210,13 @@ class UubedResourceError(UubedError):
 
 class UubedConnectionError(UubedError):
     """Raised when external service connections fail."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        service: Optional[str] = None,
-        operation: Optional[str] = None,
-        suggestion: Optional[str] = None
+        self,
+        message: str,
+        service: str | None = None,
+        operation: str | None = None,
+        suggestion: str | None = None
     ):
         """
         Initialize a connection error.
@@ -232,7 +232,7 @@ class UubedConnectionError(UubedError):
             context['service'] = service
         if operation:
             context['operation'] = operation
-            
+
         # Enhanced message with service details
         if service and operation:
             enhanced_message = f"Connection to {service} failed during {operation}: {message}"
@@ -240,7 +240,7 @@ class UubedConnectionError(UubedError):
             enhanced_message = f"Connection to {service} failed: {message}"
         else:
             enhanced_message = f"Connection failed: {message}"
-            
+
         super().__init__(
             enhanced_message,
             suggestion=suggestion,
@@ -251,12 +251,12 @@ class UubedConnectionError(UubedError):
 
 class UubedConfigurationError(UubedError):
     """Raised when configuration or setup issues are detected."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        component: Optional[str] = None,
-        suggestion: Optional[str] = None
+        self,
+        message: str,
+        component: str | None = None,
+        suggestion: str | None = None
     ):
         """
         Initialize a configuration error.
@@ -269,13 +269,13 @@ class UubedConfigurationError(UubedError):
         context = {}
         if component:
             context['component'] = component
-            
+
         # Enhanced message with component details
         if component:
             enhanced_message = f"Configuration error in {component}: {message}"
         else:
             enhanced_message = f"Configuration error: {message}"
-            
+
         super().__init__(
             enhanced_message,
             suggestion=suggestion,
@@ -294,13 +294,13 @@ def validation_error(message: str, parameter: str, expected: str, received: str)
         'shape': "Check the input dimensions and reshape if needed",
         'method': "Use one of the supported encoding methods: eq64, shq64, t8q64, zoq64"
     }
-    
+
     suggestion = None
     for key, value in suggestion_map.items():
         if key in expected.lower() or key in message.lower():
             suggestion = value
             break
-    
+
     return UubedValidationError(
         message=message,
         parameter=parameter,
@@ -310,7 +310,7 @@ def validation_error(message: str, parameter: str, expected: str, received: str)
     )
 
 
-def encoding_error(message: str, method: str, suggestion: Optional[str] = None) -> UubedEncodingError:
+def encoding_error(message: str, method: str, suggestion: str | None = None) -> UubedEncodingError:
     """Create an encoding error with method-specific suggestions."""
     method_suggestions = {
         'eq64': "Ensure embedding values are in range 0-255 and dimensions are valid",
@@ -318,10 +318,10 @@ def encoding_error(message: str, method: str, suggestion: Optional[str] = None) 
         't8q64': "Check the 'k' parameter (must be positive, typically 8-32)",
         'zoq64': "Ensure embedding has valid dimensions (typically powers of 2)"
     }
-    
+
     if not suggestion and method in method_suggestions:
         suggestion = method_suggestions[method]
-    
+
     return UubedEncodingError(
         message=message,
         method=method,
@@ -329,7 +329,7 @@ def encoding_error(message: str, method: str, suggestion: Optional[str] = None) 
     )
 
 
-def resource_error(message: str, resource_type: str, suggestion: Optional[str] = None) -> UubedResourceError:
+def resource_error(message: str, resource_type: str, suggestion: str | None = None) -> UubedResourceError:
     """Create a resource error with type-specific suggestions."""
     resource_suggestions = {
         'memory': "Try reducing batch_size or using streaming operations",
@@ -337,10 +337,10 @@ def resource_error(message: str, resource_type: str, suggestion: Optional[str] =
         'disk': "Check available disk space and file permissions",
         'network': "Check internet connection and service availability"
     }
-    
+
     if not suggestion and resource_type.lower() in resource_suggestions:
         suggestion = resource_suggestions[resource_type.lower()]
-    
+
     return UubedResourceError(
         message=message,
         resource_type=resource_type,
@@ -348,7 +348,7 @@ def resource_error(message: str, resource_type: str, suggestion: Optional[str] =
     )
 
 
-def connection_error(message: str, service: str, suggestion: Optional[str] = None) -> UubedConnectionError:
+def connection_error(message: str, service: str, suggestion: str | None = None) -> UubedConnectionError:
     """Create a connection error with service-specific suggestions."""
     service_suggestions = {
         'pinecone': "Check your API key and environment settings",
@@ -356,10 +356,10 @@ def connection_error(message: str, service: str, suggestion: Optional[str] = Non
         'qdrant': "Check the Qdrant server URL and API key",
         'chromadb': "Ensure ChromaDB is properly installed and configured"
     }
-    
+
     if not suggestion and service.lower() in service_suggestions:
         suggestion = service_suggestions[service.lower()]
-    
+
     return UubedConnectionError(
         message=message,
         service=service,
@@ -368,9 +368,9 @@ def connection_error(message: str, service: str, suggestion: Optional[str] = Non
 
 
 def configuration_error(
-    message: str, 
-    config_file: Optional[str] = None, 
-    suggestion: Optional[str] = None
+    message: str,
+    config_file: str | None = None,
+    suggestion: str | None = None
 ) -> UubedConfigurationError:
     """Create a configuration error with file-specific suggestions."""
     config_suggestions = {
@@ -379,7 +379,7 @@ def configuration_error(
         'missing': "Create a configuration file or check the file path",
         'permissions': "Check file permissions and directory access"
     }
-    
+
     if not suggestion:
         if config_file:
             if '.json' in config_file.lower():
@@ -390,7 +390,7 @@ def configuration_error(
                 suggestion = "Check configuration file syntax and format"
         else:
             suggestion = config_suggestions['missing']
-    
+
     return UubedConfigurationError(
         message=message,
         config_file=config_file,

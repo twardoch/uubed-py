@@ -11,9 +11,11 @@ GPU is not available or for methods that do not significantly benefit from GPU.
 Requires: `pip install cupy-cuda11x` (or appropriate CUDA version for your system).
 """
 
-from typing import Union, List, Optional, Dict, Any, Iterator, Iterable
-import numpy as np
 import struct
+from collections.abc import Iterable, Iterator
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
 
 try:
     import cupy as cp
@@ -38,7 +40,7 @@ def is_gpu_available() -> bool:
     return GPU_AVAILABLE
 
 
-def get_gpu_info() -> Dict[str, Any]:
+def get_gpu_info() -> dict[str, Any]:
     """Retrieve detailed information about the detected GPU(s).
 
     Returns:
@@ -49,13 +51,13 @@ def get_gpu_info() -> Dict[str, Any]:
     """
     if not GPU_AVAILABLE:
         return {"available": False, "reason": "CuPy not installed or no CUDA-enabled GPU detected."}
-    
+
     try:
         # Get information about the current CUDA device.
         device = cp.cuda.Device()
         # Get memory usage information.
         memory_info = cp.cuda.MemoryInfo()
-        
+
         return {
             "available": True,
             "device_count": cp.cuda.runtime.getDeviceCount(),
@@ -68,7 +70,7 @@ def get_gpu_info() -> Dict[str, Any]:
         }
     except Exception as e:
         # Catch any exceptions during GPU info retrieval (e.g., no CUDA context).
-        return {"available": False, "reason": f"Error retrieving GPU info: {str(e)}"}
+        return {"available": False, "reason": f"Error retrieving GPU info: {e!s}"}
 
 
 class GPUEncoder:
@@ -77,7 +79,7 @@ class GPUEncoder:
     This class encapsulates the logic for performing encoding operations directly
     on the GPU using CuPy, leveraging CUDA capabilities for performance.
     """
-    
+
     def __init__(self, device_id: int = 0):
         """
         Initialize the GPUEncoder.
@@ -91,12 +93,12 @@ class GPUEncoder:
         """
         if not GPU_AVAILABLE:
             raise RuntimeError("GPU acceleration not available. Please install CuPy and ensure a CUDA-enabled GPU is present.")
-        
+
         self.device_id: int = device_id
         # Set the current CUDA device for this encoder instance.
         cp.cuda.Device(device_id).use()
-    
-    def _to_gpu(self, data: Union[np.ndarray, List[int]]) -> CupyArray:
+
+    def _to_gpu(self, data: np.ndarray | list[int]) -> CupyArray:
         """Transfers data from CPU (NumPy array or list) to GPU (CuPy array).
 
         Args:
@@ -114,7 +116,7 @@ class GPUEncoder:
             data = data.astype(np.uint8)
         # Transfer the NumPy array to the GPU.
         return cp.asarray(data)
-    
+
     def _to_cpu(self, data: CupyArray) -> np.ndarray:
         """Transfers data from GPU (CuPy array) to CPU (NumPy array).
 
@@ -126,13 +128,13 @@ class GPUEncoder:
         """
         # Transfer the CuPy array back to the CPU as a NumPy array.
         return cp.asnumpy(data)
-    
+
     def batch_simhash_q64_gpu(
         self,
-        embeddings: Union[List[np.ndarray], np.ndarray],
+        embeddings: list[np.ndarray] | np.ndarray,
         planes: int = 64,
         seed: int = 42
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Performs GPU-accelerated batch SimHash (shq64) encoding.
 
@@ -160,28 +162,28 @@ class GPUEncoder:
         else:
             batch_size, embedding_dim = embeddings.shape
             gpu_embeddings = self._to_gpu(embeddings)
-        
+
         # Generate random projection matrix on the GPU for SimHash.
         cp.random.seed(seed)
         rand_vectors: CupyArray = cp.random.normal(size=(planes, embedding_dim), dtype=cp.float32)
-        
+
         # Convert embeddings to float32 and center them for projection.
         gpu_embeddings = gpu_embeddings.astype(cp.float32)
         gpu_embeddings = (gpu_embeddings - 128) / 128
-        
+
         # Perform batch matrix multiplication: (batch_size, embedding_dim) @ (embedding_dim, planes) -> (batch_size, planes).
         projections: CupyArray = gpu_embeddings @ rand_vectors.T
-        
+
         # Get sign bits (1 if positive, 0 if non-positive).
         bits: CupyArray = (projections > 0).astype(cp.uint8)
-        
+
         # Transfer the bits back to CPU for packing into bytes and q64 encoding.
         cpu_bits: np.ndarray = self._to_cpu(bits)
-        
-        results: List[str] = []
+
+        results: list[str] = []
         for i in range(batch_size):
             # Pack 8 bits into a single byte.
-            byte_data: List[int] = []
+            byte_data: list[int] = []
             for j in range(0, planes, 8):
                 byte_val: int = 0
                 for k in range(8):
@@ -189,18 +191,18 @@ class GPUEncoder:
                         # Shift bits into position (MSB first).
                         byte_val |= int(cpu_bits[i, j + k]) << (7 - k)
                 byte_data.append(byte_val)
-            
+
             # Encode the packed bytes using the CPU-based q64 encoder.
             encoded: str = cpu_q64_encode(bytes(byte_data))
             results.append(encoded)
-        
+
         return results
-    
+
     def batch_top_k_q64_gpu(
         self,
-        embeddings: Union[List[np.ndarray], np.ndarray],
+        embeddings: list[np.ndarray] | np.ndarray,
         k: int = 8
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Performs GPU-accelerated batch Top-K (t8q64) encoding.
 
@@ -224,39 +226,39 @@ class GPUEncoder:
         else:
             batch_size: int = embeddings.shape[0]
             gpu_embeddings = self._to_gpu(embeddings)
-        
+
         # Get the indices of the top-k largest elements along the last axis (embedding dimension).
         # `argpartition` is used for efficiency as it only guarantees the k-th element is in place.
         top_k_indices: CupyArray = cp.argpartition(gpu_embeddings, -k, axis=1)[:, -k:]
-        
+
         # Sort the top-k indices to ensure a consistent order for encoding.
         sorted_indices: CupyArray = cp.sort(top_k_indices, axis=1)
-        
+
         # Clamp the indices to 255 (max value for uint8) to prevent overflow during byte conversion.
         clamped_indices: CupyArray = cp.minimum(sorted_indices, 255)
-        
+
         # Transfer the processed indices back to CPU for q64 encoding.
         cpu_indices: np.ndarray = self._to_cpu(clamped_indices)
-        
-        results: List[str] = []
+
+        results: list[str] = []
         for i in range(batch_size):
-            indices: List[int] = cpu_indices[i].tolist()
-            
+            indices: list[int] = cpu_indices[i].tolist()
+
             # Pad the list of indices with 255 if its length is less than k.
             # This ensures a consistent output length for encoding.
             while len(indices) < k:
                 indices.append(255)
-            
+
             # Encode the indices as bytes using the CPU-based q64 encoder.
             encoded: str = cpu_q64_encode(bytes(indices))
             results.append(encoded)
-        
+
         return results
-    
+
     def batch_z_order_q64_gpu(
         self,
-        embeddings: Union[List[np.ndarray], np.ndarray]
-    ) -> List[str]:
+        embeddings: list[np.ndarray] | np.ndarray
+    ) -> list[str]:
         """
         Performs GPU-accelerated batch Z-order (zoq64) encoding.
 
@@ -278,17 +280,17 @@ class GPUEncoder:
         else:
             batch_size: int = embeddings.shape[0]
             gpu_embeddings = self._to_gpu(embeddings)
-        
+
         # Quantize each dimension to 2 bits (take the top 2 most significant bits).
         quantized: CupyArray = (gpu_embeddings >> 6) & 0b11
-        
+
         # Take the first 16 dimensions for Z-order encoding (common practice for 32-bit Z-order).
         quantized_16: CupyArray = quantized[:, :16]
-        
+
         # Transfer the quantized data to CPU for bit interleaving, as it's complex on GPU.
         cpu_quantized: np.ndarray = self._to_cpu(quantized_16)
-        
-        results: List[str] = []
+
+        results: list[str] = []
         for i in range(batch_size):
             result: int = 0
             # Iterate through each quantized value (dimension).
@@ -298,21 +300,21 @@ class GPUEncoder:
                     bit: int = (val >> bit_pos) & 1
                     # Place the bit at the correct interleaved position.
                     result |= bit << (j * 2 + bit_pos)
-            
+
             # Pack the 32-bit integer result into 4 bytes.
             packed: bytes = struct.pack(">I", result) # '>I' for big-endian unsigned int.
             # Encode the packed bytes using the CPU-based q64 encoder.
             encoded: str = cpu_q64_encode(packed)
             results.append(encoded)
-        
+
         return results
 
 def gpu_encode_batch(
-    embeddings: Union[List[np.ndarray], np.ndarray],
+    embeddings: list[np.ndarray] | np.ndarray,
     method: str = "shq64",
     device_id: int = 0,
     **kwargs: Any
-) -> List[str]:
+) -> list[str]:
     """
     Performs GPU-accelerated batch encoding for a list or array of embeddings.
 
@@ -340,27 +342,26 @@ def gpu_encode_batch(
     if not GPU_AVAILABLE:
         # Fallback to CPU batch processing if GPU is not available.
         return [cpu_encode(emb, method=method, **kwargs) for emb in embeddings]
-    
+
     # Initialize the GPU encoder for the specified device.
     encoder: GPUEncoder = GPUEncoder(device_id=device_id)
-    
+
     # Dispatch to the appropriate GPU encoding method based on the 'method' parameter.
     if method == "shq64":
         planes: int = kwargs.get("planes", 64)
         return encoder.batch_simhash_q64_gpu(embeddings, planes=planes)
-    elif method == "t8q64":
+    if method == "t8q64":
         k: int = kwargs.get("k", 8)
         return encoder.batch_top_k_q64_gpu(embeddings, k=k)
-    elif method == "zoq64":
+    if method == "zoq64":
         return encoder.batch_z_order_q64_gpu(embeddings)
-    elif method == "eq64":
+    if method == "eq64":
         # eq64 (lossless encoding) typically does not benefit significantly from GPU acceleration
         # due to its bit-level operations and lack of large matrix multiplications.
         # Therefore, it's more efficient to process it on the CPU.
         return [cpu_encode(emb, method=method, **kwargs) for emb in embeddings]
-    else:
-        # Raise an error if an unsupported method is requested for GPU acceleration.
-        raise ValueError(f"GPU acceleration not available or supported for method: {method}")
+    # Raise an error if an unsupported method is requested for GPU acceleration.
+    raise ValueError(f"GPU acceleration not available or supported for method: {method}")
 
 
 class GPUStreamingEncoder:
@@ -371,7 +372,7 @@ class GPUStreamingEncoder:
     while maintaining a streaming interface for memory efficiency. It handles
     batching internally and dispatches to the appropriate GPU encoding methods.
     """
-    
+
     def __init__(
         self,
         batch_size: int = 1000,
@@ -392,14 +393,14 @@ class GPUStreamingEncoder:
         self.batch_size: int = batch_size
         self.method: str = method
         self.device_id: int = device_id
-        self.kwargs: Dict[str, Any] = kwargs
-        
+        self.kwargs: dict[str, Any] = kwargs
+
         # Initialize GPUEncoder if GPU is available, otherwise set to None for CPU fallback.
-        self.encoder: Optional[GPUEncoder] = None
+        self.encoder: GPUEncoder | None = None
         if GPU_AVAILABLE:
             self.encoder = GPUEncoder(device_id=device_id)
-    
-    def encode_stream(self, embeddings: Iterable[Union[np.ndarray, List[int], bytes]]) -> Iterator[str]:
+
+    def encode_stream(self, embeddings: Iterable[np.ndarray | list[int] | bytes]) -> Iterator[str]:
         """
         Encode a stream of embeddings using GPU batching.
 
@@ -415,39 +416,39 @@ class GPUStreamingEncoder:
         Yields:
             str: Encoded strings, one for each input embedding.
         """
-        batch: List[Union[np.ndarray, List[int], bytes]] = []
-        
+        batch: list[np.ndarray | list[int] | bytes] = []
+
         for embedding in embeddings:
             batch.append(embedding)
-            
+
             if len(batch) >= self.batch_size:
                 # Process the accumulated batch.
                 if self.encoder:
                     # Use GPU encoding if encoder is initialized.
-                    encoded_batch: List[str] = self._encode_batch_gpu(batch)
+                    encoded_batch: list[str] = self._encode_batch_gpu(batch)
                 else:
                     # Fallback to CPU encoding if GPU is not available.
-                    encoded_batch = [cpu_encode(emb, method=self.method, **self.kwargs) 
+                    encoded_batch = [cpu_encode(emb, method=self.method, **self.kwargs)
                                    for emb in batch]
-                
+
                 # Yield each encoded string from the processed batch.
                 for encoded in encoded_batch:
                     yield encoded
-                
+
                 batch = [] # Clear the batch for the next set of embeddings.
-        
+
         # Process any remaining embeddings in the last (possibly incomplete) batch.
         if batch:
             if self.encoder:
                 encoded_batch = self._encode_batch_gpu(batch)
             else:
-                encoded_batch = [cpu_encode(emb, method=self.method, **self.kwargs) 
+                encoded_batch = [cpu_encode(emb, method=self.method, **self.kwargs)
                                for emb in batch]
-            
+
             for encoded in encoded_batch:
                 yield encoded
-    
-    def _encode_batch_gpu(self, batch: List[Union[np.ndarray, List[int], bytes]]) -> List[str]:
+
+    def _encode_batch_gpu(self, batch: list[np.ndarray | list[int] | bytes]) -> list[str]:
         """
         Internal method to dispatch a batch of embeddings to the appropriate GPU encoding function.
 
@@ -470,15 +471,14 @@ class GPUStreamingEncoder:
         if self.method == "shq64":
             planes: int = self.kwargs.get("planes", 64)
             return self.encoder.batch_simhash_q64_gpu(batch, planes=planes)
-        elif self.method == "t8q64":
+        if self.method == "t8q64":
             k: int = self.kwargs.get("k", 8)
             return self.encoder.batch_top_k_q64_gpu(batch, k=k)
-        elif self.method == "zoq64":
+        if self.method == "zoq64":
             return self.encoder.batch_z_order_q64_gpu(batch)
-        else:
-            # Fallback to CPU for methods not explicitly supported by GPUEncoder or unknown methods.
-            # This ensures robustness even if a method is passed that doesn't have a GPU path.
-            return [cpu_encode(emb, method=self.method, **self.kwargs) for emb in batch]
+        # Fallback to CPU for methods not explicitly supported by GPUEncoder or unknown methods.
+        # This ensures robustness even if a method is passed that doesn't have a GPU path.
+        return [cpu_encode(emb, method=self.method, **self.kwargs) for emb in batch]
 
 
 def benchmark_gpu_vs_cpu(
@@ -486,7 +486,7 @@ def benchmark_gpu_vs_cpu(
     embedding_dim: int = 768,
     method: str = "shq64",
     **kwargs: Any
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Benchmarks the performance of GPU encoding against CPU encoding for a given method.
 
@@ -515,29 +515,29 @@ def benchmark_gpu_vs_cpu(
                         - `gpu_error`: Error message if GPU benchmarking fails.
     """
     import time
-    
+
     # Generate synthetic test embeddings as uint8 bytes.
-    embeddings: List[np.ndarray] = [
+    embeddings: list[np.ndarray] = [
         np.random.randint(0, 256, embedding_dim, dtype=np.uint8)
         for _ in range(n_embeddings)
     ]
-    
-    results: Dict[str, Any] = {"n_embeddings": n_embeddings, "embedding_dim": embedding_dim, "method": method}
-    
+
+    results: dict[str, Any] = {"n_embeddings": n_embeddings, "embedding_dim": embedding_dim, "method": method}
+
     # --- CPU Benchmark ---
     start_time: float = time.time()
-    cpu_results: List[str] = [cpu_encode(emb, method=method, **kwargs) for emb in embeddings]
+    cpu_results: list[str] = [cpu_encode(emb, method=method, **kwargs) for emb in embeddings]
     cpu_time: float = time.time() - start_time
     results["cpu_time"] = cpu_time
     results["cpu_throughput"] = n_embeddings / cpu_time
-    
+
     # --- GPU Benchmark (if available) ---
     if GPU_AVAILABLE:
         try:
             start_time = time.time()
-            gpu_results: List[str] = gpu_encode_batch(embeddings, method=method, **kwargs)
+            gpu_results: list[str] = gpu_encode_batch(embeddings, method=method, **kwargs)
             gpu_time: float = time.time() - start_time
-            
+
             results["gpu_time"] = gpu_time
             results["gpu_throughput"] = n_embeddings / gpu_time
             results["speedup"] = cpu_time / gpu_time # Calculate speedup factor.
@@ -547,5 +547,5 @@ def benchmark_gpu_vs_cpu(
             results["gpu_error"] = str(e)
     else:
         results["gpu_available"] = False # Indicate that GPU was not available for benchmarking.
-    
+
     return results
