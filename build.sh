@@ -1,16 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# build.sh — Lint, format, and build uubed-py
+set -euo pipefail
 
-# Exit immediately if a command exits with a non-zero status.
-set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
-echo "Building uubed-py..."
+echo "==> Cleaning previous builds..."
+uvx hatch clean
 
-# Build the Python package (wheel and sdist)
+echo "==> Formatting and linting..."
+fd -e py -x uvx autoflake -i {}
+fd -e py -x uvx pyupgrade --py312-plus {}
+fd -e py -x uvx ruff check --output-format=github --fix --unsafe-fixes {}
+fd -e py -x uvx ruff format --respect-gitignore --target-version py312 {}
+
+echo "==> Building sdist + wheel..."
 uvx hatch build
 
-echo "uubed-py build complete. Wheels and sdists are in the dist/ directory."
-
-# Optional: Install the package in editable mode for development
-# echo "Installing uubed-py in editable mode..."
-# uv pip install -e .
-# echo "uubed-py installed in editable mode."
+echo "==> Build complete. Wheels and sdists are in the dist/ directory."

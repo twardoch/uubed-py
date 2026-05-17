@@ -8,29 +8,29 @@ High-performance, position-safe embedding encoding for Python.
 
 ## Overview
 
-uubed solves the "substring pollution" problem in embedding-based search systems by using position-dependent alphabets that prevent false matches. This Python package provides a comprehensive toolkit for encoding, processing, and integrating position-safe embeddings.
+uubed addresses the "substring pollution" problem in embedding-based search systems. It uses position-dependent alphabets to prevent false matches. This Python package provides tools for encoding, processing, and integrating position-safe embeddings.
 
 ## Key Features
 
-### 🚀 **High-Performance Encoding**
+### High-Performance Encoding
 - **4 encoding methods**: `eq64` (lossless), `shq64` (similarity hash), `t8q64` (top-k sparse), `zoq64` (spatial Z-order)
 - **Pure Python fallbacks** with optional native acceleration
 - **Automatic method selection** based on use case
 
-### 📊 **Memory-Efficient Streaming**
+### Memory-Efficient Streaming
 - **Process datasets larger than RAM** with constant memory usage
 - **Generator-based processing** for any iterable source
 - **Batch optimization** with configurable sizes
 - **File streaming** for direct file-to-file processing
 
-### 🔧 **Production-Ready CLI**
-- **Beautiful terminal interface** with Rich formatting
+### Production-Ready CLI
+- **Terminal interface** with Rich formatting
 - **Benchmarking tools** across all encoding methods
 - **Progress indicators** and performance metrics
-- **Piping support** for integration with shell workflows
+- **Piping support** for shell workflow integration
 
-### 🤖 **Framework Integrations**
-- **LangChain**: Complete integration for RAG applications
+### Framework Integrations
+- **LangChain**: Integration for RAG applications
 - **Vector Databases**: Pinecone, Weaviate, Qdrant, ChromaDB connectors
 - **GPU Acceleration**: CuPy-based CUDA processing
 - **Matryoshka Embeddings**: Multi-granularity progressive refinement
@@ -61,9 +61,9 @@ embedding = np.random.randint(0, 256, 768, dtype=np.uint8)
 
 # Encode with different methods
 lossless = encode(embedding, method="eq64")      # Full precision
-compact = encode(embedding, method="shq64")     # Similarity hash
-sparse = encode(embedding, method="t8q64", k=8) # Top-k indices
-spatial = encode(embedding, method="zoq64")     # Z-order curve
+compact = encode(embedding, method="shq64")      # Similarity hash
+sparse = encode(embedding, method="t8q64", k=8)  # Top-k indices
+spatial = encode(embedding, method="zoq64")      # Z-order curve
 
 # Decode (only eq64 is reversible)
 decoded = decode(lossless, method="eq64")
@@ -195,10 +195,10 @@ GPU acceleration provides 5-10x speedup for batch operations.
 
 ## Documentation
 
-- 📚 **[API Reference](notebooks/01_basic_usage.ipynb)**: Complete API documentation
-- 🚀 **[Streaming Guide](notebooks/02_streaming_api.ipynb)**: Memory-efficient processing
-- 🔗 **[Integration Examples](notebooks/03_langchain_integration.ipynb)**: LangChain and vector databases
-- 🏗️ **[Architecture](PLAN.md)**: Design and implementation details
+- **[API Reference](notebooks/01_basic_usage.ipynb)**: Complete API documentation
+- **[Streaming Guide](notebooks/02_streaming_api.ipynb)**: Memory-efficient processing
+- **[Integration Examples](notebooks/03_langchain_integration.ipynb)**: LangChain and vector databases
+- **[Architecture](PLAN.md)**: Design and implementation details
 
 ## Development
 
@@ -219,15 +219,15 @@ python -m build
 
 ## Contributing
 
-Contributions welcome! Please see our [contributing guidelines](CONTRIBUTING.md).
+Contributions welcome. See [contributing guidelines](CONTRIBUTING.md).
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file.
+MIT License. See [LICENSE](LICENSE) file.
 
 ## Citation
 
-If you use uubed in your research, please cite:
+If you use uubed in your research, cite:
 
 ```bibtex
 @software{uubed2024,
