@@ -192,7 +192,7 @@ class TestValidateEmbeddingDimensions:
 
         # Invalid size (too large)
         with pytest.raises(UubedValidationError, match="too large"):
-            _validate_embedding_dimensions(np.array(range(100001), dtype=np.uint8), "eq64")
+            _validate_embedding_dimensions(np.zeros(100001, dtype=np.uint8), "eq64")
 
     def test_shq64_dimensions(self):
         """Test shq64 dimension validation."""
@@ -206,7 +206,7 @@ class TestValidateEmbeddingDimensions:
 
         # Invalid size (too large)
         with pytest.raises(UubedValidationError, match="too large"):
-            _validate_embedding_dimensions(np.array(range(50001), dtype=np.uint8), "shq64")
+            _validate_embedding_dimensions(np.zeros(50001, dtype=np.uint8), "shq64")
 
     def test_t8q64_dimensions(self):
         """Test t8q64 dimension validation."""
@@ -232,11 +232,11 @@ class TestValidateEmbeddingDimensions:
         """Test mq64 dimension validation."""
         # Valid sizes
         _validate_embedding_dimensions(np.array([1], dtype=np.uint8), "mq64")
-        _validate_embedding_dimensions(np.array(range(1000), dtype=np.uint8), "mq64")
+        _validate_embedding_dimensions(np.zeros(1000, dtype=np.uint8), "mq64")
 
         # Invalid size (too large)
         with pytest.raises(UubedValidationError, match="too large"):
-            _validate_embedding_dimensions(np.array(range(100001), dtype=np.uint8), "mq64")
+            _validate_embedding_dimensions(np.zeros(100001, dtype=np.uint8), "mq64")
 
     def test_auto_method_skips_validation(self):
         """Test that auto method skips dimension validation."""

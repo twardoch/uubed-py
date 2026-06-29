@@ -200,8 +200,10 @@ def validate_embedding_input(
                 if np.all((embedding >= 0) & (embedding <= 1)):
                     # Normalize [0, 1] to [0, 255] and convert to uint8.
                     arr = (embedding * 255).astype(np.uint8)
-                elif np.all((embedding >= 0) & (embedding <= 255)):
+                elif np.all((embedding >= 0) & (embedding <= 255)) and float(embedding.max()) >= 2.0:
                     # Convert [0, 255] floats directly to uint8.
+                    # Require max >= 2.0 to distinguish from the [0,1] normalized range
+                    # (a value like 1.5 is out-of-range for normalized floats but below 2.0).
                     arr = embedding.astype(np.uint8)
                 else:
                     raise validation_error(
@@ -686,7 +688,12 @@ def validate_file_path(
     path_obj: Path = Path(path)
 
     # Step 1: Check if the path exists if required.
-    if check_exists and not path_obj.exists():
+    # Python 3.13+ raises PermissionError when calling .exists() inside read-only directories.
+    try:
+        path_exists = path_obj.exists()
+    except PermissionError:
+        path_exists = False
+    if check_exists and not path_exists:
         raise resource_error(
             f"File or directory does not exist: '{path_obj}'",
             resource_type="file",
@@ -724,7 +731,12 @@ def validate_file_path(
 
     # Step 4: Check if the file or its parent directory is writable if required.
     if check_writable:
-        if path_obj.exists():
+        # Python 3.13+ raises PermissionError from .exists() in read-only dirs.
+        try:
+            _writable_path_exists = path_obj.exists()
+        except PermissionError:
+            _writable_path_exists = False
+        if _writable_path_exists:
             # If the path exists, it must be a file to be writable directly.
             if not path_obj.is_file():
                 raise resource_error(

@@ -393,6 +393,6 @@ def configuration_error(
 
     return UubedConfigurationError(
         message=message,
-        config_file=config_file,
+        component=config_file,
         suggestion=suggestion
     )

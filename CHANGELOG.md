@@ -5,12 +5,45 @@ All notable changes to the uubed Python package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-01-03
+## [Unreleased] - 2026-06-29
 
-### Known Issues
-- **Test Environment Issues**: Tests fail with `ModuleNotFoundError` for 'uubed' and 'numpy'
-  - Python module import path configuration needs to be fixed
-  - Test runner environment setup requires adjustment
+### Added
+- `src_docs/` — MkDocs Material documentation structure with `mkdocs.yaml`,
+  `index.md`, `api.md` (full encoding-method reference with output-format tables),
+  `performance.md` (throughput/compression table), `integrations.md`
+  (Elasticsearch, pgvector, Solr, LangChain, vector-DB patterns), and
+  `STYLE_GUIDE.md`.
+
+### Changed
+- **`src/uubed/native_wrapper.py`** — replaced terse fallback block with detailed
+  module docstring explaining Rust-accel detection, `HAS_NATIVE` flag, and
+  pure-Python fallback implications; expanded `is_native_available()` docstring.
+- **`src/uubed/config.py`** `to_dict()` — changed shallow `self._config.copy()`
+  to `copy.deepcopy(self._config)` to prevent callers from mutating internal state.
+- **`src/uubed/exceptions.py`** `configuration_error()` — fixed incorrect kwarg
+  `config_file=` (not a valid param on `UubedConfigurationError`) to `component=`.
+- **`src/uubed/encoders/mq64.py`** `mq64_decode()` — added explicit `None` guard
+  (raises `TypeError`) so the function matches the error contract of all other
+  native-fallback functions.
+- **`src/uubed/validation.py`** float branch — tightened `[0, 255]` float detection
+  with `and embedding.max() >= 2.0` to correctly reject out-of-range normalised
+  floats like `[0.0, 0.5, 1.5]`.
+- **`src/uubed/validation.py`** `validate_file_path()` — wrapped both
+  `path_obj.exists()` calls in `try/except PermissionError` (Python 3.13 raises
+  instead of returning `False` for paths inside read-only directories).
+- **`tests/conftest.py`** — added `autouse` fixture that resets
+  `uubed.config._global_config = None` before and after every test, eliminating
+  cross-test global config contamination.
+- **`tests/test_config.py`** `TestGlobalConfig.setup_method` — replaced broken
+  `global _global_config; _global_config = None` (only reset the test module's
+  local binding) with `import uubed.config; uubed.config._global_config = None`.
+- **`tests/test_validation.py`** — replaced three `np.array(range(N), dtype=np.uint8)`
+  calls (N > 255) with `np.zeros(N, dtype=np.uint8)` to avoid `OverflowError`
+  under NumPy 2.x / Python 3.13.
+
+### Removed
+- **`setup.py`** — legacy stub (`from setuptools import setup; setup()`) removed;
+  the package has used `pyproject.toml` + hatchling exclusively since v0.2.
 
 ## [0.2.1] - 2025-07-03 (Current Development)
 

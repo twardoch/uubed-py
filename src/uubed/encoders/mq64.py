@@ -146,6 +146,10 @@ def mq64_decode(
         >>> print(f"Decoded (single level): {decoded_single_level}")
         >>> assert decoded_single_level == b"\x00\x01\x02\x03"
     """
+    # Validate input type before processing.
+    if encoded is None:
+        raise TypeError("mq64_decode: encoded must be a string, not None")
+
     # Split the encoded string by the colon delimiter to get individual q64 segments.
     # If the input string is empty, `segments` will be an empty list.
     segments: list[str] = encoded.split(':') if encoded else []

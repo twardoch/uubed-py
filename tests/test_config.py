@@ -316,8 +316,8 @@ class TestGlobalConfig:
 
     def setup_method(self):
         """Reset global config before each test."""
-        global _global_config
-        _global_config = None
+        import uubed.config
+        uubed.config._global_config = None
 
     def test_get_config_singleton(self):
         """Test that get_config returns singleton instance."""

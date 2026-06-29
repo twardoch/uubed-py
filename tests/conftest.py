@@ -8,6 +8,15 @@ import numpy as np
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def reset_global_config():
+    """Reset the uubed global config singleton before every test to prevent cross-test contamination."""
+    import uubed.config
+    uubed.config._global_config = None
+    yield
+    uubed.config._global_config = None
+
+
 @pytest.fixture
 def random_embedding():
     """Generate a random embedding for testing."""
