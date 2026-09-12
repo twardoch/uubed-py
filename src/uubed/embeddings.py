@@ -16,7 +16,7 @@ from uubed.models import get_model
 from uubed.remote import PROVIDERS
 
 REMOTE_BACKENDS = ("jina", "voyage", "hf", "cloudflare", "openai")
-BACKENDS = ("sentence-transformers", "llama.cpp", "onnx", "mlx", *REMOTE_BACKENDS)
+BACKENDS = ("sentence-transformers", "llama.cpp", "onnx", "mlx", "fastembed", *REMOTE_BACKENDS)
 MIN_TOKENS = 16
 # MLX/MPS share process-level Metal state; concurrent independent models can abort.
 _PYTHON_METAL_LOCK = RLock()
@@ -49,8 +49,12 @@ class Embedder:
         timeout: float = 60.0,
     ) -> None:
         self.model = get_model(model)
-        if backend == "onnx" and device != "cpu":
-            msg = "the verified ONNX backend requires device='cpu'"
+        if backend == "fastembed":
+            from uubed.fastembed import export_for  # noqa: PLC0415
+
+            export_for(self.model)
+        if backend in {"onnx", "fastembed"} and device != "cpu":
+            msg = "the verified ONNX/FastEmbed backend requires device='cpu'"
             raise ValueError(msg)
         if path is not None and backend != "llama.cpp":
             msg = "path is only used by the llama.cpp backend"
@@ -100,6 +104,10 @@ class Embedder:
         self._weight_stat: tuple[int, ...] | None = None
 
     def _fingerprint(self) -> str:
+        if self.backend == "fastembed":
+            from uubed.fastembed import identity  # noqa: PLC0415
+
+            return identity(self.model)
         if self.path is None:
             if self.backend in REMOTE_BACKENDS:
                 return "unversioned-hosted"
@@ -156,6 +164,10 @@ class Embedder:
                     msg = f"model file missing: {self.path}"
                     raise FileNotFoundError(msg)
                 self._runtime = LlamaBackend(self.model, self.path, self.batch_tokens, self.max_tokens)
+            elif self.backend == "fastembed":
+                from uubed.fastembed import FastEmbedBackend  # noqa: PLC0415
+
+                self._runtime = FastEmbedBackend(self.model, self.max_tokens)
             elif self.backend == "mlx":
                 from uubed.local import MlxBackend  # noqa: PLC0415
 

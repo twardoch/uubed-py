@@ -18,6 +18,8 @@ uv pip install -e '.[inference]'
 uv pip install -e '.[inference,mlx]'
 # Optional ONNX CPU backend:
 uv pip install -e '.[inference,onnx]'
+# Rust FastEmbed + ONNX Runtime (no PyTorch needed):
+uv pip install -e '.[fastembed,turbovec]'
 ```
 
 The tested combination uses Transformers 4.57.6, SentenceTransformers 5.7.0,
@@ -29,19 +31,67 @@ it can coexist with the correct Voyage runtime. No model is downloaded on import
 
 | Alias | Native size | Supported retained dimensions | Local choices | API choices |
 | --- | ---: | --- | --- | --- |
-| `jina` | 768 | 32, 64, 128, 256, 512, 768 | llama.cpp, SentenceTransformers | Jina, explicit OpenAI endpoint |
-| `gemma` | 768 | 128, 256, 512, 768 | llama.cpp, SentenceTransformers | Cloudflare, explicit OpenAI endpoint |
-| `granite` | 768 | 128, 256, 384, 512, 768 | llama.cpp, SentenceTransformers, MLX | HF, explicit OpenAI endpoint |
-| `nomic` | 768 | 256, 512, 768 | llama.cpp, SentenceTransformers | explicit OpenAI endpoint |
-| `minilm` | 384 | 384 only | SentenceTransformers, MLX, ONNX | — |
+| `jina` | 768 | 32, 64, 128, 256, 512, 768 | FastEmbed, llama.cpp, SentenceTransformers | Jina, explicit OpenAI endpoint |
+| `gemma` | 768 | 128, 256, 512, 768 | FastEmbed, llama.cpp, SentenceTransformers | Cloudflare, explicit OpenAI endpoint |
+| `granite` | 768 | 128, 256, 384, 512, 768 | FastEmbed, llama.cpp, SentenceTransformers, MLX | HF, explicit OpenAI endpoint |
+| `nomic` | 768 | 256, 512, 768 | FastEmbed, llama.cpp, SentenceTransformers | explicit OpenAI endpoint |
+| `minilm` | 384 | 384 only | FastEmbed, SentenceTransformers, MLX, ONNX | — |
 | `voyage-lite` | 2048 requested | 256, 512, 1024, 2048 | — | Voyage |
-| `voyage-nano` | 2048 | 256, 512, 1024, 2048 | SentenceTransformers | — |
+| `voyage-nano` | 2048 | 256, 512, 1024, 2048 | FastEmbed, SentenceTransformers | — |
 
 MiniLM is an English baseline. Other aliases refer to the exact multilingual
 models in `uubed.models`, with pinned Hugging Face weight revisions. Nomic also
 pins its separately hosted model/config code. GGUF files are fingerprinted with
 SHA-256. Use a verified conversion: EmbeddingGemma requires its learned dense
 layers, and Voyage nano is bidirectional with a learned output projection.
+
+## FastEmbed and TurboQuant search
+
+```python
+from uubed.embeddings import Embedder
+
+engine = Embedder("gemma", backend="fastembed", device="cpu", dimensions=256)
+try:
+    vectors = engine.embed(["Make the font bold."])
+finally:
+    engine.close()
+```
+
+This uses [fastembed-rs 6.0.3](https://github.com/Anush008/fastembed-rs) inside
+`uubed_native.NativeEmbedder`. Build/install the updated native wheel before using
+this unreleased feature. The session stays resident, releases the GIL for inference,
+clips tokens and batches inputs. Prompts are applied once by Uubed. CPU is required.
+Pinned exports and filenames form part of the cache/comparison identity.
+
+Gemma, Jina, MiniLM, Granite and Voyage nano use FP32 ONNX exports; Nomic uses
+the [Netrias FP16 export](https://huggingface.co/netrias/nomic-embed-text-v2-moe-onnx).
+Gemma/Voyage come from ONNX Community; the other FP32 exports come from the vendor
+repositories. Gemma Q4 showed batch-dependent output; Voyage/Jina Q4 lost more
+reference fidelity, and Nomic's dynamic quantization can change expert routing.
+These weight formats are separate from UB1 record precision and TurboQuant bits.
+`examples/fastembed_smoke.py --reference` checks all six against their Torch
+references; Jina's vendor export has small differences (minimum measured cosine
+0.9983), so cross-backend comparison identities remain separate. Voyage lite is
+API-only and rejected by FastEmbed. Model licenses still apply.
+
+```bash
+uubed tm build corpus/ --output memory.sqlite --model gemma --backend fastembed \
+  --device cpu --dimensions 256 --search-backend turbovec --bit-width 4
+uubed tm index old.sqlite --output indexed.sqlite --search-backend turbovec
+```
+
+[Turbovec 1.0.0](https://github.com/RyanCodrai/turbovec) implements TurboQuant in
+Rust. Its 2/3/4-bit index selects language-filtered candidates; Uubed reranks them
+against the retained int8 vectors. SQLite remains authoritative for exact text,
+variants and provenance. The index is embedded in the same file and verified on
+load. It adds disk storage, reduces resident search-vector storage, and provides
+approximate candidate recall. `--search-backend sqlite` forces exhaustive search.
+An existing memory can be copied/indexed without re-embedding or changing its source.
+
+`turbo-graph` adds TMX adjacency, provenance and graph-seeded constraints. Install
+the pinned source named in `uubed.tm_graph`, then use `--search-backend turbo-graph`;
+lookup accepts `--related-to`, `--max-hops` and `--origin`. Exact-only lookup needs
+neither optional search runtime nor embedding weights.
 
 ## Local inference
 

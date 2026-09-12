@@ -45,6 +45,7 @@ dependencies = [
 test = [
   "pytest>=7.0",
   "pytest-cov>=4.0",
+  "turbovec==1.0.0",
 ]
 gpu = [
   "cupy-cuda11x>=10.0",
@@ -78,6 +79,14 @@ onnx = [
 tm = [
     "uubed-rs>=1.0.12",
 ]
+turbovec = [
+    "turbovec==1.0.0",
+    "uubed-rs>=1.0.13",
+]
+fastembed = [
+    "huggingface-hub>=0.34,<2",
+    "uubed-rs>=1.0.14",
+]
 
 [project.urls]
 Homepage = "https://github.com/twardoch/uubed"
@@ -98,7 +107,7 @@ build-backend = "hatchling.build"
 #------------------------------------------------------------------------------
 
 [tool.hatch.build.targets.sdist]
-only-include = ["src/uubed", "tests", "README.md", "EMBEDDINGS.md", "LICENSE"]
+only-include = ["src/uubed", "tests", "README.md", "EMBEDDINGS.md", "LICENSE", "examples/fastembed_smoke.py"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uubed"]
@@ -210,6 +219,12 @@ disallow_incomplete_defs = false
 # PYTEST CONFIGURATION
 # Configuration for pytest, including markers, options, and benchmark settings.
 #------------------------------------------------------------------------------
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+    "turbovec==1.0.0",
+    "turbo-graph @ git+https://github.com/bigmacfive/turbo-graph@72f10416d4c954d42561f90465190f000e29cca9#subdirectory=turbo-graph-python",
+]
 
 [tool.pytest.ini_options]
 addopts = "-v --durations=10 -p no:briefcase -p no:pytest_virtualenv -p no:pytest-virtualenv"
