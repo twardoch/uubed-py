@@ -37,6 +37,8 @@ dependencies = [
   "click>=8.0",
   "rich>=10.0",
   "toml>=0.10.0",
+  "defusedxml>=0.7.1",
+  "typing-extensions>=4.15.0",
 ]
 
 [project.optional-dependencies]
@@ -59,6 +61,23 @@ vectordb = [
 all = [
   "uubed[test,gpu,langchain,vectordb]"
 ]
+inference = [
+    "einops>=0.8.1",
+    "httpx>=0.28",
+    "llama-cpp-python>=0.3.35",
+    "sentence-transformers>=5.2,<6",
+    "transformers>=4.57.6,<5",
+]
+mlx = [
+    "mlx-embeddings==0.0.5 ; platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "mlx-vlm==0.3.9 ; platform_machine == 'arm64' and sys_platform == 'darwin'",
+]
+onnx = [
+    "sentence-transformers[onnx]>=5.2,<6",
+]
+tm = [
+    "uubed-rs>=1.0.12",
+]
 
 [project.urls]
 Homepage = "https://github.com/twardoch/uubed"
@@ -79,13 +98,16 @@ build-backend = "hatchling.build"
 #------------------------------------------------------------------------------
 
 [tool.hatch.build.targets.sdist]
-packages = ["src/uubed"]
+only-include = ["src/uubed", "tests", "README.md", "EMBEDDINGS.md", "LICENSE"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uubed"]
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/uubed/__version__.py"
 
 [tool.hatch.envs.default]
 dependencies = [

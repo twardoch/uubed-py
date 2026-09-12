@@ -1,29 +1,13 @@
 #!/usr/bin/env python3
 # this_file: src/uubed/native_wrapper.py
-"""Wrapper for the optional Rust-accelerated extension module with pure-Python fallback.
-
-At import time this module attempts to load ``uubed._native``, a compiled
-extension built by maturin/PyO3 (``uubed-rs``).  If the ``.so``/``.pyd``
-file is absent — e.g. in a sdist-only install or a development environment
-without a Rust toolchain — the import raises ``ImportError`` and we fall back
-transparently to the pure-Python implementations under ``uubed.encoders.*``.
-
-The public names exported here (``q64_encode_native``, etc.) are therefore
-always callable regardless of whether the native extension is present.
-Callers can query ``HAS_NATIVE`` or ``is_native_available()`` to find out
-which code path is active, but for correctness they should not need to.
-
-Performance note: the native Rust path is typically 10-100× faster for
-large embeddings.  The pure-Python path is correct but slower; it is
-suitable for testing, CI, and environments where building Rust is not
-feasible.
-"""
+"""Optional uubed_native Rust acceleration with Python codec fallbacks."""
 
 try:
     # Attempt to import the Rust extension module compiled by maturin.
     # ``_native`` is a PyO3 cdylib; its presence depends on whether the
     # wheel was built with ``maturin develop`` / ``pip install uubed[native]``.
-    from . import _native
+    import uubed_native as _native
+
     q64_encode_native = _native.q64_encode_native
     q64_decode_native = _native.q64_decode_native
     simhash_q64_native = _native.simhash_q64_native
@@ -55,3 +39,16 @@ def is_native_available() -> bool:
     return value — the pure-Python fallback has the same interface.
     """
     return HAS_NATIVE
+
+
+__all__ = [
+    "HAS_NATIVE",
+    "is_native_available",
+    "mq64_decode_native",
+    "mq64_encode_native",
+    "q64_decode_native",
+    "q64_encode_native",
+    "simhash_q64_native",
+    "top_k_q64_native",
+    "z_order_q64_native",
+]

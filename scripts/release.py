@@ -1,249 +1,343 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["gitnextver==1.0.1", "tomlkit>=0.13,<1"]
+# ///
 # this_file: scripts/release.py
-"""
-Release script for uubed package.
-This script handles the complete release process including version validation,
-building, testing, and publishing.
-"""
+"""Tag, verify and publish one repository. Vendored from twardoch/uubed."""
 
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
 import subprocess
 import sys
-import re
-import os
+import tarfile
+import tempfile
 from pathlib import Path
-from typing import List, Optional, Tuple
 
-def run_command(cmd: List[str], cwd: Optional[Path] = None, capture_output: bool = False) -> subprocess.CompletedProcess:
-    """Run a command and return the result."""
-    print(f"Running: {' '.join(cmd)}")
-    try:
-        result = subprocess.run(cmd, cwd=cwd, capture_output=capture_output, text=True)
-        return result
-    except subprocess.CalledProcessError as e:
-        print(f"Command failed with exit code {e.returncode}")
-        raise
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from release_artifacts import private_path, record_artifacts, verified_artifacts
 
-def get_current_version() -> str:
-    """Get the current version from git tags."""
-    try:
-        result = run_command(["git", "describe", "--tags", "--abbrev=0"], capture_output=True)
-        if result.returncode == 0:
-            return result.stdout.strip()
+
+def run(root: Path, *args: str, capture: bool = False) -> str:
+    result = subprocess.run(
+        args,
+        cwd=root,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE if capture else None,
+    )
+    return result.stdout.strip() if capture else ""
+
+
+def public_files(root: Path) -> list[str]:
+    files = run(
+        root,
+        "git",
+        "ls-files",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+        "-z",
+        capture=True,
+    ).split("\0")
+    files = sorted({f for f in files if f and (root / f).exists()})
+    forbidden = [f for f in files if private_path(f)]
+    for name in files:
+        path = root / name
+        if not path.is_symlink():
+            continue
+        target = path.resolve()
+        if not target.is_relative_to(root.resolve()) or private_path(
+            str(target.relative_to(root.resolve()))
+        ):
+            forbidden.append(name)
+    if forbidden:
+        raise ValueError(f"Untrack private files before releasing: {forbidden}")
+    return files
+
+
+def fingerprint(root: Path) -> dict[str, str]:
+    return {
+        name: hashlib.sha256((root / name).read_bytes()).hexdigest()
+        for name in public_files(root)
+    }
+
+
+def snapshot(source: Path, target: Path) -> None:
+    files = public_files(source)
+    run(source, "git", "clone", "--quiet", "--no-hardlinks", str(source), str(target))
+    run(target, "git", "remote", "remove", "origin")
+    for path in target.iterdir():
+        if path.name == ".git":
+            continue
+        if path.is_dir() and not path.is_symlink():
+            shutil.rmtree(path)
         else:
-            return "v0.0.0"
-    except:
-        return "v0.0.0"
+            path.unlink()
+    for name in files:
+        original, copied = source / name, target / name
+        if original.is_symlink() and not original.resolve().is_relative_to(
+            source.resolve()
+        ):
+            raise ValueError(f"External symlink cannot be released: {name}")
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(original, copied, follow_symlinks=False)
+    run(target, "git", "config", "user.name", "Release preview")
+    run(target, "git", "config", "user.email", "release@example.invalid")
+    run(target, "git", "config", "core.hooksPath", "/dev/null")
 
-def get_git_version() -> str:
-    """Get the current git-based version."""
-    try:
-        result = run_command(["git", "describe", "--tags", "--dirty"], capture_output=True)
-        if result.returncode == 0:
-            return result.stdout.strip()
-        else:
-            return "v0.0.0-dev"
-    except:
-        return "v0.0.0-dev"
 
-def validate_version(version: str) -> bool:
-    """Validate that the version follows semantic versioning."""
-    # Remove 'v' prefix if present
-    version = version.lstrip('v')
-    
-    # Regex for semantic versioning
-    semver_pattern = r'^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$'
-    
-    return re.match(semver_pattern, version) is not None
+def sync_cargo(root: Path, version: str) -> None:
+    import tomlkit
 
-def check_git_status() -> bool:
-    """Check if git working directory is clean."""
-    result = run_command(["git", "status", "--porcelain"], capture_output=True)
-    if result.returncode != 0:
-        print("❌ Failed to check git status")
-        return False
-    
-    if result.stdout.strip():
-        print("❌ Git working directory is not clean. Please commit all changes.")
-        print("Uncommitted changes:")
-        print(result.stdout)
-        return False
-    
-    return True
+    manifest = root / "Cargo.toml"
+    document = tomlkit.parse(manifest.read_text())
+    document["workspace"]["package"]["version"] = version
+    manifest.write_text(tomlkit.dumps(document))
+    for member in document["workspace"]["members"]:
+        path = root / member / "Cargo.toml"
+        data = tomlkit.parse(path.read_text())
+        for dependency in data.get("dependencies", {}).values():
+            if isinstance(dependency, dict) and "path" in dependency:
+                dependency["version"] = version
+        path.write_text(tomlkit.dumps(data))
+    run(root, "cargo", "metadata", "--format-version", "1", capture=True)
 
-def check_git_tag_exists(tag: str) -> bool:
-    """Check if a git tag exists."""
-    result = run_command(["git", "tag", "-l", tag], capture_output=True)
-    return result.returncode == 0 and result.stdout.strip() == tag
 
-def run_tests() -> bool:
-    """Run the full test suite."""
-    print("🧪 Running full test suite...")
-    
-    test_script = Path(__file__).parent / "test_runner.py"
-    result = run_command([sys.executable, str(test_script)])
-    
-    if result.returncode != 0:
-        print("❌ Tests failed")
-        return False
-    
-    print("✅ All tests passed")
-    return True
+def next_tag(root: Path, bump: str) -> str:
+    from git import Repo
+    from gitnextver.cli import calculate_next_version, get_last_version_tag
 
-def build_package() -> bool:
-    """Build the package."""
-    print("📦 Building package...")
-    
-    build_script = Path(__file__).parent / "build.py"
-    result = run_command([sys.executable, str(build_script)])
-    
-    if result.returncode != 0:
-        print("❌ Build failed")
-        return False
-    
-    print("✅ Package built successfully")
-    return True
+    last = get_last_version_tag(Repo(root))
+    if not last or bump == "patch":
+        return calculate_next_version(last)
+    major, minor, _ = map(int, last[1:].split("."))
+    return f"v{major + 1}.0.0" if bump == "major" else f"v{major}.{minor + 1}.0"
 
-def create_git_tag(version: str) -> bool:
-    """Create a git tag."""
-    if not version.startswith('v'):
-        version = f'v{version}'
-    
-    if check_git_tag_exists(version):
-        print(f"⚠️  Tag {version} already exists")
-        return True
-    
-    print(f"🏷️  Creating git tag: {version}")
-    result = run_command(["git", "tag", "-a", version, "-m", f"Release {version}"])
-    
-    if result.returncode != 0:
-        print(f"❌ Failed to create tag {version}")
-        return False
-    
-    print(f"✅ Tag {version} created successfully")
-    return True
 
-def push_tag(version: str) -> bool:
-    """Push the git tag to remote."""
-    if not version.startswith('v'):
-        version = f'v{version}'
-    
-    print(f"📤 Pushing tag {version} to remote...")
-    result = run_command(["git", "push", "origin", version])
-    
-    if result.returncode != 0:
-        print(f"❌ Failed to push tag {version}")
-        return False
-    
-    print(f"✅ Tag {version} pushed successfully")
-    return True
+def make_tag(root: Path, tag: str, kind: str) -> None:
+    public_files(root)
+    if kind == "rust":
+        sync_cargo(root, tag[1:])
+    run(root, "git", "add", "--all")
+    if run(root, "git", "status", "--porcelain", capture=True):
+        run(root, "git", "commit", "-m", f"Release {tag}")
+    run(root, "git", "tag", tag)
 
-def publish_to_pypi(test: bool = False) -> bool:
-    """Publish the package to PyPI."""
-    if test:
-        print("📦 Publishing to TestPyPI...")
-        repo_url = "https://test.pypi.org/legacy/"
-        token_env = "TEST_PYPI_TOKEN"
-    else:
-        print("📦 Publishing to PyPI...")
-        repo_url = "https://upload.pypi.org/legacy/"
-        token_env = "PYPI_TOKEN"
-    
-    # Check if token is available
-    token = os.environ.get(token_env)
-    if not token:
-        print(f"❌ {token_env} environment variable not set")
-        return False
-    
-    # Use twine to upload
-    cmd = [
-        sys.executable, "-m", "twine", "upload",
-        "--repository-url", repo_url,
-        "--username", "__token__",
-        "--password", token,
-        "dist/*"
+
+def build(root: Path, out: Path, kind: str, tag: str) -> None:
+    out.mkdir(parents=True)
+    if kind == "docs":
+        run(root, "bash", "build.sh")
+        with tarfile.open(out / f"site-{tag[1:]}.tar.gz", "w:gz") as archive:
+            archive.add(root / "site", arcname="site")
+        return
+    if kind == "rust":
+        run(
+            root,
+            "uvx",
+            "maturin",
+            "build",
+            "--release",
+            "--out",
+            str(out),
+            "--interpreter",
+            "python3.12",
+        )
+        run(root, "uvx", "maturin", "sdist", "--out", str(out))
+        for crate in ("uubed-core", "uubed-tm"):
+            run(root, "cargo", "package", "-p", crate, "--locked", "--allow-dirty")
+            shutil.copy2(root / "target/package" / f"{crate}-{tag[1:]}.crate", out)
+        return
+    run(root, "uv", "build", "--no-sources", "--out-dir", str(out))
+
+
+def push(root: Path, remote: str, branch: str, tag: str) -> None:
+    run(
+        root,
+        "git",
+        "push",
+        "--atomic",
+        remote,
+        f"HEAD:refs/heads/{branch}",
+        f"refs/tags/{tag}",
+    )
+    expected = run(root, "git", "rev-parse", "HEAD", capture=True)
+    refs = run(
+        root,
+        "git",
+        "ls-remote",
+        remote,
+        f"refs/heads/{branch}",
+        f"refs/tags/{tag}*",
+        capture=True,
+    ).splitlines()
+    found = {line.split()[1]: line.split()[0] for line in refs}
+    actual_tag = found.get(f"refs/tags/{tag}^{{}}", found.get(f"refs/tags/{tag}"))
+    if found.get(f"refs/heads/{branch}") != expected or actual_tag != expected:
+        raise ValueError("Remote branch/tag verification failed; nothing uploaded")
+
+
+def upload(root: Path, paths: list[Path], kind: str, tag: str, remote: str) -> None:
+    if os.environ.get("PUBLISH_SKIP_UPLOAD") == "1":
+        print("Package/site upload skipped; Git branch and tag HAVE been pushed.")
+        return
+    if kind == "docs":
+        with tempfile.TemporaryDirectory(prefix="uubed-site-") as temporary:
+            with tarfile.open(paths[0]) as archive:
+                archive.extractall(temporary, filter="data")
+            run(
+                root,
+                "uvx",
+                "--from",
+                "ghp-import==2.1.0",
+                "ghp-import",
+                "-n",
+                "-p",
+                "-r",
+                remote,
+                "-b",
+                "gh-pages",
+                "-m",
+                f"Deploy {tag}",
+                str(Path(temporary) / "site"),
+            )
+        expected = run(root, "git", "rev-parse", "gh-pages", capture=True)
+        actual = run(
+            root, "git", "ls-remote", remote, "refs/heads/gh-pages", capture=True
+        )
+        if not actual or actual.split()[0] != expected:
+            raise ValueError("Published site branch verification failed")
+        return
+    if kind == "rust":
+        from urllib.error import HTTPError
+        from urllib.request import Request, urlopen
+
+        for crate in ("uubed-core", "uubed-tm"):
+            request = Request(
+                f"https://crates.io/api/v1/crates/{crate}/{tag[1:]}",
+                headers={"User-Agent": "uubed-release"},
+            )
+            try:
+                with urlopen(request, timeout=30) as response:
+                    published = json.load(response)
+                import hashlib
+
+                artifact = next(
+                    p for p in paths if p.name == f"{crate}-{tag[1:]}.crate"
+                )
+                if (
+                    published["version"]["checksum"]
+                    != hashlib.sha256(artifact.read_bytes()).hexdigest()
+                ):
+                    raise ValueError(
+                        f"Published crate differs: {crate}; use a new version"
+                    )
+            except HTTPError as error:
+                if error.code != 404:
+                    raise
+                run(root, "cargo", "publish", "-p", crate, "--locked")
+    distributions = [
+        str(p) for p in paths if p.suffix == ".whl" or p.name.endswith(".tar.gz")
     ]
-    
-    result = run_command(cmd)
-    
-    if result.returncode != 0:
-        print("❌ Failed to publish to PyPI")
-        return False
-    
-    print("✅ Package published successfully")
-    return True
+    run(root, "uv", "publish", *distributions)
 
-def main():
-    """Main release function."""
-    print("🚀 Starting uubed release process...")
-    
-    # Parse command line arguments
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--test":
-            test_mode = True
-            print("📦 Running in test mode (will publish to TestPyPI)")
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Test and build a tagged disposable copy; no commits, tags, pushes or uploads in the source repo",
+    )
+    parser.add_argument(
+        "--resume",
+        metavar="TAG",
+        help="Retry the exact clean tagged HEAD, reusing verified artifacts",
+    )
+    parser.add_argument("--bump", choices=["patch", "minor", "major"], default="patch")
+    parser.add_argument("--remote", default="origin")
+    args = parser.parse_args()
+    root = Path.cwd().resolve()
+    config = json.loads((root / "release.json").read_text())
+    kind = config["kind"]
+    if (
+        Path(run(root, "git", "rev-parse", "--show-toplevel", capture=True)).resolve()
+        != root
+    ):
+        raise ValueError("Run publish.sh at its repository root")
+    public_files(root)
+    if args.resume and (
+        not re.fullmatch(r"v\d+\.\d+\.\d+", args.resume)
+        or run(root, "git", "status", "--porcelain", capture=True)
+        or run(root, "git", "rev-parse", f"{args.resume}^{{commit}}", capture=True)
+        != run(root, "git", "rev-parse", "HEAD", capture=True)
+    ):
+        raise ValueError("--resume requires a clean checkout at the exact release tag")
+    branch = run(root, "git", "symbolic-ref", "--short", "HEAD", capture=True)
+    if not args.dry_run:
+        run(root, "git", "fetch", "--tags", args.remote)
+        remote_branch = run(
+            root, "git", "ls-remote", "--heads", args.remote, branch, capture=True
+        )
+        if remote_branch:
+            run(
+                root,
+                "git",
+                "merge-base",
+                "--is-ancestor",
+                remote_branch.split()[0],
+                "HEAD",
+            )
+    tag = args.resume or next_tag(root, args.bump)
+    print(
+        f"{config['name']}: {'preview' if args.dry_run else 'release'} {tag}",
+        flush=True,
+    )
+    tested_source = fingerprint(root)
+    run(root, "bash", "test.sh")
+    if fingerprint(root) != tested_source:
+        raise ValueError(
+            "Source changed during tests; rerun against the finished changes"
+        )
+    with tempfile.TemporaryDirectory(prefix="uubed-release-") as temporary:
+        checkout = root
+        if args.dry_run:
+            checkout = Path(temporary) / "source"
+            snapshot(root, checkout)
+        if not args.resume:
+            make_tag(checkout, tag, kind)
+        commit = run(checkout, "git", "rev-parse", "HEAD", capture=True)
+        destination = root / "dist" / ("preview" if args.dry_run else "releases") / tag
+        if args.resume and (destination / "manifest.json").exists():
+            paths = verified_artifacts(destination, tag[1:], commit)
         else:
-            version = sys.argv[1]
-            test_mode = False
-    else:
-        print("Usage: python scripts/release.py [version] OR python scripts/release.py --test")
-        print("Example: python scripts/release.py v1.0.3")
-        sys.exit(1)
-    
-    # If test mode, use current git version
-    if test_mode:
-        version = get_git_version()
-        print(f"Using git version: {version}")
-    
-    # Validate version format
-    if not validate_version(version):
-        print(f"❌ Invalid version format: {version}")
-        print("Version must follow semantic versioning (e.g., v1.2.3)")
-        sys.exit(1)
-    
-    # Check git status
-    if not check_git_status():
-        sys.exit(1)
-    
-    # Run tests
-    if not run_tests():
-        sys.exit(1)
-    
-    # Build package
-    if not build_package():
-        sys.exit(1)
-    
-    # Create git tag (skip in test mode)
-    if not test_mode:
-        if not create_git_tag(version):
-            sys.exit(1)
-    
-    # Install twine if not present
-    try:
-        subprocess.run([sys.executable, "-m", "twine", "--version"], 
-                      capture_output=True, check=True)
-    except subprocess.CalledProcessError:
-        print("Installing twine...")
-        subprocess.run([sys.executable, "-m", "pip", "install", "twine"], check=True)
-    
-    # Publish to PyPI
-    if not publish_to_pypi(test=test_mode):
-        sys.exit(1)
-    
-    # Push tag (skip in test mode)
-    if not test_mode:
-        if not push_tag(version):
-            sys.exit(1)
-    
-    print("\n" + "="*60)
-    print("🎉 RELEASE COMPLETE!")
-    print("="*60)
-    print(f"Version: {version}")
-    if test_mode:
-        print("Published to: TestPyPI")
-    else:
-        print("Published to: PyPI")
-        print(f"Git tag: {version}")
-    print("="*60)
+            fresh = Path(temporary) / "artifacts"
+            build(checkout, fresh, kind, tag)
+            record_artifacts(fresh, tag[1:], commit)
+            if destination.exists():
+                shutil.rmtree(destination)
+            shutil.copytree(fresh, destination)
+            paths = verified_artifacts(destination, tag[1:], commit)
+        if not args.dry_run:
+            public_files(root)
+            if run(root, "git", "status", "--porcelain", capture=True):
+                raise ValueError(
+                    f"Build changed tracked files; inspect changes before --resume {tag}"
+                )
+            push(root, args.remote, branch, tag)
+            upload(root, paths, kind, tag, args.remote)
+        print(f"Verified {tag}: {destination}")
+
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (ValueError, subprocess.CalledProcessError) as error:
+        sys.exit(f"Release stopped: {error}")

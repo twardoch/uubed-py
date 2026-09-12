@@ -1,9 +1,24 @@
+---
+this_file: CHANGELOG.md
+---
+
 # Changelog
 
 All notable changes to the uubed Python package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased] - 2026-09-11
+
+- Add the model-aware `Embedder`, persistent llama.cpp/SentenceTransformers/MLX
+  runtimes and validated Jina/Voyage/HF/Cloudflare/OpenAI-compatible clients.
+- Add UB1 signed-vector quantization and atomic source-file embedding records.
+- Pin compatible inference dependencies and Nomic's separately hosted model code;
+  reject changed GGUF weights and incompatible task/provider configurations.
+- Fix source distribution layout: preserve `src/uubed` so wheels built from the
+  sdist contain the package. Verified by an isolated wheel install and file round trip.
+- Keep existing byte encoding APIs compatible; document the new API separately.
 
 ## [Unreleased] - 2026-06-29
 
@@ -292,3 +307,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This version established the foundation for the Python package
 - Pure Python implementations serve as fallbacks when native extensions aren't available
 - All subsequent features build upon this stable base
+## 2026-09-11 — Shared native workspace and translation memory
+
+Consolidated native libraries into uubed-core, uubed-tm and uubed-python. Added
+portable SQLite exact/pair storage, signed int8 search, streaming English TMX
+import, atomic builds, model-space checks and `uubed tm` commands. Both book
+alignment and Abersetz consume the shared Python model runtime. Removed duplicate
+release runners, placeholder native tests and generated site output. Built-module
+imports now use the actual uubed_native extension.
+
+Verification is recorded in ../../research/consolidation: Rust/SIMD, built native
+wheel, Python and consumer suites, real TMX retrieval, copied-book alignment,
+recording-LLM integration and C API execution. No packages were published.
+
+## Unreleased — release tooling
+
+Added consistent publish/build/test scripts; Hatch VCS Python versions and synchronized Cargo workspace releases. Excluded local corpora, databases, credentials, generated versions and agent state from Git/package inputs. Removed conflicting auto-publish jobs and broad site upload workflows.
+
+## 2026-09-12 — License-file release validation
+
+The shared archive gate now checks every License-File declaration in metadata
+2.4+ against a regular file at the required sdist or wheel location. Missing,
+misplaced and directory-only licenses fail before pushing or uploading. Synced
+the helper across all six repositories. Verification: 14 release-tool tests
+passed; nine existing sibling preview artifacts passed the stronger checks.

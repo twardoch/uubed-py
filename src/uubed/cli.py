@@ -255,5 +255,9 @@ def info() -> None:
     console.print("  uubed bench --size 1000 --dims 768")
 
 
+from .tm_cli import tm
+
+main.add_command(tm)
+
 if __name__ == "__main__":
     main()

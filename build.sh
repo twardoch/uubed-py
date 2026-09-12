@@ -1,20 +1,5 @@
 #!/usr/bin/env bash
-# build.sh — Lint, format, and build uubed-py
+# this_file: build.sh
 set -euo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-echo "==> Cleaning previous builds..."
-uvx hatch clean
-
-echo "==> Formatting and linting..."
-fd -e py -x uvx autoflake -i {}
-fd -e py -x uvx pyupgrade --py312-plus {}
-fd -e py -x uvx ruff check --output-format=github --fix --unsafe-fixes {}
-fd -e py -x uvx ruff format --respect-gitignore --target-version py312 {}
-
-echo "==> Building sdist + wheel..."
-uvx hatch build
-
-echo "==> Build complete. Wheels and sdists are in the dist/ directory."
+cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")"
+exec uv build --no-sources --out-dir "${1:-dist}"
